@@ -3,8 +3,8 @@ set -e
 
 ####################################################
 #
-# Insert Section in GRUB configuration file
-# v.0.5 from 30.12.2012. by aso
+# Insert Folding section in GRUB configuration file
+# v.0.7.2 by 30.12.2012. from aso
 #
 # -t, --pipline           processing input file (stdin) into stdout output file
 # -i, --in-place          processing config file "in place" from stdout; default option
@@ -16,7 +16,8 @@ BEG='BEGIN'
 Sec='Section'
 gen='gentoo'
 win='win'
-
+ver='0.7.2'
+version="$ver, by 30.12.2012 from aso"
 
 sysconfdir="/etc"
 grub_mkcfg_dir="${sysconfdir}/grub.d"
@@ -38,7 +39,7 @@ cos=$win
 usage () {
     cat <<EOF
 Usage: $self [OPTION]
-Generate a grub config file
+Insert Folding section in GRUB configuration file
 
   -t, --pipline           processing input file (stdin) into stdout output file
   -i, --in-place          processing config file "in place" from stdout; default option
@@ -151,7 +152,7 @@ do
 	exit 2 ;;
     -v | --version)
 #	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
-	echo "v.0.2.0, 21.12.2012."
+	echo $version
 	exit 0 ;;
     -t | --pipeline)
 	pipe=${option} ;;
@@ -165,32 +166,48 @@ do
 done
 
 
+
+#echo "Sectioning grub.cfg ..." >&2
+echo "Folding ($ver) ..." >&2
+echo "# Folding $version"
+echo "# This is a stub"
+echo "# Output of this module was placed bypass the main flow"
+
+
+
 if ! [ $pipe ] ; then
 
   tmpbuf='/tmp/$$$sect$$$'
-  exec 4<&1
-  outfile=$(readlink /proc/self/fd/4)
-#  exec 4>&- 1>&-	# close stdout & file #4
-  exec 4>&-		# close file #4
-#  exec 1>&-		# close stdout
-  cp $outfile $tmpbuf
-cp $tmpbuf u1
-#  exec 1>${outfile}
+  exec 4<&0	# store stdin into #4
+  exec 6>&1	# store stdout into #6
+  outfile=$(readlink /proc/self/fd/6)
+#  exec 4<&-		# close file #4
 
+#  cp $outfile $tmpbuf
+  fsz1=$(du -b $outfile)
+  echo "-------------\n file size1 $fsz1" >&2
+  set -- $fsz1
+  fsz1=$1
+fsz2=$2
+  echo "Now:\n file size1 $fsz1\n fsz2       $fsz2" >&2
+#  :> outfile
+#cat $outfile > u1
+  exec 1>&-		# close stdout
+  exec 0< $outfile
+  exec 1> $tmpbuf
+#  exec 4> $outfile
 fi
 
 
-echo "Sectioning grub.cfg ..." >&2
-#sect_fn 'win' 'prolog' >&2
-
 ##************##
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)"
+#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)" > $outfile
+sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)"
 ##************##
-cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" > u2
-cat u2 | sed $allopts -e "$(remark_insert $win)" > u3
-cat u3 | sed $allopts -e "$(echo_remark $gen)" > u4
-cat u4 | sed $allopts -e "$(remark_insert $gen)" > u5
-cat u5 >&1
+#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" > u2
+#cat u2 | sed $allopts -e "$(remark_insert $win)" > u3
+#cat u3 | sed $allopts -e "$(echo_remark $gen)" > u4
+#cat u4 | sed $allopts -e "$(remark_insert $gen)" > u5
+#cat u5
 
 
 
@@ -204,6 +221,30 @@ cat u5 >&1
 #echo "$(remark_insert $win)" >&2
 
 if ! [ $pipe ] ; then
+	#restore all files
+  exec 1>&-		# close stdout
+  exec 0<&-		# close stdin
+#  fsz2=$(du -b $outfile)
+  fsz2=$(du -b $tmpbuf)
+  set -- $fsz2
+  fsz2=$1
+  other=$2
+  echo "file size2 $fsz2" >&2
+  echo "other tail: $other" >&2
+
+  cat $tmpbuf > $outfile
+#  :>$outfile
+  exec 0<&4
+  exec 1>&6
+  
+  delta=$(($fsz2 - $fsz1))
+  echo "delta size of new file: $delta" >&2
+  tail -c $(($fsz2 - $fsz1)) $tmpbuf
+  
   rm "$tmpbuf"	# remove tmpbuf
-exec 1>&-
+  
+  echo "End folding." >&2
+#  exec 1>&4
+#  exec 4>&-
+#exec 1>&-
 fi
