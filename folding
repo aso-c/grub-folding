@@ -4,7 +4,7 @@ set -e
 ####################################################
 #
 # Insert Folding section in GRUB configuration file
-# v.0.8.5 by 30.12.2012. from aso
+# v.0.9.0 by 30.12.2012. from aso
 #
 # -t, --pipline           processing input file (stdin) into stdout output file
 # -i, --in-place          processing config file "in place" from stdout; default option
@@ -12,7 +12,7 @@ set -e
 ####################################################
 
 
-ver='0.8.5'
+ver='0.9.0'
 version="$ver, by 30.12.2012 from aso"
 BEG='BEGIN'
 Sec='Section'
@@ -157,13 +157,11 @@ do
 done
 
 
-
-#echo "Sectioning grub.cfg ..." >&2
 echo "Folding ($ver) ..." >&2
+
 echo "# Folding $version"
 echo "# This is a stub"
 echo "# Output of this module was placed bypass the main flow"
-
 
 
 if ! [ $pipe ] ; then
@@ -182,25 +180,9 @@ fi
 
 
 ##************##
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)" > $outfile
 sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)"
 ##************##
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" > u2
-#cat u2 | sed $allopts -e "$(remark_insert $win)" > u3
-#cat u3 | sed $allopts -e "$(echo_remark $gen)" > u4
-#cat u4 | sed $allopts -e "$(remark_insert $gen)" > u5
-#cat u5
 
-
-
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)" >&2
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(echo_remark $gen)" >&2
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" >&2
-#echo "\n\n=============================================" >&2
-#echo "###### echo_remark $win ######" >&2
-#echo "$(echo_remark $win)" >&2
-#echo "\n\n###### remark_insert $win ######" >&2
-#echo "$(remark_insert $win)" >&2
 
 if ! [ $pipe ] ; then
 	#restore all files
@@ -215,6 +197,6 @@ if ! [ $pipe ] ; then
   tail -c $(($fsz2 - $fsz1)) $tmpbuf
   rm "$tmpbuf"	# remove tmpbuf
   
-echo "End folding." >&2
+#echo "End folding." >&2
 
 fi
