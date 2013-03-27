@@ -4,7 +4,7 @@ set -e
 ####################################################
 #
 # Insert Folding section in GRUB configuration file
-# v.0.7.2 by 30.12.2012. from aso
+# v.0.7.3 by 30.12.2012. from aso
 #
 # -t, --pipline           processing input file (stdin) into stdout output file
 # -i, --in-place          processing config file "in place" from stdout; default option
@@ -16,7 +16,7 @@ BEG='BEGIN'
 Sec='Section'
 gen='gentoo'
 win='win'
-ver='0.7.2'
+ver='0.7.3'
 version="$ver, by 30.12.2012 from aso"
 
 sysconfdir="/etc"
@@ -82,9 +82,7 @@ esac
 }
 
 
-#p='prologue'
 p='prolog'
-#e='epilogue'
 e='epilog'
 
 # Insert section in config file function
@@ -184,12 +182,14 @@ if ! [ $pipe ] ; then
 #  exec 4<&-		# close file #4
 
 #  cp $outfile $tmpbuf
-  fsz1=$(du -b $outfile)
-  echo "-------------\n file size1 $fsz1" >&2
-  set -- $fsz1
+#  fsz1=$(du -b $outfile)
+#  echo "-------------\n file size1 $fsz1" >&2
+#  set -- $fsz1
+  set -- $(du -b $outfile)
   fsz1=$1
-fsz2=$2
-  echo "Now:\n file size1 $fsz1\n fsz2       $fsz2" >&2
+  echo "-------------\n file size1 $fsz1" >&2
+#fsz2=$2
+#  echo "Now:\n file size1 $fsz1\n fsz2       $fsz2" >&2
 #  :> outfile
 #cat $outfile > u1
   exec 1>&-		# close stdout
@@ -224,21 +224,21 @@ if ! [ $pipe ] ; then
 	#restore all files
   exec 1>&-		# close stdout
   exec 0<&-		# close stdin
-#  fsz2=$(du -b $outfile)
-  fsz2=$(du -b $tmpbuf)
-  set -- $fsz2
+#  fsz2=$(du -b $tmpbuf)
+#  set -- $fsz2
+  set -- $(du -b $tmpbuf)
   fsz2=$1
-  other=$2
+#  other=$2
   echo "file size2 $fsz2" >&2
-  echo "other tail: $other" >&2
+#  echo "other tail: $other" >&2
 
   cat $tmpbuf > $outfile
 #  :>$outfile
   exec 0<&4
   exec 1>&6
   
-  delta=$(($fsz2 - $fsz1))
-  echo "delta size of new file: $delta" >&2
+#  delta=$(($fsz2 - $fsz1))
+#  echo "delta size of new file: $delta" >&2
   tail -c $(($fsz2 - $fsz1)) $tmpbuf
   
   rm "$tmpbuf"	# remove tmpbuf
