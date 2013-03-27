@@ -1,20 +1,19 @@
 #! /bin/sh
 set -e
-####################################################
-#
-# Insert Folding section in GRUB configuration file
-# v.0.9.1 by 30.12.2012. from aso
-#
-# -t, --pipline           processing input file (stdin) into stdout output file
-# -i, --in-place          processing config file "in place" from stdout; default option
-#
-####################################################
+#***************************************************************************************#
+#											#
+# Insert Folding section in GRUB configuration file					#
+# (c) aso, v.0.9.2 by 30.12.2012.							#
+#   GPLv3										#
+#											#
+# -t, --pipline           processing input file (stdin) into stdout output file		#
+# -i, --in-place          processing config file "in place" from stdout; default option	#
+#											#
+#***************************************************************************************#
 
 
-ver='0.9.1'
+ver='0.9.2'
 version="$ver, by 30.12.2012 from aso"
-BEG='BEGIN'
-Sec='Section'
 gen='gentoo'
 win='win'
 
@@ -180,7 +179,10 @@ fi
 
 
 ##************##
-sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)"
+sed $allopts -e "$(echo_remark $win)" |
+ sed $allopts -e "$(remark_insert $win)" |
+ sed $allopts -e "$(echo_remark $gen)" |
+ sed $allopts -e "$(remark_insert $gen)"
 ##************##
 
 

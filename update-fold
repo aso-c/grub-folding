@@ -3,7 +3,7 @@ set -e
 ####################################################
 #
 # Interactive launch of Sectioneer
-# v.0.3.4 from 29.12.2012. by aso
+# v.0.4.0 from 29.12.2012. by aso
 #
 # -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
 # -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
@@ -54,7 +54,7 @@ argument () {
 }
 
 
-piped='--pipe'
+piped='--pipeline'
 
 # Processing the arguments.
 while test $# -gt 0
@@ -67,7 +67,7 @@ do
 	usage
 	exit 2 ;;
     -v | --version)
-	echo "v.0.3.4, 27.12.2012."
+	echo "v.0.4.0, 27.12.2012."
 	exit 0 ;;
     -f | --input)
 	in_cfg=`argument $option "$@"`; shift;;
@@ -80,6 +80,7 @@ do
 	;;
     -i | --in-place)
 	inplace="$option"
+	piped=''
 	if [ "$1" ] ; then
 	  if ! expr "$1" : "-."> /dev/null; then
 	    if test "x${out_cfg}" = "x"; then
@@ -91,6 +92,7 @@ do
 	;;
     --in-place=*)
 	inplace=$(echo "$option" | sed 's/=.*//')
+	piped=''
 	if ! [ ${out_cfg} ]; then
 	  out_cfg=$(echo "$option" | sed 's/--in-place=//')
 	fi
@@ -103,7 +105,8 @@ do
 done
 
 
-if [ $inplace ] ; then
+#if [ $inplace ] ; then
+if ! [ $piped ] ; then
   if ! [ $out_cfg ]; then
     out_cfg=$in_cfg
   fi
@@ -128,7 +131,7 @@ echo "Other options is:     $allopts"
 
 if [ "$in_cfg" ]; then
 #  echo "set input to $in_cfg" >&2
-  exec 5<&0	    # Связать дескр. #5 со stdin, сохраняя stdout.
+  exec 4<&0	    # Связать дескр. #5 со stdin, сохраняя stdout.
   exec < $in_cfg    # stdout замещается файлом "logfile.txt".
 fi
 
@@ -140,7 +143,7 @@ fi
 
 
 echo "execute ./sectioneer $allopts" >&2
-./sectioneer $allopts
+./sectioneer --in-place $allopts
 
 ##./sectioneer "$inplace $allopts"
 #echo "execute ./sectioneer $inplace $allopts" >&2
@@ -155,12 +158,13 @@ fi
 
 if [ "$in_cfg" ]; then
 #  echo "Restore default input" >&2
-  exec 0<&5 5<&-    # Восстановить stdin.
+  exec 0<&4 4<&-    # Восстановить stdin.
 fi
 
 
 
-if [ $inplace ] ; then
+#if [ $inplace ] ; then
+if ! [ $piped ] ; then
 #  echo ''
 #  echo "######### Return that all #########"
 #  echo ''
