@@ -3,7 +3,7 @@ set -e
 ####################################################
 #
 # Interactive launch of Sectioneer
-# v.0.3.3 from 29.12.2012. by aso
+# v.0.3.4 from 29.12.2012. by aso
 #
 # -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
 # -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
@@ -54,6 +54,7 @@ argument () {
 }
 
 
+piped='--pipe'
 
 # Processing the arguments.
 while test $# -gt 0
@@ -66,18 +67,15 @@ do
 	usage
 	exit 2 ;;
     -v | --version)
-#	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
-	echo "v.0.3.3, 21.12.2012."
+	echo "v.0.3.4, 27.12.2012."
 	exit 0 ;;
     -f | --input)
 	in_cfg=`argument $option "$@"`; shift;;
     --input=*)
-#	in_cfg=`echo "$option" | sed 's/--input=//'`;;
 	in_cfg=$(echo "$option" | sed 's/--input=//');;
     -o | --output)
 	out_cfg=`argument $option "$@"`; shift;;
     --output=*)
-#	out_cfg=`echo "$option" | sed 's/--output=//'`
 	out_cfg=$(echo "$option" | sed 's/--output=//')
 	;;
     -i | --in-place)
@@ -85,7 +83,6 @@ do
 	if [ "$1" ] ; then
 	  if ! expr "$1" : "-."> /dev/null; then
 	    if test "x${out_cfg}" = "x"; then
-#	      out_cfg=`echo "$1" | sed 's/--in-place=//'`
 	      out_cfg=$(echo "$1" | sed 's/--in-place=//')
 	    fi
 	    shift
@@ -93,10 +90,8 @@ do
 	fi
 	;;
     --in-place=*)
-#	inplace=`echo "$option" | sed 's/=.*//'`
 	inplace=$(echo "$option" | sed 's/=.*//')
 	if ! [ ${out_cfg} ]; then
-#	  out_cfg=`echo "$option" | sed 's/--in-place=//'`
 	  out_cfg=$(echo "$option" | sed 's/--in-place=//')
 	fi
 	;;
@@ -120,7 +115,7 @@ if [ $inplace ] ; then
 fi
 
 
-echo "Sectioning grub.cfg ..." >&2
+echo "Interactive wrapper for sectioning..." >&2
 
 
 echo "################################################################"
@@ -132,20 +127,20 @@ echo "Other options is:     $allopts"
 
 
 if [ "$in_cfg" ]; then
-  echo "set input to $in_cfg" >&2
+#  echo "set input to $in_cfg" >&2
   exec 5<&0	    # Связать дескр. #5 со stdin, сохраняя stdout.
   exec < $in_cfg    # stdout замещается файлом "logfile.txt".
 fi
 
 if [ "$out_cfg" ]; then
-  echo "set output to $out_cfg" >&2
+#  echo "set output to $out_cfg" >&2
   exec 6>&1	    # Связать дескр. #6 со stdout, сохраняя stdout.
   exec > $out_cfg   # stdout замещается файлом "logfile.txt".
 fi
 
 
 echo "execute ./sectioneer $allopts" >&2
-#./sectioneer "$allopts"
+./sectioneer $allopts
 
 ##./sectioneer "$inplace $allopts"
 #echo "execute ./sectioneer $inplace $allopts" >&2
@@ -154,23 +149,23 @@ echo "execute ./sectioneer $allopts" >&2
 
 
 if [ "$out_cfg" ]; then
-  echo "Restore default output" >&2
+#  echo "Restore default output" >&2
   exec 1>&6 6>&-    # Восстановить stdout и закрыть дескр. #6.
 fi
 
 if [ "$in_cfg" ]; then
-  echo "Restore default input" >&2
+#  echo "Restore default input" >&2
   exec 0<&5 5<&-    # Восстановить stdin.
 fi
 
 
 
 if [ $inplace ] ; then
-  echo ''
-  echo "######### Return that all #########"
-  echo ''
+#  echo ''
+#  echo "######### Return that all #########"
+#  echo ''
   if [ $out_cfg ]; then
-    echo "rm \"$in_cfg\""
+#    echo "rm \"$in_cfg\""
     rm "$in_cfg"
   fi
 fi
