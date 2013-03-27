@@ -1,10 +1,9 @@
 #! /bin/sh
 set -e
-
 ####################################################
 #
 # Insert Folding section in GRUB configuration file
-# v.0.9.0 by 30.12.2012. from aso
+# v.0.9.1 by 30.12.2012. from aso
 #
 # -t, --pipline           processing input file (stdin) into stdout output file
 # -i, --in-place          processing config file "in place" from stdout; default option
@@ -12,7 +11,7 @@ set -e
 ####################################################
 
 
-ver='0.9.0'
+ver='0.9.1'
 version="$ver, by 30.12.2012 from aso"
 BEG='BEGIN'
 Sec='Section'
@@ -26,8 +25,6 @@ self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 
 
-pfn='grub.cfg'	# Processing file name
-cos=$win
 
 
 usage () {
@@ -43,11 +40,13 @@ EOF
 }
 
 
+
 # Create marker
 mark () {
 local MARK='###'
 echo "$MARK\ $1\ $MARK"
 }
+
 
 
 # Generate section file name
@@ -75,6 +74,7 @@ esac
 }
 
 
+
 p='prolog'
 e='epilog'
 
@@ -89,6 +89,7 @@ echo "
 /$(mark "BEGIN\ $(echo $(sect_fn $1 $e)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $e)
 "
 } # sect_insert()--------------------------------------------------------------
+
 
 
 # Echoing string for varkup section in config file function
@@ -170,12 +171,11 @@ if ! [ $pipe ] ; then
   exec 4<&0	# store stdin into #4
   exec 6>&1	# store stdout into #6
   outfile=$(readlink /proc/self/fd/6)
-  set -- $(du -b $outfile)
-  fsz1=$1
-#  echo "-------------\n file size1 $fsz1" >&2
+  set -- $(du -b $outfile); fsz1=$1
   exec 1>&-		# close stdout
   exec 0< $outfile
   exec 1> $tmpbuf
+
 fi
 
 
@@ -188,15 +188,11 @@ if ! [ $pipe ] ; then
 	#restore all files
   exec 1>&-		# close stdout
   exec 0<&-		# close stdin
-  set -- $(du -b $tmpbuf)
-  fsz2=$1
-#  echo "file size2 $fsz2" >&2
+  set -- $(du -b $tmpbuf); fsz2=$1
   cat $tmpbuf > $outfile
   exec 0<&4
   exec 1>&6
   tail -c $(($fsz2 - $fsz1)) $tmpbuf
   rm "$tmpbuf"	# remove tmpbuf
-  
-#echo "End folding." >&2
 
 fi
