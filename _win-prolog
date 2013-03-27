@@ -26,10 +26,29 @@ set -e
 #export TEXTDOMAIN=grub
 #export TEXTDOMAINDIR="${datarootdir}/locale"
 
-echo "Close Windows section in Menu" >&2
+# Don't change the next "if" operator
+if test "x${_infolding}" = "x" ; then
+  echo "# This is a stub"
+  exit
+fi
 
-# My insertion - MS Windows (all variants) - aso
+
+echo "Start Windows folding section in menu" >&2
+
+
+# My insertion - aso
 cat << EOF
+submenu "MS Windows (all variants)" {
+EOF
+
+cat << EOF
+# Custom entry for System Commander launch
+menuentry "Microsoft Windows (all variants, on /dev/sdb)" --class windows --class os {
+	insmod part_msdos
+	insmod ntfs
+	set root='(hd1)'
+#	search --no-floppy --fs-uuid --set=root 0000000088EECEDE
+	drivemap -s (hd0) ${root}
+	chainloader +1
 }
-# End of Windows section
 EOF

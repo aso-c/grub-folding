@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.2.7 by 17.01.2013.							#
+# (c) aso, v.1.3.1 by 17.01.2013.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.2.7'
+ver='1.3.1'
 version="$ver, by 17.01.2013 from aso"
 #gen='gentoo'
 gen='gen'

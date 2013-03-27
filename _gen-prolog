@@ -26,18 +26,23 @@ set -e
 #export TEXTDOMAIN=grub
 #export TEXTDOMAINDIR="${datarootdir}/locale"
 
-echo "Begin Gentoo Section in Menu" >&2
+# Don't change the next "if" operator
+if test "x${_infolding}" = "x" ; then
+  echo "# This is a stub"
+  exit
+fi
 
 
-# My insertion - aso
-cat << EOF
+echo "Start Gentoo folding section in menu" >&2
+
 # Start of Gentoo section
+cat << EOF
 submenu "Gentoo Linux (all vaiants)" {
 EOF
 
 # My insertion - aso
-cat << EOF
 # Gentoo section - Universal entry from Gentoo Legacy Grub
+cat << EOF
 menuentry "Gentoo Linux (all variants, on /dev/sda5)" --class gnu-linux --class gnu --class os {
 	insmod part_msdos
 	insmod ext2

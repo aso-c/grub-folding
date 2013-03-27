@@ -26,11 +26,20 @@ set -e
 #export TEXTDOMAIN=grub
 #export TEXTDOMAINDIR="${datarootdir}/locale"
 
+# Don't change the next "if" operator
+if test "x${_infolding}" = "x" ; then
+  echo "# This is a stub"
+  echo "# It's a test version"
+  exit
+fi
 
-echo "Close Gentoo section in Menu" >&2
+
+echo "Close Gentoo folding section in menu" >&2
+echo "The Test version of process" >&2
 
 # My insertion - aso
+echo
 cat << EOF
+# Test variant
 }
-# End of Gentoo section - aso
 EOF
