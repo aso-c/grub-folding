@@ -1,0 +1,219 @@
+#! /bin/sh
+set -e
+####################################################
+#
+# Interactive launch of Sectioneer
+# v.0.3.0 from 29.12.2012. by aso
+#
+# -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
+# -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
+# -i, --in-place          generate config from FILE & to FILE [input or output]
+#                           [if both or file omitted - output prcedency]
+#                         file is allowed after any flag, separated by a space
+# -h, --help              print this message and exit
+# -v, --version           print the version information and exit
+#
+####################################################
+
+#BEG='BEGIN'
+#Sec='Section'
+#gen='gentoo'
+#win='win'
+
+
+sysconfdir="/etc"
+grub_mkconfig_dir="${sysconfdir}"/grub.d
+
+self=`basename $0`
+GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
+
+
+
+
+usage () {
+    cat <<EOF
+Usage: $self [OPTION]
+Generate a grub config file
+
+# -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
+# -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
+# -i, --in-place          generate config from FILE & to FILE [input or output]
+#                           [if both or file omitted - output prcedency]
+#                         file is allowed after any flag, separated by a space
+# -h, --help              print this message and exit
+# -v, --version           print the version information and exit
+
+Report bugs to <bug-grub@gnu.org>.
+EOF
+}
+
+
+argument () {
+  opt=$1
+  shift
+
+  if test $# -eq 0; then
+      echo "$0: option requires an argument -- '$opt'" 1>&2
+      exit 1
+  fi
+  echo $1
+}
+
+
+
+
+
+
+
+
+
+
+#allopts=''	# list of all unrecognized options
+#in_cfg=''	# name if input cfg file
+#out_cfg=''	# name of output cfg file
+#inplace=''	# flag - in place processing (input == output)
+
+
+
+# Processing the arguments.
+while test $# -gt 0
+do
+    option=$1
+    shift
+
+    case "$option" in
+    -h | --help)
+	usage
+	exit 2 ;;
+    -v | --version)
+#	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
+	echo "v.0.3.0, 21.12.2012."
+	exit 0 ;;
+    -f | --input)
+	#grub_cfg=`argument $option "$@"`; shift;;
+	in_cfg=`argument $option "$@"`; shift;;
+    --input=*)
+	#grub_cfg=`echo "$option" | sed 's/--output=//'`
+	in_cfg=`echo "$option" | sed 's/--input=//'`;;
+    -o | --output)
+	out_cfg=`argument $option "$@"`; shift;;
+    --output=*)
+	out_cfg=`echo "$option" | sed 's/--output=//'`
+	;;
+    -i | --in-place)
+	inplace="$option"
+	echo "\$1 $1"
+	echo "\$2 $2"
+	echo "\$3 $3"
+	if ! expr "$1" : "-."> /dev/null; then
+#	case "$1" in
+##	if [ $1 != -* ]; then
+#	  -*) ;;
+#	  *)
+	  echo "out_cfg - '$out_cfg'"
+	  if test "x${out_cfg}" = "x"; then
+	    echo "is in this is"
+	    out_cfg=`echo "$1" | sed 's/--in-place=//'`
+	  fi
+	  shift
+	  #;;
+##	fi
+#	esac
+	fi
+	;;
+    --in-place=*)
+	inplace=`echo "$option" | sed 's/=.*//'`
+	if ! [ ${out_cfg} ]; then
+	  out_cfg=`echo "$option" | sed 's/--in-place=//'`
+	fi
+	;;
+    -*)
+	allopts="$allopts $option"
+	;;
+    # Explicitly ignore non-option arguments, for compatibility.
+    esac
+done
+
+#if test "x${grub_cfg}" != "x"; then
+#  rm -f ${grub_cfg}.new
+#  exec > ${grub_cfg}.new
+
+#  # Allow this to fail, since /boot/grub/ might need to be fatfs to support some
+#  # firmware implementations (e.g. OFW or EFI).
+#  chmod 400 ${grub_cfg}.new || grub_warn "Could not make ${grub_cfg}.new readable by only root.\
+#  This means that if the generated config contains a password it is readable by everyone"
+#fi
+
+if [ $inplace ] ; then
+  echo ''
+  echo "######### is inplaced #########"
+  echo ''
+  if ! [ $out_cfg ]; then
+    echo 'out_cfg=$in_cfg'
+    out_cfg=$in_cfg
+  fi
+  if [ "$out_cfg" ]; then
+    in_cfg='/tmp/$$$sect$$$'
+    echo "in_cfg='"'/tmp/$$$sect$$$'"'"
+    echo "cat $out_cfg > $in_cfg"
+    cat $out_cfg > $in_cfg
+  fi
+fi
+
+
+echo "Sectioning grub.cfg ..." >&2
+
+
+echo "################################################################"
+echo "input file in_cfg   = $in_cfg"
+echo "output file out_cfg = $out_cfg"
+echo "inplace?         = $inplace"
+echo "Other options is:     $allopts"
+
+
+
+if [ "$in_cfg" ]; then
+  echo "set input to $in_cfg" >&2
+  exec 5<&0	    # Связать дескр. #5 со stdin, сохраняя stdout.
+  exec < $in_cfg    # stdout замещается файлом "logfile.txt".
+fi
+
+if [ "$out_cfg" ]; then
+  echo "set output to $out_cfg" >&2
+  exec 6>&1	    # Связать дескр. #6 со stdout, сохраняя stdout.
+  exec > $out_cfg   # stdout замещается файлом "logfile.txt".
+fi
+
+
+echo "execute ./sectioneer $allopts" >&2
+#./sectioneer "$allopts"
+
+##./sectioneer "$inplace $allopts"
+#echo "execute ./sectioneer $inplace $allopts" >&2
+
+###------>cat
+
+
+if [ "$out_cfg" ]; then
+  echo "Restore default output" >&2
+  exec 1>&6 6>&-    # Восстановить stdout и закрыть дескр. #6.
+fi
+
+if [ "$in_cfg" ]; then
+  echo "Restore default input" >&2
+  exec 0<&5 5<&-    # Восстановить stdin.
+fi
+
+
+
+if [ $inplace ] ; then
+  echo ''
+  echo "######### Return that all #########"
+  echo ''
+  if [ $out_cfg ]; then
+    echo "rm \"$in_cfg\""
+    rm "$in_cfg"
+  fi
+fi
+
+
