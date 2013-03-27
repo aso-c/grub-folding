@@ -3,7 +3,7 @@ set -e
 ####################################################
 #
 # Interactive launch of Sectioneer
-# v.0.3.0 from 29.12.2012. by aso
+# v.0.3.3 from 29.12.2012. by aso
 #
 # -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
 # -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
@@ -14,12 +14,6 @@ set -e
 # -v, --version           print the version information and exit
 #
 ####################################################
-
-#BEG='BEGIN'
-#Sec='Section'
-#gen='gentoo'
-#win='win'
-
 
 sysconfdir="/etc"
 grub_mkconfig_dir="${sysconfdir}"/grub.d
@@ -61,20 +55,6 @@ argument () {
 
 
 
-
-
-
-
-
-
-
-#allopts=''	# list of all unrecognized options
-#in_cfg=''	# name if input cfg file
-#out_cfg=''	# name of output cfg file
-#inplace=''	# flag - in place processing (input == output)
-
-
-
 # Processing the arguments.
 while test $# -gt 0
 do
@@ -87,44 +67,37 @@ do
 	exit 2 ;;
     -v | --version)
 #	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
-	echo "v.0.3.0, 21.12.2012."
+	echo "v.0.3.3, 21.12.2012."
 	exit 0 ;;
     -f | --input)
-	#grub_cfg=`argument $option "$@"`; shift;;
 	in_cfg=`argument $option "$@"`; shift;;
     --input=*)
-	#grub_cfg=`echo "$option" | sed 's/--output=//'`
-	in_cfg=`echo "$option" | sed 's/--input=//'`;;
+#	in_cfg=`echo "$option" | sed 's/--input=//'`;;
+	in_cfg=$(echo "$option" | sed 's/--input=//');;
     -o | --output)
 	out_cfg=`argument $option "$@"`; shift;;
     --output=*)
-	out_cfg=`echo "$option" | sed 's/--output=//'`
+#	out_cfg=`echo "$option" | sed 's/--output=//'`
+	out_cfg=$(echo "$option" | sed 's/--output=//')
 	;;
     -i | --in-place)
 	inplace="$option"
-	echo "\$1 $1"
-	echo "\$2 $2"
-	echo "\$3 $3"
-	if ! expr "$1" : "-."> /dev/null; then
-#	case "$1" in
-##	if [ $1 != -* ]; then
-#	  -*) ;;
-#	  *)
-	  echo "out_cfg - '$out_cfg'"
-	  if test "x${out_cfg}" = "x"; then
-	    echo "is in this is"
-	    out_cfg=`echo "$1" | sed 's/--in-place=//'`
+	if [ "$1" ] ; then
+	  if ! expr "$1" : "-."> /dev/null; then
+	    if test "x${out_cfg}" = "x"; then
+#	      out_cfg=`echo "$1" | sed 's/--in-place=//'`
+	      out_cfg=$(echo "$1" | sed 's/--in-place=//')
+	    fi
+	    shift
 	  fi
-	  shift
-	  #;;
-##	fi
-#	esac
 	fi
 	;;
     --in-place=*)
-	inplace=`echo "$option" | sed 's/=.*//'`
+#	inplace=`echo "$option" | sed 's/=.*//'`
+	inplace=$(echo "$option" | sed 's/=.*//')
 	if ! [ ${out_cfg} ]; then
-	  out_cfg=`echo "$option" | sed 's/--in-place=//'`
+#	  out_cfg=`echo "$option" | sed 's/--in-place=//'`
+	  out_cfg=$(echo "$option" | sed 's/--in-place=//')
 	fi
 	;;
     -*)
@@ -134,28 +107,14 @@ do
     esac
 done
 
-#if test "x${grub_cfg}" != "x"; then
-#  rm -f ${grub_cfg}.new
-#  exec > ${grub_cfg}.new
-
-#  # Allow this to fail, since /boot/grub/ might need to be fatfs to support some
-#  # firmware implementations (e.g. OFW or EFI).
-#  chmod 400 ${grub_cfg}.new || grub_warn "Could not make ${grub_cfg}.new readable by only root.\
-#  This means that if the generated config contains a password it is readable by everyone"
-#fi
 
 if [ $inplace ] ; then
-  echo ''
-  echo "######### is inplaced #########"
-  echo ''
   if ! [ $out_cfg ]; then
-    echo 'out_cfg=$in_cfg'
     out_cfg=$in_cfg
   fi
+
   if [ "$out_cfg" ]; then
     in_cfg='/tmp/$$$sect$$$'
-    echo "in_cfg='"'/tmp/$$$sect$$$'"'"
-    echo "cat $out_cfg > $in_cfg"
     cat $out_cfg > $in_cfg
   fi
 fi
