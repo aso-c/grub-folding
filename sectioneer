@@ -167,32 +167,28 @@ done
 
 if ! [ $pipe ] ; then
 
-#echo "====================================\n\nIn the no pipe" >&2
   tmpbuf='/tmp/$$$sect$$$'
   exec 4<&1
   outfile=$(readlink /proc/self/fd/4)
   exec 4>&- 1>&-	# close stdout & file #4
-#ls -l /proc/self/fd >&2
   cp $outfile $tmpbuf
-#cat $outfile >&2
   exec 1>${outfile}
-#  exec >&4
 
 fi
 
 
 echo "Sectioning grub.cfg ..." >&2
-sect_fn 'win' 'prolog' >&2
+#sect_fn 'win' 'prolog' >&2
 
-#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)"
-cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)" >&2
+cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)"
+#cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" | sed $allopts -e "$(remark_insert $gen)" >&2
 #cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(echo_remark $gen)" >&2
 #cat $tmpbuf | sed $allopts -e "$(echo_remark $win)" | sed $allopts -e "$(remark_insert $win)" | sed $allopts -e "$(echo_remark $gen)" >&2
-echo "\n\n=============================================" >&2
-echo "###### echo_remark $win ######" >&2
-echo "$(echo_remark $win)" >&2
-echo "\n\n###### remark_insert $win ######" >&2
-echo "$(remark_insert $win)" >&2
+#echo "\n\n=============================================" >&2
+#echo "###### echo_remark $win ######" >&2
+#echo "$(echo_remark $win)" >&2
+#echo "\n\n###### remark_insert $win ######" >&2
+#echo "$(remark_insert $win)" >&2
 
 if ! [ $pipe ] ; then
   rm "$tmpbuf"	# remove tmpbuf
