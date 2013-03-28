@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.3.1 by 17.01.2013.							#
+# (c) aso, v.1.3.9 by 17.01.2013.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,9 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.3.1'
+ver='1.3.9'
 version="$ver, by 17.01.2013 from aso"
-#gen='gentoo'
 gen='gen'
 win='win'
 
@@ -33,13 +32,12 @@ export _infolding
 
 
 
-
 BEG='BEGIN'
 EN='END'
 
 
 
-usage () {
+usage() {
     cat <<EOF
 Usage: $self [OPTION]
 Insert Folding section in GRUB configuration file
@@ -50,7 +48,6 @@ Insert Folding section in GRUB configuration file
 ###Report bugs to <bug-grub@gnu.org>.
 EOF
 }
-
 
 
 # Create marker
@@ -65,11 +62,8 @@ echo "$MARK\ $1\ $MARK"
 #   #1 - prefix, OS_name (gentoo, win),
 #   #2 - tail {prolog | epilog}
 sect_fn(){
-#echo "${grub_mkcfg_dir}/$1-$2.cfg"
 echo "_$1-$2"
 }
-
-
 
 
 # Echoing OS name from class
@@ -79,31 +73,28 @@ o_name() {
 case "$1" in
 'win')	  echo 'Microsoft Windows'
 	;;
-'gentoo') echo 'Gentoo Linux'
-	;;
 'gen')	  echo 'Gentoo Linux'
 	;;
 esac
 }
 
 
+# Create full format marker string
+# Paramatars:
+#   $1 - 'BEGIN' / 'END'
+#   $2 - full file name
+fullmark()
+{
+sed 's/\//\\&/'g <<EOF
+$(mark "$1\ $grub_mkcfg_dir/$2")
+EOF
+} # fullmark() -----------------------------------
+
+
+
 
 p='prolog'
 e='epilog'
-
-# Insert section in config file function
-# Parameters:
-#   $1 - OS class
-remark_insert()
-{
-## control string for sed for search control comment: '### Begin...' & insert file name
-echo "
-/$(mark "BEGIN\ $(echo $(sect_fn $1 $p)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $p)
-/$(mark "BEGIN\ $(echo $(sect_fn $1 $e)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $e)
-"
-} # remark_insert()------------------------------------------------------------
-
-
 
 # Safe string
 safe="!!!Reserved!!!"
@@ -116,13 +107,12 @@ safe="!!!Reserved!!!"
 final_mark()
 {
 ${grub_mkcfg_dir}/$(sect_fn $1 $2) > "$tmprefix$(sect_fn $1 $2)"
-sed -e "/$(mark "$BEG\ $(echo ${grub_mkcfg_dir}/$(sect_fn $1 $2)| sed 's/\//\\&/'g)")${safe}/ {
+sed -e "/$(fullmark $BEG $(sect_fn $1 $2))${safe}/ {
 r $tmprefix$(sect_fn $1 $2)
 s/${safe}//
 }"
 rm -f "tmprefix$(sect_fn $1 $2)"
 } # final_mark()---------------------------------------------------------------
-
 
 
 # Echoing string for varkup section in config file function
@@ -135,8 +125,8 @@ echo "
 /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
 
 i\\
-\\\n$(mark "$BEG\ $(echo ${grub_mkcfg_dir}/$(sect_fn $1 $p)| sed 's/\//\\&/'g)")$safe
-i\\$(mark "$EN\ $(echo ${grub_mkcfg_dir}/$(sect_fn $1 $p)| sed 's/\//\\&/'g)")\\\n
+\\\n$(fullmark $BEG $(sect_fn $1 $p))$safe
+i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
 
 :consect		# continue sampling section
 n
@@ -154,14 +144,12 @@ b interch
 :close
 
 i\\
-\\\n$(mark "$BEG\ $(echo ${grub_mkcfg_dir}/$(sect_fn $1 $e)| sed 's/\//\\&/'g)")$safe
-i\\$(mark "$EN\ $(echo ${grub_mkcfg_dir}/$(sect_fn $1 $e)| sed 's/\//\\&/'g)")\\\n
+\\\n$(fullmark $BEG $(sect_fn $1 $e))$safe
+i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
 
 :end
 "
-
 } # echo_remark() -------------------------------------------------------------------------
-
 
 
 
@@ -177,7 +165,6 @@ do
 	usage
 	exit 2 ;;
     -v | --version)
-#	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
 	echo $version
 	exit 0 ;;
     -t | --pipeline)
@@ -215,10 +202,8 @@ fi
 
 ##************##
 sed $allopts -e "$(echo_remark $win)" |
-# sed $allopts -e "$(remark_insert $win)" |
  final_mark $win $p | final_mark $win $e |
  sed $allopts -e "$(echo_remark $gen)" |
-# sed $allopts -e "$(remark_insert $gen)"
  final_mark $gen $p | final_mark $gen $e
 ##************##
 
