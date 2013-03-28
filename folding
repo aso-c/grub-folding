@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.4.3 by 17.01.2013.							#
+# (c) aso, v.1.4.9 by 23.01.2013.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,9 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.4.3'
-version="$ver, by 17.01.2013 from aso"
+ver='1.4.9'
+version="$ver, by 23.01.2013 from aso"
+
 gen='gen'
 win='win'
 
@@ -30,12 +31,15 @@ tmprefix="$tmpdir/fold$$$"
 _infolding='Yes'
 export _infolding
 
+
+
 BEG='BEGIN'
 EN='END'
 
 
 
-usage() {
+usage()
+{
     cat <<EOF
 Usage: $self [OPTION]
 Insert Folding section in GRUB configuration file
@@ -50,7 +54,6 @@ EOF
 
 # Create marker
 mark() {
-#   $1 - name in marker
 local MARK='###'
 echo "$MARK\ $1\ $MARK"
 } # mark() ---------------------------------------
@@ -58,8 +61,8 @@ echo "$MARK\ $1\ $MARK"
 
 # Generate section file name
 # Parameters:
-#   $1 - prefix, OS_name (gentoo, win),
-#   $2 - tail {prolog | epilog}
+#   #1 - prefix, OS_name (gentoo, win),
+#   #2 - tail {prolog | epilog}
 sect_fn() {
 echo "_$1-$2"
 } # sect_fn() ------------------------------------
@@ -67,11 +70,13 @@ echo "_$1-$2"
 
 # Echoing OS name from class
 # Parameter:
-#   $1 - class OS (gentoo, win),
+#   #1 - class OS (gentoo, win),
 o_name()
 {
 case "$1" in
 'win')	  echo 'Microsoft Windows'
+	;;
+'gentoo') echo 'Gentoo Linux'
 	;;
 'gen')	  echo 'Gentoo Linux'
 	;;
@@ -96,6 +101,43 @@ EOF
 p='prolog'
 e='epilog'
 
+# Insert section in config file function
+# Parameters:
+#   $1 - OS class
+remark_insert()
+{
+## control string for sed for search control comment: '### Begin...' & insert file name
+echo "
+/$(fullmark $BEG $(sect_fn $1 $p))/ r $(sect_fn $1 $p)
+/$(fullmark $BEG $(sect_fn $1 $e))/ r $(sect_fn $1 $e)
+"
+} # remark_insert()------------------------------------------------------------
+
+
+# Insert folding section in config file function
+# Parameters:
+#   $1 - OS class (win/gentoo)
+#   $2 - sect class (prolog/epilog)
+remark_insert2()
+{
+## control string for sed for search control comment: '### Begin...' & insert file name
+#echo "
+#/$(mark "BEGIN\ $(echo $(sect_fn $1 $p)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $p)
+#/$(mark "BEGIN\ $(echo $(sect_fn $1 $e)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $e)
+#"
+echo "
+/$(fullmark $BEG $(sect_fn $1 $2))/! b end
+
+n
+/$(fullmark $EN $(sect_fn $1 $2))/! end
+i \\
+$($grub_mkcfg_dir/$(sect_fn $1 $2) | sed 's/\\/\\\\/g; s/[#; {}//]/\\&/g; $!s/.$/&\\/g')
+
+:end
+"
+} # remark_insert2()-----------------------------------------------------------
+
+
 # Safe string
 safe="!!!Reserved!!!"
 
@@ -113,6 +155,7 @@ s/${safe}//
 }"
 rm -f "tmprefix$(sect_fn $1 $2)"
 } # final_mark()---------------------------------------------------------------
+
 
 
 # Echoing string for varkup section in config file function
@@ -149,6 +192,7 @@ i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
 
 :end
 "
+
 } # echo_remark() -------------------------------------------------------------------------
 
 
@@ -165,6 +209,7 @@ do
 	usage
 	exit 2 ;;
     -v | --version)
+#	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
 	echo $version
 	exit 0 ;;
     -t | --pipeline)
@@ -202,8 +247,10 @@ fi
 
 ##************##
 sed $allopts -e "$(echo_remark $win)" |
+# sed $allopts -e "$(remark_insert $win)" |
  final_mark $win $p | final_mark $win $e |
  sed $allopts -e "$(echo_remark $gen)" |
+# sed $allopts -e "$(remark_insert $gen)"
  final_mark $gen $p | final_mark $gen $e
 ##************##
 
