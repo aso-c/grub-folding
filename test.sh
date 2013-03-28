@@ -51,19 +51,12 @@ remark_insert2()
 #/$(mark "BEGIN\ $(echo $(sect_fn $1 $e)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $e)
 #"
 echo "
-/$(fullmark $BEG\ $(sect_fn $1 $p))/! b inner
+/$(fullmark $BEG $(sect_fn $1 $2))/! b end
 
-#p
 n
-
-/$(fullmark $EN $(sect_fn $1 $p))/ {
+/$(fullmark $EN $(sect_fn $1 $2))/! end
 i \\
-$($grub_mkcfg_dir/$(sect_fn $1 $p))
-}
-
-:inner
-
-#p
+$($grub_mkcfg_dir/$(sect_fn $1 $2) | sed 's/\\/\\\\/g; s/[#; {}//]/\\&/g; $!s/.$/&\\/g')
 
 :end
 "
@@ -89,7 +82,6 @@ rm -f "tmprefix$(sect_fn $1 $2)"
 } # final_mark()---------------------------------------------------------------
 
 
-
 echo '==========================================================================================\n'
 #echo '$win insertion'
 #remark_insert $win
@@ -100,12 +92,10 @@ echo '==========================================================================
 #remark_insert2 $gen
 
 #sed  -ne "$(remark_insert2 $win $p)" | sed -ne "$(remark_insert2 $win $e)"
-final_mark $win $p | final_mark $win $e |
-final_mark $gen $p | final_mark $gen $e
-
+#final_mark $win $p | final_mark $win $e |
+#final_mark $gen $p | final_mark $gen $e
 
 #remark_insert $win
-#remark_insert2 $win
-#final_mark $win $p |
-#final_mark $win $e
+remark_insert2 $win $p
+sed -e "$(remark_insert2 $win $p)"
 #sed -e "$(remark_insert3 $win $e)" |...
