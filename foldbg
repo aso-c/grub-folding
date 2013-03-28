@@ -15,47 +15,11 @@ self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 
 
-#in_cfg='bbb1'
-in_cfg='bbb2'
+in_cfg='bbb1'
+#in_cfg='bbb2'
 out_cfg='bbb'
 placeopt='--in-place'
 
-
-#echo "#################################################" >&2
-#echo '===[ In wrapper of sectioneer ]===' >&2
-#ls -l /proc/self >&2
-#ls -l /proc/self/fd >&2
-#echo "#0 is `readlink /proc/self/fd/0`" >&2
-#echo "#1 is `readlink /proc/self/fd/1`" >&2
-#echo "#2 is `readlink /proc/self/fd/2`" >&2
-#echo "#################################################" >&2
-#echo ''>&2
-#
-#echo "################################################################" >&2
-#echo "Debug launch for sectioneer" >&2
-#echo "input file in_cfg   = '$in_cfg'" >&2
-#echo "output file out_cfg = '$out_cfg'" >&2
-#echo "inplace?         = '$placeopt'" >&2
-#echo "Other options is:     '$allopts'" >&2
-#
-#
-##echo "copy $in_cfg to $out_cfg" >&2
-##cp "$in_cfg" "$out_cfg"
-#
-##exec > ${grub_cfg}.new
-#
-#exec > ${out_cfg}
-#
-#echo "cat $in_cfg" >&2
-#cat "$in_cfg"
-#
-#echo "Testing strings" >&2
-#echo "#==[ The Test String #01 ]=.*-=-*.*-=-*.*-=-*.*-=-*.*-=-*.="
-#echo "#==[ The Test String #02 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #03 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #04 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #05 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #06 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
 
 
 ###############
@@ -66,36 +30,3 @@ echo "exec ./test.sh" >&2
 ./test.sh < $in_cfg
 ###################
 
-
-#echo "#==[ The Test String #07 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #08 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #09 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #10 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #11 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#echo "#==[ The Test String #12 ]=.+-=-+.*-=-*.+-=-+.*-=-*.+-=-+.="
-#
-#
-#transform="s,x,x,"
-#
-#prefix="/usr"
-#exec_prefix="${prefix}"
-#bindir="${exec_prefix}/bin"
-#grub_script_check="${bindir}/`echo grub-script-check | sed "${transform}"`"
-#
-#
-#if test "x${out_cfg}" != "x" ; then
-#  if ! ${grub_script_check} ${out_cfg}; then
-#    echo "Syntax errors are detected in generated GRUB config file." >&2
-#    echo "Ensure that there are no errors in /etc/default/grub" >&2
-#    echo "and /etc/grub.d/* files or please file a bug report with" >&2
-#    echo "${out_cfg} file was created." >&2
-#  else
-#    ## none of the children aborted with error, install the new grub.cfg
-#    #mv -f ${grub_cfg}.new ${grub_cfg}
-#
-#    echo '' >&2
-#    echo "######### Finished run #########" >&2
-#    echo '' >&2
-#  fi
-#fi
-#
