@@ -2,8 +2,8 @@
 set -e
 #***************************************************************************************#
 #											#
-# Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.4.9 by 23.01.2013.							#
+# Маке Folding section in GRUB configuration file					#
+# (c) aso, v.1.6.0 by 11.02.2013.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,14 +12,15 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.4.9'
-version="$ver, by 23.01.2013 from aso"
-
+ver='1.6.0'
+version="$ver, by 11.02.2013 from aso"
+#gen='gentoo'
 gen='gen'
 win='win'
 
 sysconfdir="/etc"
-grub_mkcfg_dir="${sysconfdir}/grub.d"
+#grub_mkcfg_dir="${sysconfdir}/grub.d"
+grub_mkcfg_dir='./my.grub.d'
 
 self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
@@ -27,7 +28,7 @@ GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
 
-# Calling from folding marker 
+# Calling from folding marker
 _infolding='Yes'
 export _infolding
 
@@ -101,17 +102,17 @@ EOF
 p='prolog'
 e='epilog'
 
-# Insert section in config file function
-# Parameters:
-#   $1 - OS class
-remark_insert()
-{
-## control string for sed for search control comment: '### Begin...' & insert file name
-echo "
-/$(fullmark $BEG $(sect_fn $1 $p))/ r $(sect_fn $1 $p)
-/$(fullmark $BEG $(sect_fn $1 $e))/ r $(sect_fn $1 $e)
-"
-} # remark_insert()------------------------------------------------------------
+## Insert section in config file function
+## Parameters:
+##   $1 - OS class
+#remark_insert()
+#{
+### control string for sed for search control comment: '### Begin...' & insert file name
+#echo "
+#/$(fullmark $BEG $(sect_fn $1 $p))/ r $(sect_fn $1 $p)
+#/$(fullmark $BEG $(sect_fn $1 $e))/ r $(sect_fn $1 $e)
+#"
+#} # remark_insert()------------------------------------------------------------
 
 
 # Insert folding section in config file function
@@ -138,23 +139,23 @@ $($grub_mkcfg_dir/$(sect_fn $1 $2) | sed 's/\\/\\\\/g; s/[#; {}//]/\\&/g; $!s/.$
 } # remark_insert2()-----------------------------------------------------------
 
 
-# Safe string
-safe="!!!Reserved!!!"
-
-# Insert folding section in config file function
-# on file insertion & full control of output (-n option)
-# Parameters:
-#   $1 - OS class (win/gentoo)
-#   $2 - sect class (prolog/epilog)
-final_mark()
-{
-${grub_mkcfg_dir}/$(sect_fn $1 $2) > "$tmprefix$(sect_fn $1 $2)"
-sed -e "/$(fullmark $BEG $(sect_fn $1 $2))${safe}/ {
-r $tmprefix$(sect_fn $1 $2)
-s/${safe}//
-}"
-rm -f "tmprefix$(sect_fn $1 $2)"
-} # final_mark()---------------------------------------------------------------
+## Safe string
+#safe="!!!Reserved!!!"
+#
+## Insert folding section in config file function
+## on file insertion & full control of output (-n option)
+## Parameters:
+##   $1 - OS class (win/gentoo)
+##   $2 - sect class (prolog/epilog)
+#final_mark()
+#{
+#${grub_mkcfg_dir}/$(sect_fn $1 $2) > "$tmprefix$(sect_fn $1 $2)"
+#sed -e "/$(fullmark $BEG $(sect_fn $1 $2))${safe}/ {
+#r $tmprefix$(sect_fn $1 $2)
+#s/${safe}//
+#}"
+#rm -f "tmprefix$(sect_fn $1 $2)"
+#} # final_mark()---------------------------------------------------------------
 
 
 
@@ -246,14 +247,53 @@ fi
 
 
 ##************##
-sed $allopts -e "$(echo_remark $win)" |
-# sed $allopts -e "$(remark_insert $win)" |
- final_mark $win $p | final_mark $win $e |
- sed $allopts -e "$(echo_remark $gen)" |
-# sed $allopts -e "$(remark_insert $gen)"
- final_mark $gen $p | final_mark $gen $e
-##************##
+#sed $allopts -e "$(echo_remark $win)" |
+## sed $allopts -e "$(remark_insert $win)" |
+# final_mark $win $p | final_mark $win $e |
+# sed $allopts -e "$(echo_remark $gen)" |
+## sed $allopts -e "$(remark_insert $gen)"
+# final_mark $gen $p | final_mark $gen $e
 
+
+###==== Test variant ==============================
+#echo '####sed $allopts -e "$(echo_remark $win)"'	>&2
+#echo "$(echo_remark $win)"				>&2
+#echo '================================================' >&2
+#echo '#### sed $allopts -e "$(remark_insert2 $win $p)"' >&2
+#echo "$(remark_insert2 $win $p)"			>&2
+#echo '================================================' >&2
+echo '#### sed $allopts -e "$(remark_insert2 $win $e)"' >&2
+echo "$(remark_insert2 $win $e)"			>&2
+echo '================================================' >&2
+#echo '#### sed $allopts -e "$(echo_remark $gen)"'	>&2
+#echo "$(echo_remark $gen)"				>&2
+#echo '================================================' >&2
+#echo '#### sed $allopts -e "$(remark_insert2 $gen $p)"' >&2
+#echo "$(remark_insert2 $gen $p)"			>&2
+#echo '================================================' >&2
+echo '#### sed $allopts -e "$(remark_insert2 $gen $e)"' >&2
+echo "$(remark_insert2 $gen $e)"			>&2
+echo '================================================' >&2
+###================================================
+
+
+##==== Original variant =========================
+sed $allopts -e "$(echo_remark $win)" |
+ sed $allopts -e "$(remark_insert2 $win $p)" |
+ sed $allopts -e "$(remark_insert2 $win $e)" |
+# final_mark $win $p | final_mark $win $e |
+ sed $allopts -e "$(echo_remark $gen)" |
+ sed $allopts -e "$(remark_insert2 $gen $p)"|
+ sed $allopts -e "$(remark_insert2 $gen $e)"
+# final_mark $gen $p | final_mark $gen $e
+##================================================
+
+###************##
+###Temporary**##
+#echo "=============settings==================" >&2
+#set                                            >&2
+#echo "===============end=====================" >&2
+###************##
 
 if ! [ $pipe ] ; then
 	#restore all files
@@ -265,5 +305,4 @@ if ! [ $pipe ] ; then
   exec 1>&6
   tail -c $(($fsz2 - $fsz1)) $tmpbuf
   rm "$tmpbuf"	# remove tmpbuf
-
 fi
