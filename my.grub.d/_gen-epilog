@@ -35,10 +35,8 @@ fi
 
 
 echo "Close Gentoo folding section in menu" >&2
-echo "The Test version of process" >&2
 
 # My insertion - aso
 cat << EOF
-# Test variant
 }
 EOF
