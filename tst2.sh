@@ -24,16 +24,7 @@ grub_mkcfg_dir='/etc/grub.d'
 
 #sed 's/\//\\&/'g
 
-# Create full format marker string
-# Paramatars:
-#   $1 - 'BEGIN' / 'END'
-#   $2 - full file name
-#fullmark()
-#{
-#sed 's/\//\\&/'g <<EOF
-#$(mark "$1\ $grub_mkcfg_dir/$2")
-#EOF
-#} # fullmark()-----------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 echo_final()

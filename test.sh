@@ -11,7 +11,8 @@ set -e
 
 #sysconfdir="/etc"
 #grub_mkcfg_dir="${sysconfdir}/grub.d"
-grub_mkcfg_dir="cfg-test"
+#grub_mkcfg_dir="cfg-test"
+grub_mkcfg_dir="./my.grub.d"
 
 
 #=[ end of const part ]========================================================
@@ -19,7 +20,7 @@ grub_mkcfg_dir="cfg-test"
 
 
 
-# Calling from folding marker 
+# Calling from folding marker
 _infolding='Yes'
 export _infolding
 
@@ -38,29 +39,6 @@ echo "
 /$(fullmark $BEG $(sect_fn $1 $e))/ r $(sect_fn $1 $e)
 "
 } # remark_insert()------------------------------------------------------------
-
-# Insert folding section in config file function
-# Parameters:
-#   $1 - OS class (win/gentoo)
-#   $2 - sect class (prolog/epilog)
-remark_insert2()
-{
-## control string for sed for search control comment: '### Begin...' & insert file name
-#echo "
-#/$(mark "BEGIN\ $(echo $(sect_fn $1 $p)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $p)
-#/$(mark "BEGIN\ $(echo $(sect_fn $1 $e)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $e)
-#"
-echo "
-/$(fullmark $BEG $(sect_fn $1 $2))/! b end
-
-n
-/$(fullmark $EN $(sect_fn $1 $2))/! end
-i \\
-$($grub_mkcfg_dir/$(sect_fn $1 $2) | sed 's/\\/\\\\/g; s/[#; {}//]/\\&/g; $!s/.$/&\\/g')
-
-:end
-"
-} # remark_insert2()-----------------------------------------------------------
 
 
 # Safe string
@@ -82,20 +60,54 @@ rm -f "tmprefix$(sect_fn $1 $2)"
 } # final_mark()---------------------------------------------------------------
 
 
+# Echoing string for varkup section in config file function
+# Parameters:
+#   $1 - OS class (gen, win...)
+echo_remark()
+{
+echo "
+/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
+
+i\\
+\\\n$(fullmark $BEG $(sect_fn $1 $p))
+i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
+
+:consect		# continue sampling section
+n
+/^}/! b consect
+
+:interch		# final of section. Sampling iterval between sections
+n
+/[^#]*.*menuentry/ {	# detect new section
+/[^#]*.*$(o_name $1)/ b consect	# new section is desired
+b close			# new section is not desired
+}
+/### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
+b interch
+
+:close
+
+i\\
+\\\n$(fullmark $BEG $(sect_fn $1 $e))
+i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
+
+:end
+"
+} # echo_remark() -------------------------------------------------------------------------
+
+
 echo '==========================================================================================\n'
-#echo '$win insertion'
-#remark_insert $win
+echo '$win insertion'
 
 #echo '---------------------------------------------------\n'
-#echo '$gen insertion'
-##remark_insert $gen
-#remark_insert2 $gen
+echo '$gen insertion'
 
 #sed  -ne "$(remark_insert2 $win $p)" | sed -ne "$(remark_insert2 $win $e)"
 #final_mark $win $p | final_mark $win $e |
 #final_mark $gen $p | final_mark $gen $e
 
-#remark_insert $win
-remark_insert2 $win $p
-sed -e "$(remark_insert2 $win $p)"
+sed -e "$(echo_remark $win)" |
+#| sed -e "$(remark_insert2 $win $p)"
+sed -e "$(echo_remark $gen)"
+
 #sed -e "$(remark_insert3 $win $e)" |...

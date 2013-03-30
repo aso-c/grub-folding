@@ -15,7 +15,8 @@ self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 
 
-in_cfg='bbb1'
+in_cfg='aaa'
+#in_cfg='bbb1'
 #in_cfg='bbb2'
 out_cfg='bbb'
 placeopt='--in-place'
@@ -29,4 +30,3 @@ echo "exec ./test.sh" >&2
 #./folding $placeopt
 ./test.sh < $in_cfg
 ###################
-
