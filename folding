@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.6.1'
+ver='1.6.2'
 version="$ver, by 29.03.2013 from aso"
 #gen='gentoo'
 gen='gen'
@@ -107,7 +107,7 @@ e='epilog'
 # Parameters:
 #   $1 - OS class (win/gentoo)
 #   $2 - sect class (prolog/epilog)
-remark_insert()
+echo_final()
 {
 echo "
 /$(fullmark $BEG $(sect_fn $1 $2))/! b end
@@ -119,7 +119,7 @@ $($grub_mkcfg_dir/$(sect_fn $1 $2) | sed 's/\\/\\\\/g; s/[#; {}//]/\\&/g; $!s/.$
 
 :end
 "
-} # remark_insert()------------------------------------------------------------
+} # echo_final()----------------------------------------------------------------
 
 
 
@@ -213,11 +213,11 @@ fi
 
 ##==== Original variant =========================
 sed $allopts -e "$(echo_remark $win)"	|
-sed $allopts -e "$(remark_insert $win $p)" |
-sed $allopts -e "$(remark_insert $win $e)" |
+sed $allopts -e "$(echo_final $win $p)" |
+sed $allopts -e "$(echo_final $win $e)" |
 sed $allopts -e "$(echo_remark $gen)"	|
-sed $allopts -e "$(remark_insert $gen $p)" |
-sed $allopts -e "$(remark_insert $gen $e)"
+sed $allopts -e "$(echo_final $gen $p)" |
+sed $allopts -e "$(echo_final $gen $e)"
 ##================================================
 
 
