@@ -61,10 +61,7 @@ echo_final()
 #echo "/$(fullmark $BEG $(sect_fn $1 $2))/! ctra-ta-ta"
 echo "$ b"	# break processing, output
 echo "/$(fullmark $BEG $(sect_fn $1 $2))/! b"
-#echo 'p'
-#echo 'ctra-ta-ta'
 echo 'h'	# hold current string
-#echo 'd'	# delete pattern space
 echo 's/.*//'	# clear pattern space
 echo 'n'	# read new line
 echo "/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}"
@@ -74,15 +71,10 @@ echo "/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}"
 #    echo 'G'	# add 2'nd string
 #    echo 'b'
 #echo '}'
-
 echo 'x'	# exchange hold & pattern space
-echo "appa-appa-appa\\na$(fullmark $EN $(sect_fn $1 $2))"
+#echo "appa-appa-appa\\na$(fullmark $EN $(sect_fn $1 $2))"
+echo "r $tmprefix$(sect_fn $1 $2)"
 echo 'b'	# exit
-
-
-#echo ''
-#echo ':exit'
-
 
 } # echo_final()---------------------------------------------------------------
 
@@ -96,7 +88,13 @@ safe="!!!Reserved!!!"
 #   $2 - sect class (prolog/epilog)
 final_mark()
 {
-#${grub_mkcfg_dir}/$(sect_fn $1 $2) > "$tmprefix$(sect_fn $1 $2)"
+${grub_mkcfg_dir}/$(sect_fn $1 $2) |
+sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" > "$tmprefix$(sect_fn $1 $2)"
+
+#echo "$(fullmark $EN $(sect_fn $1 $2))" >> "$tmprefix$(sect_fn $1 $2)"
+
+
+
 
 #sed -e "/$(fullmark $BEG $(sect_fn $1 $2))/ {
 #r $tmprefix$(sect_fn $1 $2)
@@ -116,7 +114,8 @@ final_mark()
 sed -e "$(echo_final $1 $2)"
 #echo "$(echo_final $1 $2)"
 
-#rm -f "tmprefix$(sect_fn $1 $2)"
+#echo "$tmprefix$(sect_fn $1 $2)"
+rm -f "$tmprefix$(sect_fn $1 $2)"
 } # final_mark()---------------------------------------------------------------
 
 
@@ -175,5 +174,7 @@ echo '$gen insertion'
 final_mark $win $p
 #sed -e "$(echo_final $win $p)"
 #echo "$(echo_final $win $p)"
+#sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))"
+#sed -e "$ a$(fullmark $EN $(sect_fn $win $p))"
 
 #sed -e "$(remark_insert3 $win $e)" |...
