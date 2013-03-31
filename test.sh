@@ -79,27 +79,16 @@ echo 'b'	# exit
 } # echo_final()---------------------------------------------------------------
 
 
-# Safe string
-safe="!!!Reserved!!!"
 
 # Insert folding section in config file function on file insertion
 # Parameters:
 #   $1 - OS class (win/gentoo)
 #   $2 - sect class (prolog/epilog)
-final_mark()
+remark_insert()
 {
 ${grub_mkcfg_dir}/$(sect_fn $1 $2) |
 sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" > "$tmprefix$(sect_fn $1 $2)"
 
-#echo "$(fullmark $EN $(sect_fn $1 $2))" >> "$tmprefix$(sect_fn $1 $2)"
-
-
-
-
-#sed -e "/$(fullmark $BEG $(sect_fn $1 $2))/ {
-#r $tmprefix$(sect_fn $1 $2)
-#s/${safe}//
-#}"
 
 #sed -e "/$(fullmark $BEG $(sect_fn $1 $2))/! b
 ##h   # hold current string
@@ -110,13 +99,10 @@ sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" > "$tmprefix$(sect_fn $1 $2)"
 #
 #"
 
-
 sed -e "$(echo_final $1 $2)"
-#echo "$(echo_final $1 $2)"
 
-#echo "$tmprefix$(sect_fn $1 $2)"
 rm -f "$tmprefix$(sect_fn $1 $2)"
-} # final_mark()---------------------------------------------------------------
+} # remark_insert()------------------------------------------------------------
 
 
 # Echoing string for varkup section in config file function
@@ -167,14 +153,12 @@ echo '$gen insertion'
 
 #echo "$(echo_final $win $e)"
 
-#sed -e "$(echo_remark $win)"    |
-#sed -e "$(final_mark $win $p)"  |
-#sed -e "$(echo_remark $gen)"
+sed -e "$(echo_remark $win)"	|
+sed -e "$(echo_remark $gen)"	|
+remark_insert $win $p	|
+remark_insert $win $e	|
+remark_insert $gen $p	|
+remark_insert $gen $e
 
-final_mark $win $p
-#sed -e "$(echo_final $win $p)"
-#echo "$(echo_final $win $p)"
-#sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))"
-#sed -e "$ a$(fullmark $EN $(sect_fn $win $p))"
 
 #sed -e "$(remark_insert3 $win $e)" |...
