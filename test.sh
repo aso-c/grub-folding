@@ -24,21 +24,6 @@ grub_mkcfg_dir="./my.grub.d"
 _infolding='Yes'
 export _infolding
 
-# Insert folding section in config file function
-# Parameters:
-#   $1 - OS class
-remark_insert()
-{
-## control string for sed for search control comment: '### Begin...' & insert file name
-#echo "
-#/$(mark "BEGIN\ $(echo $grub_mkcfg_dir/$(sect_fn $1 $p)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $p)
-#/$(mark "BEGIN\ $(echo $grub_mkcfg_dir/$(sect_fn $1 $e)| sed 's/\//\\&/'g)")/ r $(sect_fn $1 $e)
-#"
-echo "
-/$(fullmark $BEG $(sect_fn $1 $p))/ r $(sect_fn $1 $p)
-/$(fullmark $BEG $(sect_fn $1 $e))/ r $(sect_fn $1 $e)
-"
-} # remark_insert()------------------------------------------------------------
 
 
 # Echoing control string for insert folding section
@@ -58,23 +43,19 @@ echo_final()
 #:exit
 #"
 
-#echo "/$(fullmark $BEG $(sect_fn $1 $2))/! ctra-ta-ta"
-echo "$ b"	# break processing, output
-echo "/$(fullmark $BEG $(sect_fn $1 $2))/! b"
-echo 'h'	# hold current string
-echo 's/.*//'	# clear pattern space
-echo 'n'	# read new line
-echo "/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}"
-#echo "/$(fullmark $EN $(sect_fn $1 $2))/! {"
-#    #echo 'ctututu'
-#    echo 'x'	# retreat 1'st string
-#    echo 'G'	# add 2'nd string
-#    echo 'b'
-#echo '}'
-echo 'x'	# exchange hold & pattern space
-#echo "appa-appa-appa\\na$(fullmark $EN $(sect_fn $1 $2))"
-echo "r $tmprefix$(sect_fn $1 $2)"
-echo 'b'	# exit
+cat << EOF
+abba
+EOF
+
+#echo "$ b"	# at eof break processing, send to output
+#echo "/$(fullmark $BEG $(sect_fn $1 $2))/! b"
+#echo 'h'	# hold current string
+#echo 's/.*//'	# clear pattern space
+#echo 'n'	# read new line
+#echo "/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}"
+#echo 'x'	# exchange hold & pattern space
+#echo "r $tmprefix$(sect_fn $1 $2)"
+#echo 'b'	# exit
 
 } # echo_final()---------------------------------------------------------------
 
@@ -86,9 +67,12 @@ echo 'b'	# exit
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-${grub_mkcfg_dir}/$(sect_fn $1 $2) |
-sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" > "$tmprefix$(sect_fn $1 $2)"
+#${grub_mkcfg_dir}/$(sect_fn $1 $2) |
+#sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" > "$tmprefix$(sect_fn $1 $2)"
 
+sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
+$(${grub_mkcfg_dir}/$(sect_fn $1 $2))
+EOF
 
 #sed -e "/$(fullmark $BEG $(sect_fn $1 $2))/! b
 ##h   # hold current string
@@ -110,12 +94,13 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 #   $1 - OS class (gen, win...)
 echo_remark()
 {
-echo "
+cat << EOF
+#echo "
 /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
 
 i\\
-\\\n$(fullmark $BEG $(sect_fn $1 $p))
-i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
+\\n$(fullmark $BEG $(sect_fn $1 $p))
+i\\$(fullmark $EN $(sect_fn $1 $p))\\n
 
 :consect		# continue sampling section
 n
@@ -133,11 +118,13 @@ b interch
 :close
 
 i\\
-\\\n$(fullmark $BEG $(sect_fn $1 $e))
-i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
+\\n$(fullmark $BEG $(sect_fn $1 $e))
+i\\$(fullmark $EN $(sect_fn $1 $e))\\n
 
 :end
-"
+#"
+EOF
+
 } # echo_remark() -------------------------------------------------------------------------
 
 
@@ -151,14 +138,14 @@ echo '$gen insertion'
 #final_mark $win $p | final_mark $win $e |
 #final_mark $gen $p | final_mark $gen $e
 
-#echo "$(echo_final $win $e)"
+echo_final $win $e
 
-sed -e "$(echo_remark $win)"	|
-sed -e "$(echo_remark $gen)"	|
-remark_insert $win $p	|
-remark_insert $win $e	|
-remark_insert $gen $p	|
-remark_insert $gen $e
-
+#sed -e "$(echo_remark $win)"
+#sed -e "$(echo_remark $win)"	|
+#sed -e "$(echo_remark $gen)"	|
+#remark_insert $win $p	|
+#remark_insert $win $e	|
+#remark_insert $gen $p	|
+#remark_insert $gen $e
 
 #sed -e "$(remark_insert3 $win $e)" |...
