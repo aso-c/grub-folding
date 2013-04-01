@@ -44,7 +44,15 @@ echo_final()
 #"
 
 cat << EOF
-abba
+/$(fullmark $BEG $(sect_fn $1 $2))/! b
+$ b	# at eof break processing, send to output
+h	# hold current string
+s/.*//	# clear pattern space
+n	# read new line
+/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
+x	# exchange hold & pattern space
+r $tmprefix$(sect_fn $1 $2)
+b	# exit
 EOF
 
 #echo "$ b"	# at eof break processing, send to output
@@ -95,7 +103,6 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 echo_remark()
 {
 cat << EOF
-#echo "
 /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
 
 i\\
@@ -122,7 +129,6 @@ i\\
 i\\$(fullmark $EN $(sect_fn $1 $e))\\n
 
 :end
-#"
 EOF
 
 } # echo_remark() -------------------------------------------------------------------------
@@ -138,14 +144,14 @@ echo '$gen insertion'
 #final_mark $win $p | final_mark $win $e |
 #final_mark $gen $p | final_mark $gen $e
 
-echo_final $win $e
+#echo_final $win $e
 
 #sed -e "$(echo_remark $win)"
-#sed -e "$(echo_remark $win)"	|
-#sed -e "$(echo_remark $gen)"	|
-#remark_insert $win $p	|
-#remark_insert $win $e	|
-#remark_insert $gen $p	|
-#remark_insert $gen $e
+sed -e "$(echo_remark $win)"	|
+sed -e "$(echo_remark $gen)"	|
+remark_insert $win $p	|
+remark_insert $win $e	|
+remark_insert $gen $p	|
+remark_insert $gen $e
 
 #sed -e "$(remark_insert3 $win $e)" |...
