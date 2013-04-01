@@ -35,14 +35,10 @@ echo_final()
 {
 cat <<- EOF
 	/$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
-#	h	# hold current string
 	h; s/.*//; n	# hold && clear pattern space; read new lone
-#	n	# read new line
 	/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
-#	x	# exchange hold & pattern space
 	# exchange & output file after restored str
 	x; r $tmprefix$(sect_fn $1 $2)
-#	b	# exit
 EOF
 } # echo_final()---------------------------------------------------------------
 
