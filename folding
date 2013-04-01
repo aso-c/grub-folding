@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.7.0 by 01.04.2013.							#
+# (c) aso, v.1.7.1 by 01.04.2013.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.7.0'
+ver='1.7.1'
 version="$ver, by 01.04.2013 from aso"
 
 gen='gen'
@@ -108,12 +108,12 @@ e='epilog'
 #   $2 - sect class (prolog/epilog)
 echo_final()
 {
-cat <<- EOF
-	/$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
-	h; s/.*//; n	# hold && clear pattern space; read new lone
-	/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
-	# exchange & output file after restored str
-	x; r $tmprefix$(sect_fn $1 $2)
+cat <<-EOF
+    /$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
+    h; s/.*//; n	# hold && clear pattern space; read new lone
+    /$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
+    # exchange & output file after restored str
+    x; r $tmprefix$(sect_fn $1 $2)
 EOF
 } # echo_final()---------------------------------------------------------------
 
@@ -138,7 +138,7 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 echo_remark()
 {
 echo "
-/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
+/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - end curr line processing
 
 i\\
 \\\n$(fullmark $BEG $(sect_fn $1 $p))
@@ -163,7 +163,7 @@ i\\
 \\\n$(fullmark $BEG $(sect_fn $1 $e))
 i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
 
-:end
+#:end
 "
 
 } # echo_remark() -------------------------------------------------------------------------

@@ -33,12 +33,12 @@ export _infolding
 #   $2 - sect class (prolog/epilog)
 echo_final()
 {
-cat <<- EOF
-	/$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
-	h; s/.*//; n	# hold && clear pattern space; read new lone
-	/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
-	# exchange & output file after restored str
-	x; r $tmprefix$(sect_fn $1 $2)
+cat <<-EOF
+    /$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
+    h; s/.*//; n	# hold && clear pattern space; read new lone
+    /$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
+    # exchange & output file after restored str
+    x; r $tmprefix$(sect_fn $1 $2)
 EOF
 } # echo_final()---------------------------------------------------------------
 
@@ -67,30 +67,25 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 echo_remark()
 {
 cat << EOF
-/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b # if no detect start of section /menuentry <OS_Name>/ - exit
-
-i\\
-\\n$(fullmark $BEG $(sect_fn $1 $p))
-i\\$(fullmark $EN $(sect_fn $1 $p))\\n
+    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
+    i$(fullmark $BEG $(sect_fn $1 $p))
+    i$(fullmark $EN $(sect_fn $1 $p))\\n
 
 :consect		# continue sampling section
-n
-/^}/! b consect
+    n; /^}/! b consect
 
 :interch		# final of section. Sampling iterval between sections
-n
-/[^#]*.*menuentry/ {	# detect new section
-/[^#]*.*$(o_name $1)/ b consect	# new section is desired
-b close			# new section is not desired
-}
-/### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
-b interch
+    n
+    /[^#]*.*menuentry/ {	# detect new section
+	/[^#]*.*$(o_name $1)/ b consect	# new section is desired
+	b close			# new section is not desired
+    }
+    /### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
+    b interch
 
 :close
-
-i\\
-\\n$(fullmark $BEG $(sect_fn $1 $e))
-i\\$(fullmark $EN $(sect_fn $1 $e))\\n
+    i$(fullmark $BEG $(sect_fn $1 $e))
+    i$(fullmark $EN $(sect_fn $1 $e))\\n
 EOF
 
 } # echo_remark() -------------------------------------------------------------------------
