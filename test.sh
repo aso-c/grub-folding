@@ -33,38 +33,17 @@ export _infolding
 #   $2 - sect class (prolog/epilog)
 echo_final()
 {
-#echo "!/$(fullmark $BEG $(sect_fn $1 $2))/ b exit
-##h   # hold current string
-#/$(fullmark $EN $(sect_fn $1 $2))/ {
-##x   # exchange hold & pattern space
-##r $tmprefix$(sect_fn $1 $2)
-#}
-#
-#:exit
-#"
-
-cat << EOF
-/$(fullmark $BEG $(sect_fn $1 $2))/! b
-$ b	# at eof break processing, send to output
-h	# hold current string
-s/.*//	# clear pattern space
-n	# read new line
-/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
-x	# exchange hold & pattern space
-r $tmprefix$(sect_fn $1 $2)
-b	# exit
+cat <<- EOF
+	/$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
+#	h	# hold current string
+	h; s/.*//; n	# hold && clear pattern space; read new lone
+#	n	# read new line
+	/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
+#	x	# exchange hold & pattern space
+	# exchange & output file after restored str
+	x; r $tmprefix$(sect_fn $1 $2)
+#	b	# exit
 EOF
-
-#echo "$ b"	# at eof break processing, send to output
-#echo "/$(fullmark $BEG $(sect_fn $1 $2))/! b"
-#echo 'h'	# hold current string
-#echo 's/.*//'	# clear pattern space
-#echo 'n'	# read new line
-#echo "/$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}"
-#echo 'x'	# exchange hold & pattern space
-#echo "r $tmprefix$(sect_fn $1 $2)"
-#echo 'b'	# exit
-
 } # echo_final()---------------------------------------------------------------
 
 
@@ -75,23 +54,12 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-#${grub_mkcfg_dir}/$(sect_fn $1 $2) |
-#sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" > "$tmprefix$(sect_fn $1 $2)"
-
 sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
 $(${grub_mkcfg_dir}/$(sect_fn $1 $2))
 EOF
 
-#sed -e "/$(fullmark $BEG $(sect_fn $1 $2))/! b
-##h   # hold current string
-#/$(fullmark $EN $(sect_fn $1 $2))/ {
-##x   # exchange hold & pattern space
-##r $tmprefix$(sect_fn $1 $2)
-#}
-#
-#"
-
 sed -e "$(echo_final $1 $2)"
+#echo_final $1 $2
 
 rm -f "$tmprefix$(sect_fn $1 $2)"
 } # remark_insert()------------------------------------------------------------
@@ -103,7 +71,7 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 echo_remark()
 {
 cat << EOF
-/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
+/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b # if no detect start of section /menuentry <OS_Name>/ - exit
 
 i\\
 \\n$(fullmark $BEG $(sect_fn $1 $p))
@@ -127,8 +95,6 @@ b interch
 i\\
 \\n$(fullmark $BEG $(sect_fn $1 $e))
 i\\$(fullmark $EN $(sect_fn $1 $e))\\n
-
-:end
 EOF
 
 } # echo_remark() -------------------------------------------------------------------------
