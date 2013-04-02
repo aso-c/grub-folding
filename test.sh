@@ -71,23 +71,21 @@ cat << EOF
     i$(fullmark $BEG $(sect_fn $1 $p))
     i$(fullmark $EN $(sect_fn $1 $p))\\n
 
-:consect		# continue sampling section
+:consect	# continue sampling section
     n; /^}/! b consect
 
-:interch		# final of section. Sampling iterval between sections
-    n
-    /[^#]*.*menuentry/ {	# detect new section
-	/[^#]*.*$(o_name $1)/ b consect	# new section is desired
-	b close			# new section is not desired
+:interch	# out of section, sampling iterval between sections
+    n; /[^#]*.*menuentry/ {	# detect start of new section
+	/[^#]*.*$(o_name $1)/ b consect	# new section is started
+	b close			# not more new section
     }
-    /### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
-    b interch
+    /### \($BEG\)\|\($EN\)/! b interch
+#    b close	# detect new section, marked by control comments
 
 :close
     i$(fullmark $BEG $(sect_fn $1 $e))
     i$(fullmark $EN $(sect_fn $1 $e))\\n
 EOF
-
 } # echo_remark() -------------------------------------------------------------------------
 
 

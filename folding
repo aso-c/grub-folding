@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.7.1 by 01.04.2013.							#
+# (c) aso, v.1.7.2 by 02.04.2013.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -135,38 +135,62 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 # Echoing string for varkup section in config file function
 # Parameters:
 #   $1 - OS class (gen, win...)
+#echo_remark()
+#{
+#echo "
+#/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - end curr line processing
+#
+#i\\
+#\\\n$(fullmark $BEG $(sect_fn $1 $p))
+#i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
+#
+#:consect		# continue sampling section
+#n
+#/^}/! b consect
+#
+#:interch		# final of section. Sampling iterval between sections
+#n
+#/[^#]*.*menuentry/ {	# detect new section
+#/[^#]*.*$(o_name $1)/ b consect	# new section is desired
+#b close			# new section is not desired
+#}
+#/### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
+#b interch
+#
+#:close
+#
+#i\\
+#\\\n$(fullmark $BEG $(sect_fn $1 $e))
+#i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
+#
+##:end
+#"
+#} # echo_remark() -------------------------------------------------------------------------
+
 echo_remark()
 {
-echo "
-/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - end curr line processing
+cat << EOF
+    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
+    i$(fullmark $BEG $(sect_fn $1 $p))
+    i$(fullmark $EN $(sect_fn $1 $p))\\n
 
-i\\
-\\\n$(fullmark $BEG $(sect_fn $1 $p))
-i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
+:consect	# continue sampling section
+    n; /^}/! b consect
 
-:consect		# continue sampling section
-n
-/^}/! b consect
-
-:interch		# final of section. Sampling iterval between sections
-n
-/[^#]*.*menuentry/ {	# detect new section
-/[^#]*.*$(o_name $1)/ b consect	# new section is desired
-b close			# new section is not desired
-}
-/### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
-b interch
+:interch	# out of section, sampling iterval between sections
+    n; /[^#]*.*menuentry/ {	# detect start of new section
+	/[^#]*.*$(o_name $1)/ b consect	# new section is started
+	b close			# not more new section
+    }
+    /### \($BEG\)\|\($EN\)/! b interch
 
 :close
-
-i\\
-\\\n$(fullmark $BEG $(sect_fn $1 $e))
-i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
-
-#:end
-"
-
+    i$(fullmark $BEG $(sect_fn $1 $e))
+    i$(fullmark $EN $(sect_fn $1 $e))\\n
+EOF
 } # echo_remark() -------------------------------------------------------------------------
+
+
 
 
 
@@ -219,12 +243,6 @@ fi
 
 
 ##************##
-#sed $allopts -e "$(echo_remark $win)" |
-## sed $allopts -e "$(remark_insert $win)" |
-# final_mark $win $p | final_mark $win $e |
-# sed $allopts -e "$(echo_remark $gen)" |
-## sed $allopts -e "$(remark_insert $gen)"
-# final_mark $gen $p | final_mark $gen $e
 
 
 
