@@ -46,9 +46,11 @@ cat << EOF
 menuentry "Microsoft Windows (all variants, on /dev/sdb)" --class windows --class os {
 	insmod part_msdos
 	insmod ntfs
-	set root='(hd1)'
 #	search --no-floppy --fs-uuid --set=root 0000000088EECEDE
-	drivemap -s (hd0) ${root}
+	set root='(hd1)'
+	drivemap (hd0) (hd2)
+	drivemap (hd1) (hd0)
+	drivemap (hd2) (hd1)
 	chainloader +1
 }
 EOF

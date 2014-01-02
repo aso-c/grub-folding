@@ -46,10 +46,9 @@ cat << EOF
 menuentry "Gentoo Linux (all variants, on /dev/sda5)" --class gnu-linux --class gnu --class os {
 	insmod part_msdos
 	insmod ext2
-	set root='(hd0.msdos2)'
-#	search --no-floppy --fs-uuid --set=root ECEF-1EE0
-	drivemap -s (hd0) ${root}
+	set root='(hd2,msdos2)'
+	search --no-floppy --fs-uuid --set=root 20e9f929-3d53-4814-abbd-2e0a38e0eaae
+	drivemap -s (hd2) (hd0)
 	chainloader +1
 }
 EOF
-
