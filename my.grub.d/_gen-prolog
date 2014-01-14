@@ -75,16 +75,12 @@ do
 	echo $version
 	exit 1 ;;
     -i | --insert)
-#	_insert='YES'
 	_insert=1
 	;;
     -x | --exclude)
-#	_exclude='YES'
 	_exclude=1
 	;;
     -ix | -xi)
-#	_insert='YES'
-#	_exclude='YES'
 	_insert=1
 	_exclude=1
 	;;
@@ -95,31 +91,30 @@ do
     esac
 done
 
-echo "insert: ${_insert}"
-echo "exclude: $_exclude"
+#echo "insert: ${_insert}"
+#echo "exclude: $_exclude"
+#
+#
+#if [ ${_insert} = 0 ] ; then
+#  echo "# Nongenerate section output"
+#else
+#  echo "# Generate section output"
+#fi
+#
+#if ! [ "${_exclude}" = 0 ] ; then
+#  echo "# Exclude section header from output"
+#else
+#  echo "# Include section header into output"
+#fi
 
 
-#if test "${_insert}" = "YES" ; then
-if [ ${_insert} = 0 ] ; then
-  echo "# Nongenerate section output"
-else
-  echo "# Generate section output"
-fi
-
-#if test ${_exclude} = 'YES' ; then
-if ! [ "${_exclude}" = 0 ] ; then
-  echo "# Exclude section header from output"
-else
-  echo "# Include section header into output"
-fi
-
-
-exit
+#exit
 
 
 
 # Don't change the next "if" operator
-if test "x${_infolding}" = "x" ; then
+#if test "x${_infolding}" = "x" ; then
+if [ ${_insert} = 0 ] ; then
   echo "# This is a gentoo prologue stub"
   exit
 fi
@@ -127,10 +122,21 @@ fi
 
 echo "Start Gentoo folding section in menu" >&2
 
-# Start of Gentoo section
-cat << EOF
-submenu "Gentoo Linux (all vaiants)" {
-EOF
+# User code section >>>------------------------
+# Insert user code here, between this lines for code6 placed before section header
+# End of user code section <<<-----------------
+
+## Begin of Gentoo section header
+#cat << EOF
+#submenu "Gentoo Linux (all vaiants)" {
+#EOF
+
+# Insert Gentoo section header if nedeed
+if  [ "${_exclude}" = 0 ] ; then
+    echo 'submenu "Gentoo Linux (all vaiants)" {'
+fi
+
+# Insert user code below this line for code, placed in section >>>-----------------
 
 # My insertion - aso
 # Gentoo section - Universal entry from Gentoo Legacy Grub
@@ -145,3 +151,4 @@ menuentry "Gentoo Linux (all variants, on /dev/sda5)" --class gnu-linux --class 
 	chainloader +1
 }
 EOF
+
