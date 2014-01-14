@@ -19,10 +19,10 @@ set -e
 
 ####################################################
 #
-# Gentoo prologue GRUB configuration file
+# Gentoo section prologue GRUB configuration file
 # v.1.8.0 from 02.01.2014. by aso
 #
-# -i, --insert            output section data into stdout
+# -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
 # -h, --help              print this message and exit
 # -v, --version           print the version information and exit
@@ -91,29 +91,8 @@ do
     esac
 done
 
-#echo "insert: ${_insert}"
-#echo "exclude: $_exclude"
-#
-#
-#if [ ${_insert} = 0 ] ; then
-#  echo "# Nongenerate section output"
-#else
-#  echo "# Generate section output"
-#fi
-#
-#if ! [ "${_exclude}" = 0 ] ; then
-#  echo "# Exclude section header from output"
-#else
-#  echo "# Include section header into output"
-#fi
-
-
-#exit
-
-
 
 # Don't change the next "if" operator
-#if test "x${_infolding}" = "x" ; then
 if [ ${_insert} = 0 ] ; then
   echo "# This is a gentoo prologue stub"
   exit
@@ -122,9 +101,10 @@ fi
 
 echo "Start Gentoo folding section in menu" >&2
 
-# User code section >>>------------------------
-# Insert user code here, between this lines for code6 placed before section header
-# End of user code section <<<-----------------
+# User code section 1 >>>------------------------
+# Insert user code here, between this lines, code placed out of section, before section header
+
+# End of user code section <<<-------------------
 
 ## Begin of Gentoo section header
 #cat << EOF
@@ -136,7 +116,8 @@ if  [ "${_exclude}" = 0 ] ; then
     echo 'submenu "Gentoo Linux (all vaiants)" {'
 fi
 
-# Insert user code below this line for code, placed in section >>>-----------------
+# User code section 2 >>>------------------------
+# Insert user code below this line, code placed in section after header >>>-----------------
 
 # My insertion - aso
 # Gentoo section - Universal entry from Gentoo Legacy Grub

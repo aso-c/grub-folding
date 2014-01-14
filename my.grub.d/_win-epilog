@@ -16,6 +16,23 @@ set -e
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+
+####################################################
+#
+# MS Windows section epiologue GRUB configuration file
+# v.1.8.0 from 14.01.2014. by aso
+#
+# -i, --insert            insert section data into stdout
+# -x, --exclude           exclude folding header
+# -h, --help              print this message and exit
+# -v, --version           print the version information and exit
+#
+####################################################
+
+ver='1.8.0'
+date='14.01.2014'
+version="$ver, from $date by aso"
+
 #
 #prefix="/usr"
 #exec_prefix="${prefix}"

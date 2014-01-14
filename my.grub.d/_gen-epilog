@@ -16,6 +16,23 @@ set -e
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+
+####################################################
+#
+# Gentoo section epilogue GRUB configuration file
+# v.1.8.0 from 14.01.2014. by aso
+#
+# -i, --insert            insert section data into stdout
+# -x, --exclude           exclude folding header
+# -h, --help              print this message and exit
+# -v, --version           print the version information and exit
+#
+####################################################
+
+ver='1.8.0'
+date='14.01.2014'
+version="$ver, from $date by aso"
+
 #
 #prefix="/usr"
 #exec_prefix="${prefix}"
@@ -26,8 +43,58 @@ set -e
 #export TEXTDOMAIN=grub
 #export TEXTDOMAINDIR="${datarootdir}/locale"
 
+usage()
+{
+    cat <<EOF
+Usage: $self [OPTION]
+Insert Folding section in GRUB configuration file
+
+  -i, --insert            output section data into stdout
+  -x, --exclude           exclude folding header
+  -h, --help              print this message and exit
+  -v, --version           print the version information and exit
+
+Combined short options are allowed.
+EOF
+} # usage() --------------------------------------
+
+
+_insert=0
+_exclude=0
+
+# Processing the arguments.
+while test $# -gt 0
+do
+    option=$1
+    shift
+
+    case "$option" in
+    -h | --help)
+	usage
+	exit 2 ;;
+    -v | --version)
+	echo $version
+	exit 1 ;;
+    -i | --insert)
+	_insert=1
+	;;
+    -x | --exclude)
+	_exclude=1
+	;;
+    -ix | -xi)
+	_insert=1
+	_exclude=1
+	;;
+    -*)
+	echo "Unrecognized options: $option"
+	;;
+    # Explicitly ignore non-option arguments, for compatibility.
+    esac
+done
+
 # Don't change the next "if" operator
-if test "x${_infolding}" = "x" ; then
+#if test "x${_infolding}" = "x" ; then
+if [ ${_insert} = 0 ] ; then
   echo "# This is a stub"
   echo "# It's a test version"
   exit
@@ -36,7 +103,30 @@ fi
 
 echo "Close Gentoo folding section in menu" >&2
 
-# My insertion - aso
-cat << EOF
-}
-EOF
+## My insertion - aso
+#cat << EOF
+#}
+#EOF
+
+
+#-----------------------------------------
+# User code section 1 >>>------------------------
+# Insert user code here, between this lines, code placed in section
+
+# End of user code section <<<-------------------
+
+## Begin of Gentoo section header
+#cat << EOF
+#submenu "Gentoo Linux (all vaiants)" {
+#EOF
+
+# Insert Gentoo section footer if nedeed, close the section
+if  [ "${_exclude}" = 0 ] ; then
+    echo '}'
+fi
+
+# User code section 2 >>>------------------------
+# Add user code below this line, code placed out of section
+
+
+#-----------------------------------------
