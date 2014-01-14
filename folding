@@ -19,7 +19,9 @@ gen='gen'
 win='win'
 
 sysconfdir="/etc"
-grub_mkcfg_dir="${sysconfdir}/grub.d"
+#grub_mkcfg_dir="${sysconfdir}/grub.d"
+# for dev
+grub_mkcfg_dir='./my.grub.d'
 
 self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`

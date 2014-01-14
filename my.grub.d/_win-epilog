@@ -92,15 +92,7 @@ do
     esac
 done
 
-## Don't change the next "if" operator
-#if [ ${_insert} = 0 ] ; then
-#  echo "# This is a gentoo epilogue stub"
-#  echo "# It's a test version"
-#  exit
-#fi
-
 # Don't change the next "if" operator
-#if test "x${_infolding}" = "x" ; then
 if [ ${_insert} = 0 ] ; then
   echo "# This is a win section epilogue stub"
   exit
@@ -113,16 +105,6 @@ echo "Close Windows folding section in menu" >&2
 # Insert user code here, between this lines, code placed in section
 
 # End of user code section <<<-------------------
-
-## My insertion - aso
-#cat << EOF
-#}
-#EOF
-
-## Insert Gentoo section footer if nedeed, close the section
-#if  [ "${_exclude}" = 0 ] ; then
-#    echo '}'
-#fi
 
 ## My insertion - MS Windows (all variants) - aso
 #cat << EOF

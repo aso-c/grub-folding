@@ -1,7 +1,8 @@
 #! /bin/sh
 set -e
 
-. "./foldlib"
+#. "./foldlib"
+. "./folding"
 
 #grub_mkcfg_dir="cfg-test"
 grub_mkcfg_dir='/etc/grub.d'
