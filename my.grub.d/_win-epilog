@@ -19,7 +19,7 @@ set -e
 
 ####################################################
 #
-# MS Windows section epiologue GRUB configuration file
+# MS Windows section epilogue GRUB configuration file
 # v.1.8.0 from 14.01.2014. by aso
 #
 # -i, --insert            insert section data into stdout
@@ -43,15 +43,96 @@ version="$ver, from $date by aso"
 #export TEXTDOMAIN=grub
 #export TEXTDOMAINDIR="${datarootdir}/locale"
 
+usage()
+{
+    cat <<EOF
+Usage: $self [OPTION]
+Insert Folding section in GRUB configuration file
+
+  -i, --insert            output section data into stdout
+  -x, --exclude           exclude folding header
+  -h, --help              print this message and exit
+  -v, --version           print the version information and exit
+
+Combined short options are allowed.
+EOF
+} # usage() --------------------------------------
+
+
+_insert=0
+_exclude=0
+
+# Processing the arguments.
+while test $# -gt 0
+do
+    option=$1
+    shift
+
+    case "$option" in
+    -h | --help)
+	usage
+	exit 2 ;;
+    -v | --version)
+	echo $version
+	exit 1 ;;
+    -i | --insert)
+	_insert=1
+	;;
+    -x | --exclude)
+	_exclude=1
+	;;
+    -ix | -xi)
+	_insert=1
+	_exclude=1
+	;;
+    -*)
+	echo "Unrecognized options: $option"
+	;;
+    # Explicitly ignore non-option arguments, for compatibility.
+    esac
+done
+
+## Don't change the next "if" operator
+#if [ ${_insert} = 0 ] ; then
+#  echo "# This is a gentoo epilogue stub"
+#  echo "# It's a test version"
+#  exit
+#fi
+
 # Don't change the next "if" operator
-if test "x${_infolding}" = "x" ; then
-  echo "# This is a stub"
+#if test "x${_infolding}" = "x" ; then
+if [ ${_insert} = 0 ] ; then
+  echo "# This is a win section epilogue stub"
   exit
 fi
 
+
 echo "Close Windows folding section in menu" >&2
 
-# My insertion - MS Windows (all variants) - aso
-cat << EOF
-}
-EOF
+# User code section 1 >>>------------------------
+# Insert user code here, between this lines, code placed in section
+
+# End of user code section <<<-------------------
+
+## My insertion - aso
+#cat << EOF
+#}
+#EOF
+
+## Insert Gentoo section footer if nedeed, close the section
+#if  [ "${_exclude}" = 0 ] ; then
+#    echo '}'
+#fi
+
+## My insertion - MS Windows (all variants) - aso
+#cat << EOF
+#}
+#EOF
+
+# Insert Gentoo section footer if nedeed, close the section
+if  [ "${_exclude}" = 0 ] ; then
+    echo '}'
+fi
+
+# User code section 2 >>>------------------------
+# Add user code below this line, code placed out of section

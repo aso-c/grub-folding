@@ -93,9 +93,8 @@ do
 done
 
 # Don't change the next "if" operator
-#if test "x${_infolding}" = "x" ; then
 if [ ${_insert} = 0 ] ; then
-  echo "# This is a stub"
+  echo "# This is a gentoo section epilogue stub"
   echo "# It's a test version"
   exit
 fi

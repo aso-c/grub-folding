@@ -93,7 +93,7 @@ done
 
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
-  echo "# This is a win prologue stub"
+  echo "# This is a win section prologue stub"
   exit
 fi
 
@@ -107,8 +107,6 @@ fi
 
 echo "Start Windows folding section in menu" >&2
 
-
-#------------------------------------------------------------------------
 # User code section 1 >>>------------------------
 # Insert user code here, between this lines, code placed out of section, before section header
 
