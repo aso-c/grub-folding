@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.7.2 by 02.04.2013.							#
+# (c) aso, v.1.8.0 by 02.01.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.7.3'
-version="$ver, by 01.04.2013 from aso"
+ver='1.8.0'
+version="$ver, by 02.01.2014 from aso"
 
 gen='gen'
 win='win'
@@ -132,32 +132,9 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 } # remark_insert()------------------------------------------------------------
 
 
-# Echoing string for varkup section in config file function
+# Echoing string for markup section in config file function
 # Parameters:
 #   $1 - OS class (gen, win...)
-#echo_remark()
-#{
-#cat << EOF
-#    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-#    i$(fullmark $BEG $(sect_fn $1 $p))
-#    i$(fullmark $EN $(sect_fn $1 $p))\\n
-#
-#:consect	# continue sampling section
-#    n; /^}/! b consect
-#
-#:interch	# out of section, sampling iterval between sections
-#    n; /[^#]*.*menuentry/ {	# detect start of new section
-#	/[^#]*.*$(o_name $1)/ b consect	# new section is started
-#	b close			# not more new section
-#    }
-#    /### \($BEG\)\|\($EN\)/! b interch
-#
-#:close
-#    i$(fullmark $BEG $(sect_fn $1 $e))
-#    i$(fullmark $EN $(sect_fn $1 $e))\\n
-#EOF
-#} # echo_remark() -------------------------------------------------------------------------
-
 echo_remark()
 {
 cat << EOF
@@ -168,7 +145,7 @@ cat << EOF
 :consect	# continue sampling section
     n; /^}/! b consect
 
-:intersect	# out of section, sampling iterval between sections
+:intersect	# out of section, sampling interval between sections
     n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
     /[^#]*.*menuentry/! b intersect	# detect that not start of new section
     /[^#]*.*$(o_name $1)/ b consect	# new section is started

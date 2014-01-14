@@ -16,6 +16,23 @@ set -e
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+
+####################################################
+#
+# Gentoo prologue GRUB configuration file
+# v.1.8.0 from 02.01.2014. by aso
+#
+# -i, --insert            output section data into stdout
+# -x, --exclude           exclude folding header
+# -h, --help              print this message and exit
+# -v, --version           print the version information and exit
+#
+####################################################
+
+ver='1.8.0'
+date='02.01.2014'
+version="$ver, from $date by aso"
+
 #
 #prefix="/usr"
 #exec_prefix="${prefix}"
@@ -26,9 +43,84 @@ set -e
 #export TEXTDOMAIN=grub
 #export TEXTDOMAINDIR="${datarootdir}/locale"
 
+usage()
+{
+    cat <<EOF
+Usage: $self [OPTION]
+Insert Folding section in GRUB configuration file
+
+  -i, --insert            output section data into stdout
+  -x, --exclude           exclude folding header
+  -h, --help              print this message and exit
+  -v, --version           print the version information and exit
+
+Combined short options are allowed.
+EOF
+} # usage() --------------------------------------
+
+_insert=0
+_exclude=0
+
+# Processing the arguments.
+while test $# -gt 0
+do
+    option=$1
+    shift
+
+    case "$option" in
+    -h | --help)
+	usage
+	exit 2 ;;
+    -v | --version)
+	echo $version
+	exit 1 ;;
+    -i | --insert)
+#	_insert='YES'
+	_insert=1
+	;;
+    -x | --exclude)
+#	_exclude='YES'
+	_exclude=1
+	;;
+    -ix | -xi)
+#	_insert='YES'
+#	_exclude='YES'
+	_insert=1
+	_exclude=1
+	;;
+    -*)
+	echo "Unrecognized options: $option"
+	;;
+    # Explicitly ignore non-option arguments, for compatibility.
+    esac
+done
+
+echo "insert: ${_insert}"
+echo "exclude: $_exclude"
+
+
+#if test "${_insert}" = "YES" ; then
+if [ ${_insert} = 0 ] ; then
+  echo "# Nongenerate section output"
+else
+  echo "# Generate section output"
+fi
+
+#if test ${_exclude} = 'YES' ; then
+if ! [ "${_exclude}" = 0 ] ; then
+  echo "# Exclude section header from output"
+else
+  echo "# Include section header into output"
+fi
+
+
+exit
+
+
+
 # Don't change the next "if" operator
 if test "x${_infolding}" = "x" ; then
-  echo "# This is a stub"
+  echo "# This is a gentoo prologue stub"
   exit
 fi
 
@@ -43,6 +135,7 @@ EOF
 # My insertion - aso
 # Gentoo section - Universal entry from Gentoo Legacy Grub
 cat << EOF
+
 menuentry "Gentoo Linux (all variants, on /dev/sda5)" --class gnu-linux --class gnu --class os {
 	insmod part_msdos
 	insmod ext2
