@@ -103,21 +103,14 @@ fi
 
 echo "Close Gentoo folding section in menu" >&2
 
-## My insertion - aso
-#cat << EOF
-#}
-#EOF
-
-
-#-----------------------------------------
 # User code section 1 >>>------------------------
 # Insert user code here, between this lines, code placed in section
 
 # End of user code section <<<-------------------
 
-## Begin of Gentoo section header
+## My insertion - aso
 #cat << EOF
-#submenu "Gentoo Linux (all vaiants)" {
+#}
 #EOF
 
 # Insert Gentoo section footer if nedeed, close the section
@@ -127,6 +120,3 @@ fi
 
 # User code section 2 >>>------------------------
 # Add user code below this line, code placed out of section
-
-
-#-----------------------------------------
