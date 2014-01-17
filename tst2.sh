@@ -1,6 +1,9 @@
 #! /bin/sh
 set -e
 
+_dev=1
+export _dev
+
 #. "./foldlib"
 . "./folding"
 
@@ -28,61 +31,65 @@ grub_mkcfg_dir='/etc/grub.d'
 # ------------------------------------------------------------------------------
 
 
-echo_final()
-{
-echo "/$(fullmark $BEG $(sect_fn $1 $2))$safe/ {
-r $tmprefix$(sect_fn $1 $2)
-s/${safe}//
-}"
-#r $tmprefix$(basename $(sect_fn $1 $2))
+#echo_final()
+#{
+#echo "/$(fullmark $BEG $(sect_fn $1 $2))$safe/ {
+#r $tmprefix$(sect_fn $1 $2)
+#s/${safe}//
+#}"
+##r $tmprefix$(basename $(sect_fn $1 $2))
+#
+#} # echo_final()---------------------------------------------------------------
 
-} # echo_final()---------------------------------------------------------------
 
+## Echoing string for varkup section in config file function
+## Parameters:
+##   $1 - OS class (gen, win...)
+#echo_remark()
+#{
+#
+#echo "
+#/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
+#
+#i\\
+#\\\n$(fullmark $BEG $(sect_fn $1 $p))$safe
+#i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
+#
+#:consect		# continue sampling section
+#n
+#/^}/! b consect
+#
+#:interch		# final of section. Sampling iterval between sections
+#n
+#/[^#]*.*menuentry/ {	# detect new section
+#/[^#]*.*$(o_name $1)/ b consect	# new section is desired
+#b close			# new section is not desired
+#}
+#/### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
+#b interch
+#
+#:close
+#
+#i\\
+#\\\n$(fullmark $BEG $(sect_fn $1 $e))$safe
+#i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
+#
+#:end
+#"
+#
+#} # echo_remark() -------------------------------------------------------------------------
 
-# Echoing string for varkup section in config file function
-# Parameters:
-#   $1 - OS class (gen, win...)
-echo_remark()
-{
+echo 'Mark'
 
-echo "
-/\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b end  # detect start of section /menuentry <OS_Name>/
-
-i\\
-\\\n$(fullmark $BEG $(sect_fn $1 $p))$safe
-i\\$(fullmark $EN $(sect_fn $1 $p))\\\n
-
-:consect		# continue sampling section
-n
-/^}/! b consect
-
-:interch		# final of section. Sampling iterval between sections
-n
-/[^#]*.*menuentry/ {	# detect new section
-/[^#]*.*$(o_name $1)/ b consect	# new section is desired
-b close			# new section is not desired
-}
-/### \($BEG\)\|\($EN\)/ b close	# detect new section, marked by control comments
-b interch
-
-:close
-
-i\\
-\\\n$(fullmark $BEG $(sect_fn $1 $e))$safe
-i\\$(fullmark $EN $(sect_fn $1 $e))\\\n
-
-:end
-"
-
-} # echo_remark() -------------------------------------------------------------------------
-
+echo "$(fullmark $BEG $(sect_fn $gen $p))"
+echo "$(fullmark $BEG $(sect_fn $win $e))"
 
 echo '==[ Remark ]==============================================================================\n'
 
-echo_remark $win
+#echo_remark $win
 
 echo '==[ Insert ]==============================================================================\n'
 
-echo_final $win $p
+#echo_final $win $p
 
 #fullmark $win $p

@@ -29,9 +29,9 @@ GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
 
-# Calling from folding marker
-_infolding='Yes'
-export _infolding
+## Calling from folding marker
+#_infolding='Yes'
+#export _infolding
 
 
 
@@ -127,7 +127,7 @@ EOF
 remark_insert()
 {
 sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
-$(${grub_mkcfg_dir}/$(sect_fn $1 $2))
+$(${grub_mkcfg_dir}/$(sect_fn $1 $2) -i)
 EOF
 sed $allopts -e "$(echo_final $1 $2)"
 rm -f "$tmprefix$(sect_fn $1 $2)"
@@ -159,7 +159,10 @@ EOF
 } # echo_remark() -------------------------------------------------------------------------
 
 
-
+#for dev target
+if [ $_dev ] ; then
+    return
+fi
 
 
 # Processing the arguments.
