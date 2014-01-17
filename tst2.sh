@@ -8,7 +8,7 @@ export _dev
 . "./folding"
 
 #grub_mkcfg_dir="cfg-test"
-grub_mkcfg_dir='/etc/grub.d'
+#grub_mkcfg_dir='/etc/grub.d'
 
 
 # The test of shell programming
@@ -95,7 +95,23 @@ echo "$(fullmark $BEG $(sect_fn $win $e))"
 echo '==[ Remark ]==============================================================================\n'
 
 #echo_remark $win
-sed -e "/aaa/!b;n;s/b*/$(shldslash './my.grub.d/_gen-prolog') -ix/e"
+#sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)#.*/\2 -i/e"
+#sed -e "/aaa/!b;n;s/\(# exec\!\)\($(shldslash '${grub_mkcfg_dir}/$(sect_fn $gen $p)')\)#.*/\2 -i/e"
+#sed -e "s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\2 -i/e"
+#echo "s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\2 -i/e"
+
+#teta="s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\\2 -i/e"
+#sed -e "${teta}"
+#echo "$teta"
+
+
+#teta='/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\2 -i/e'
+#sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\2 -i/e"
+#echo "${teta}"
+
+#sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
+#sed -e "s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
+#echo "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 
 echo '==[ Insert ]==============================================================================\n'
 

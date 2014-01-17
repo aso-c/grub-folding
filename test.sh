@@ -45,26 +45,22 @@ grub_mkcfg_dir="./my.grub.d"
 #    x; r $tmprefix$(sect_fn $1 $2)
 #EOF
 #} # echo_final()---------------------------------------------------------------
-#
-#
-#
-## Insert folding section in config file function on file insertion
-## Parameters:
-##   $1 - OS class (win/gentoo)
-##   $2 - sect class (prolog/epilog)
-#remark_insert()
-#{
-#sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
-#$(${grub_mkcfg_dir}/$(sect_fn $1 $2))
-#EOF
-#
-#sed -e "$(echo_final $1 $2)"
-##echo_final $1 $2
-#
-#rm -f "$tmprefix$(sect_fn $1 $2)"
-#} # remark_insert()------------------------------------------------------------
-#
-#
+
+
+# Insert folding section in config file function on file insertion
+# Parameters:
+#   $1 - OS class (win/gentoo)
+#   $2 - sect class (prolog/epilog)
+remark_insert()
+{
+sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
+$(${grub_mkcfg_dir}/$(sect_fn $1 $2) -i)
+EOF
+sed $allopts -e "$(echo_final $1 $2)"
+rm -f "$tmprefix$(sect_fn $1 $2)"
+} # remark_insert()------------------------------------------------------------
+
+
 ## Echoing string for varkup section in config file function
 ## Parameters:
 ##   $1 - OS class (gen, win...)
