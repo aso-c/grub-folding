@@ -54,6 +54,15 @@ EOF
 } # usage() --------------------------------------
 
 
+#
+# Shielded Slash
+# for using in sed-scripts
+shldslash()
+{
+    echo $1 | sed 's/\//\\&/'g
+} # shldslash
+
+
 # Create marker
 mark() {
 local MARK='###'

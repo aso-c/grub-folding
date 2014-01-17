@@ -79,6 +79,14 @@ grub_mkcfg_dir='/etc/grub.d'
 #
 #} # echo_remark() -------------------------------------------------------------------------
 
+##
+## Shielded Slash
+## for using in sed-scripts
+#shldslash()
+#{
+#    echo $1 | sed 's/\//\\&/'g
+#} # shldslash
+
 echo 'Mark'
 
 echo "$(fullmark $BEG $(sect_fn $gen $p))"
@@ -87,6 +95,7 @@ echo "$(fullmark $BEG $(sect_fn $win $e))"
 echo '==[ Remark ]==============================================================================\n'
 
 #echo_remark $win
+sed -e "/aaa/!b;n;s/b*/$(shldslash './my.grub.d/_gen-prolog') -ix/e"
 
 echo '==[ Insert ]==============================================================================\n'
 
