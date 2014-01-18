@@ -143,6 +143,16 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 } # remark_insert()------------------------------------------------------------
 
 
+# Insert folding section in config file function on file insertion
+# Parameters:
+#   $1 - OS class (win/gentoo)
+#   $2 - sect class (prolog/epilog)
+remark_insert2()
+{
+    sed -e "s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)\([^#]*\)/\2\3 /e"
+} # remark_insert2()------------------------------------------------------------
+
+
 # Echoing string for markup section in config file function
 # Parameters:
 #   $1 - OS class (gen, win...)

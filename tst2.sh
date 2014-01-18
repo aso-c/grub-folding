@@ -107,14 +107,18 @@ echo '==[ Remark ]==============================================================
 # Замена имени исполняемого файла на вывод его исполнения,
 # вариант с переменной сценария, и одновременным выводом через команду echo
 # В заменяющей части команды s/// - \2 - добавлен лишний бэкслэш: \\2
-teta="s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\\2 -i/e"
+#teta="s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\\2 -i/e"
+#sed -e "${teta}"
+#echo "$teta"
+
+
+# Вариант со считыванием опции исполнения сценария из командного комментария.
+# Сценарий в переменной shell.
+#teta="s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\\2 -i /e"
+teta="s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $win $p))\)\([^#]*\)/\\2\\3 /e"
 sed -e "${teta}"
-echo "$teta"
-
-
-#teta='/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\2 -i/e'
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\2 -i/e"
-#echo "${teta}"
+echo "${teta}"
 
 # Вариант: замена сразу обоих типов файлов секций - _[gen,win]-prolog за один проход sed
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"

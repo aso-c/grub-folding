@@ -15,19 +15,10 @@ export _dev
 
 #sysconfdir="/etc"
 #grub_mkcfg_dir="${sysconfdir}/grub.d"
-#grub_mkcfg_dir="cfg-test"
 grub_mkcfg_dir="./my.grub.d"
 
 
 #=[ end of const part ]========================================================
-
-
-
-
-# Calling from folding marker
-#_infolding='Yes'
-#export _infolding
-
 
 
 ## Echoing control string for insert folding section
@@ -53,11 +44,7 @@ grub_mkcfg_dir="./my.grub.d"
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
-$(${grub_mkcfg_dir}/$(sect_fn $1 $2) -i)
-EOF
-sed $allopts -e "$(echo_final $1 $2)"
-rm -f "$tmprefix$(sect_fn $1 $2)"
+    sed -e "s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)\([^#]*\)/\2\3 /e"
 } # remark_insert()------------------------------------------------------------
 
 
@@ -99,25 +86,28 @@ rm -f "$tmprefix$(sect_fn $1 $2)"
 echo '==========================================================================================\n'
 echo "$win insertion"
 
-echo_final $win $p
+#echo_final $win $p
 
 #echo '---------------------------------------------------\n'
 echo "$gen insertion"
 
-echo_final $gen $e
+#echo_final $gen $e
 
 #sed  -ne "$(remark_insert2 $win $p)" | sed -ne "$(remark_insert2 $win $e)"
 #final_mark $win $p | final_mark $win $e |
 #final_mark $gen $p | final_mark $gen $e
+
+#remark_insert2 $win $p | remark_insert2 $win $e |
+#remark_insert2 $gen $p | remark_insert2 $gen $e
 
 #echo_final $win $e
 
 ##sed -e "$(echo_remark $win)"
 #sed -e "$(echo_remark $win)"	|
 #sed -e "$(echo_remark $gen)"	|
-#remark_insert $win $p	|
-#remark_insert $win $e	|
-#remark_insert $gen $p	|
-#remark_insert $gen $e
+remark_insert $win $p	|
+remark_insert $win $e	|
+remark_insert $gen $p	|
+remark_insert $gen $e
 
 #sed -e "$(remark_insert3 $win $e)" |...
