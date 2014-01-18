@@ -48,39 +48,31 @@ remark_insert()
 } # remark_insert()------------------------------------------------------------
 
 
-## Echoing string for varkup section in config file function
-## Parameters:
-##   $1 - OS class (gen, win...)
-#echo_remark()
-#{
-#cat << EOF
-#    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-#    i$(fullmark $BEG $(sect_fn $1 $p))
-#    i$(fullmark $EN $(sect_fn $1 $p))\\n
-#
-#:consect	# continue sampling section
-#    n; /^}/! b consect
-#
-#:intersect	# out of section, sampling iterval between sections
-#    n;
-#    /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-#    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
-#    /[^#]*.*$(o_name $1)/ b consect	# new section is started
-##    b close			# not more new section
-##    b interch			# detect new section, marked by control comments
-#
-##    n; /[^#]*.*menuentry/ {	# detect start of new section
-##	/[^#]*.*$(o_name $1)/ b consect	# new section is started
-##	b close			# not more new section
-##    }
-##    /### \($BEG\)\|\($EN\)/! b interch
-###    b close	# detect new section, marked by control comments
-##
-#:close
-#    i$(fullmark $BEG $(sect_fn $1 $e))
-#    i$(fullmark $EN $(sect_fn $1 $e))\\n
-#EOF
-#} # echo_remark() -------------------------------------------------------------------------
+# Echoing string for markup section in config file function
+# Parameters:
+#   $1 - OS class (gen, win...)
+echo_remark()
+{
+cat << EOF
+    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
+    i$(fullmark $BEG $(sect_fn $1 $p))
+    i #exec!$grub_mkcfg_dir/$(sect_fn $1 $p) -i #
+    i$(fullmark $EN $(sect_fn $1 $p))\\n
+
+:consect	# continue sampling section
+    n; /^}/! b consect
+
+:intersect	# out of section, sampling interval between sections
+    n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
+    /[^#]*.*$(o_name $1)/ b consect	# new section is started
+
+:close
+    i$(fullmark $BEG $(sect_fn $1 $e))
+    i# exec!$grub_mkcfg_dir/$(sect_fn $1 $e) -i #
+    i$(fullmark $EN $(sect_fn $1 $e))\\n
+EOF
+} # echo_remark() -------------------------------------------------------------------------
 
 
 echo '==========================================================================================\n'
@@ -103,8 +95,8 @@ echo "$gen insertion"
 #echo_final $win $e
 
 ##sed -e "$(echo_remark $win)"
-#sed -e "$(echo_remark $win)"	|
-#sed -e "$(echo_remark $gen)"	|
+sed -e "$(echo_remark $win)"	|
+sed -e "$(echo_remark $gen)"	|
 remark_insert $win $p	|
 remark_insert $win $e	|
 remark_insert $gen $p	|
