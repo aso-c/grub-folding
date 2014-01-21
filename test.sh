@@ -37,26 +37,26 @@ grub_mkcfg_dir="./my.grub.d"
 #EOF
 #} # echo_final()---------------------------------------------------------------
 
-# Echoing string of control comment
-# Parameters:
-#   $1 - OS class (gen, win...)
-#   $2 - tail (prolog, epilog...)
-echo_cmd()
-{
-    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
-    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
-    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
-
-#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\n"\
-#	"# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n"\
-#	"$(fullmark $EN $(sect_fn $1 $2))\\n"
-
-#    cat <<-EOF
-#	$(fullmark $BEG $(sect_fn $1 $2))\\n\
-#	# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n\
-#	$(fullmark $EN $(sect_fn $1 $2))\\n
-#	EOF
-} # echo_cmd
+## Echoing string of control comment
+## Parameters:
+##   $1 - OS class (gen, win...)
+##   $2 - tail (prolog, epilog...)
+#echo_cmd()
+#{
+#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
+#    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
+#    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
+#
+##    echo "$(fullmark $BEG $(sect_fn $1 $2))\\n"\
+##	"# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n"\
+##	"$(fullmark $EN $(sect_fn $1 $2))\\n"
+#
+##    cat <<-EOF
+##	$(fullmark $BEG $(sect_fn $1 $2))\\n\
+##	# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n\
+##	$(fullmark $EN $(sect_fn $1 $2))\\n
+##	EOF
+#} # echo_cmd
 
 # Echoing string for markup section in config file function
 # Parameters:
@@ -65,10 +65,10 @@ echo_remark()
 {
 cat << EOF
     /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-#    i$(echo_cmd $1 $p)
-    i$(fullmark $BEG $(sect_fn $1 $p))
-    i# exec!$grub_mkcfg_dir/$(sect_fn $1 $p) -i #
-    i$(fullmark $EN $(sect_fn $1 $p))\\n
+    i$(echo_cmd $1 $p)
+    #i$(fullmark $BEG $(sect_fn $1 $p))
+    #i# exec!$grub_mkcfg_dir/$(sect_fn $1 $p) -i #
+    #i$(fullmark $EN $(sect_fn $1 $p))\\n
 
 :consect	# continue sampling section
     n; /^}/! b consect

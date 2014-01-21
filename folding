@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.1 by 17.01.2014.							#
+# (c) aso, v.1.9.2 by 19.01.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -13,7 +13,7 @@ set -e
 
 
 ver='1.9.2'
-version="$ver, by 17.01.2014 from aso"
+version="$ver, by 19.01.2014 from aso"
 
 gen='gen'
 win='win'
@@ -106,18 +106,42 @@ EOF
 p='prolog'
 e='epilog'
 
+## Echoing string of control comment
+## Parameters:
+##   $1 - OS class (gen, win...)
+##   $2 - tail (prolog, epilog...)
+#echo_cmd()
+#{
+#    cat << EOF
+#	i$(fullmark $BEG $(sect_fn $1 $2))
+#	i # exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #
+#	i$(fullmark $EN $(sect_fn $1 $2))\\n
+#EOF
+#} # echo_cmd
+
 # Echoing string of control comment
 # Parameters:
 #   $1 - OS class (gen, win...)
 #   $2 - tail (prolog, epilog...)
 echo_cmd()
 {
-    cat << EOF
-	i$(fullmark $BEG $(sect_fn $1 $2))
-	i # exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #
-	i$(fullmark $EN $(sect_fn $1 $2))\\n
-EOF
+    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
+    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
+    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
+
+#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\n"\
+#	"# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n"\
+#	"$(fullmark $EN $(sect_fn $1 $2))\\n"
+
+#    cat <<-EOF
+#	$(fullmark $BEG $(sect_fn $1 $2))\\n\
+#	# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n\
+#	$(fullmark $EN $(sect_fn $1 $2))\\n
+#	EOF
 } # echo_cmd
+
+
+
 
 # Echoing string for markup section in config file function
 # Parameters:
@@ -126,7 +150,7 @@ echo_remark()
 {
 cat << EOF
     /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-    $(echo_cmd $1 $p)
+    i$(echo_cmd $1 $p)
 
 :consect	# continue sampling section
     n; /^}/! b consect
@@ -137,7 +161,7 @@ cat << EOF
     /[^#]*.*$(o_name $1)/ b consect	# new section is started
 
 :close
-    $(echo_cmd $1 $e)
+    i$(echo_cmd $1 $e)
 #    i$(fullmark $BEG $(sect_fn $1 $e))
 #    i# exec!$grub_mkcfg_dir/$(sect_fn $1 $e) -i #
 #    i$(fullmark $EN $(sect_fn $1 $e))\\n
