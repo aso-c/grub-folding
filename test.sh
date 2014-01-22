@@ -17,6 +17,14 @@ export _dev
 #grub_mkcfg_dir="${sysconfdir}/grub.d"
 grub_mkcfg_dir="./my.grub.d"
 
+## Generate section file name
+## Parameters:
+##   #1 - prefix, OS_name (gentoo, win),
+##   #2 - tail {prolog | epilog}
+#sect_fn() {
+#echo "_$1-$2"
+#} # sect_fn() ------------------------------------
+
 
 #=[ end of const part ]========================================================
 
@@ -37,55 +45,32 @@ grub_mkcfg_dir="./my.grub.d"
 #EOF
 #} # echo_final()---------------------------------------------------------------
 
-## Echoing string of control comment
+
+## Echoing string for markup section in config file function
 ## Parameters:
 ##   $1 - OS class (gen, win...)
-##   $2 - tail (prolog, epilog...)
-#echo_cmd()
+#echo_remark()
 #{
-#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
-#    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
-#    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
+#cat << EOF
+#    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
+#    i$(fullmark $BEG $(sect_fn $1 $p))
+#    i # exec!$grub_mkcfg_dir/$(sect_fn $1 $p) -i #
+#    i$(fullmark $EN $(sect_fn $1 $p))\\n
 #
-##    echo "$(fullmark $BEG $(sect_fn $1 $2))\\n"\
-##	"# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n"\
-##	"$(fullmark $EN $(sect_fn $1 $2))\\n"
+#:consect	# continue sampling section
+#    n; /^}/! b consect
 #
-##    cat <<-EOF
-##	$(fullmark $BEG $(sect_fn $1 $2))\\n\
-##	# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n\
-##	$(fullmark $EN $(sect_fn $1 $2))\\n
-##	EOF
-#} # echo_cmd
-
-# Echoing string for markup section in config file function
-# Parameters:
-#   $1 - OS class (gen, win...)
-echo_remark()
-{
-cat << EOF
-    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-    i$(echo_cmd $1 $p)
-    #i$(fullmark $BEG $(sect_fn $1 $p))
-    #i# exec!$grub_mkcfg_dir/$(sect_fn $1 $p) -i #
-    #i$(fullmark $EN $(sect_fn $1 $p))\\n
-
-:consect	# continue sampling section
-    n; /^}/! b consect
-
-:intersect	# out of section, sampling interval between sections
-    n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
-    /[^#]*.*$(o_name $1)/ b consect	# new section is started
-
-:close
-    i$(echo_cmd $1 $e)
-    #i$(fullmark $BEG $(sect_fn $1 $e))
-    #i# exec!$grub_mkcfg_dir/$(sect_fn $1 $e) -i #
-    #i$(fullmark $EN $(sect_fn $1 $e))\\n
-EOF
-} # echo_remark() -------------------------------------------------------------------------
-
+#:intersect	# out of section, sampling interval between sections
+#    n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+#    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
+#    /[^#]*.*$(o_name $1)/ b consect	# new section is started
+#
+#:close
+#    i$(fullmark $BEG $(sect_fn $1 $e))
+#    i# exec!$grub_mkcfg_dir/$(sect_fn $1 $e) -i #
+#    i$(fullmark $EN $(sect_fn $1 $e))\\n
+#EOF
+#} # echo_remark() -------------------------------------------------------------------------
 
 
 echo '==========================================================================================\n'
@@ -109,9 +94,9 @@ echo "$gen insertion"
 
 #echo_final $win $e
 
-sed -e "$(echo_remark $win)"
-#sed -e "$(echo_remark $win)"	|
-#sed -e "$(echo_remark $gen)"	|
+#sed -e "$(echo_remark $win)"
+sed -e "$(echo_remark $win)"	|
+sed -e "$(echo_remark $gen)"	#|
 #remark_insert $win $p	|
 #remark_insert $win $e	|
 #remark_insert $gen $p	|

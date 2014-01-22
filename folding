@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.2 by 19.01.2014.							#
+# (c) aso, v.1.9.3 by 21.01.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.2'
-version="$ver, by 19.01.2014 from aso"
+ver='1.9.3'
+version="$ver, by 21.01.2014 from aso"
 
 gen='gen'
 win='win'
@@ -52,7 +52,7 @@ EOF
 #
 # Shielded Slash
 # for using in sed-scripts
-shldslash()
+shield()
 {
     echo $1 | sed 's/\//\\&/'g
 } # shldslash
@@ -65,13 +65,6 @@ echo "$MARK\ $1\ $MARK"
 } # mark() ---------------------------------------
 
 
-# Generate section file name
-# Parameters:
-#   #1 - prefix, OS_name (gentoo, win),
-#   #2 - tail {prolog | epilog}
-sect_fn() {
-echo "_$1-$2"
-} # sect_fn() ------------------------------------
 
 
 # Echoing OS name from class
@@ -106,41 +99,19 @@ EOF
 p='prolog'
 e='epilog'
 
-## Echoing string of control comment
-## Parameters:
-##   $1 - OS class (gen, win...)
-##   $2 - tail (prolog, epilog...)
-#echo_cmd()
-#{
-#    cat << EOF
-#	i$(fullmark $BEG $(sect_fn $1 $2))
-#	i # exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #
-#	i$(fullmark $EN $(sect_fn $1 $2))\\n
-#EOF
-#} # echo_cmd
-
 # Echoing string of control comment
 # Parameters:
 #   $1 - OS class (gen, win...)
 #   $2 - tail (prolog, epilog...)
 echo_cmd()
 {
-    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
-    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
-    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
-
-#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\n"\
-#	"# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n"\
-#	"$(fullmark $EN $(sect_fn $1 $2))\\n"
-
-#    cat <<-EOF
-#	$(fullmark $BEG $(sect_fn $1 $2))\\n\
-#	# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\n\
-#	$(fullmark $EN $(sect_fn $1 $2))\\n
-#	EOF
+#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
+    echo " \\\\n$(fullmark $BEG _$1-$2)\\"
+#    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
+    echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
+#    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
+    echo "$(fullmark $EN _$1-$2)\\\\n"
 } # echo_cmd
-
-
 
 
 # Echoing string for markup section in config file function
@@ -150,7 +121,7 @@ echo_remark()
 {
 cat << EOF
     /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-    i$(echo_cmd $1 $p)
+    i\\$(echo_cmd $1 $p)
 
 :consect	# continue sampling section
     n; /^}/! b consect
@@ -161,38 +132,9 @@ cat << EOF
     /[^#]*.*$(o_name $1)/ b consect	# new section is started
 
 :close
-    i$(echo_cmd $1 $e)
-#    i$(fullmark $BEG $(sect_fn $1 $e))
-#    i# exec!$grub_mkcfg_dir/$(sect_fn $1 $e) -i #
-#    i$(fullmark $EN $(sect_fn $1 $e))\\n
+    i\\$(echo_cmd $1 $e)
 EOF
 } # echo_remark() -------------------------------------------------------------------------
-
-## Echoing string for markup section in config file function
-## Parameters:
-##   $1 - OS class (gen, win...)
-#echo_remark()
-#{
-#cat << EOF
-#    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-#    i$(fullmark $BEG $(sect_fn $1 $p))
-#    i # exec!$grub_mkcfg_dir/$(sect_fn $1 $p) -i #
-#    i$(fullmark $EN $(sect_fn $1 $p))\\n
-#
-#:consect	# continue sampling section
-#    n; /^}/! b consect
-#
-#:intersect	# out of section, sampling interval between sections
-#    n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-#    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
-#    /[^#]*.*$(o_name $1)/ b consect	# new section is started
-#
-#:close
-#    i$(fullmark $BEG $(sect_fn $1 $e))
-#    i# exec!$grub_mkcfg_dir/$(sect_fn $1 $e) -i #
-#    i$(fullmark $EN $(sect_fn $1 $e))\\n
-#EOF
-#} # echo_remark() -------------------------------------------------------------------------
 
 
 # Insert folding section in config file function on file insertion
@@ -201,7 +143,8 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-    sed -e "s/# *exec! *\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)\([^#]*\)/\1\2 /e"
+#    sed -e "s/# *exec! *\($(shldslash ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
 
