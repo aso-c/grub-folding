@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.3 by 21.01.2014.							#
+# (c) aso, v.1.9.4 by 28.01.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.3'
-version="$ver, by 21.01.2014 from aso"
+ver='1.9.4'
+version="$ver, by 28.01.2014 from aso"
 
 gen='gen'
 win='win'
@@ -54,7 +54,7 @@ EOF
 # for using in sed-scripts
 shield()
 {
-    echo $1 | sed 's/\//\\&/'g
+    echo $* | sed 's/\//\\&/'g
 } # shldslash
 
 
@@ -120,7 +120,22 @@ echo_cmd()
 echo_remark()
 {
 cat << EOF
-    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
+# entrance
+ # if not matched submenu - go to presample
+    /\([^#]*.*submenu\)/! b presample; $ b
+  # resampling of inner sequence
+  b #exit
+  
+:presample
+ # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
+    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b
+#presample
+ # sampling menuentry section in hold
+ # if next section is not target
+    # output buffer
+    # exit b exit
+ 
+ # insert control comment before output buffer
     i\\$(echo_cmd $1 $p)
 
 :consect	# continue sampling section
@@ -144,6 +159,7 @@ EOF
 remark_insert()
 {
 #    sed -e "s/# *exec! *\($(shldslash ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+    #sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
     sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 

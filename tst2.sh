@@ -87,11 +87,60 @@ export _dev
 #    echo $1 | sed 's/\//\\&/'g
 #} # shldslash
 
+#
+# Shielding
+# for using in sed-scripts
+shield1()
+{
+    if [ "$1no" = 'no' ] ; then
+	echo 'First parameter is absent'
+    else
+	echo 'First parameter is present'
+	echo $*
+	echo
+    fi
+
+    echo $* | sed 's/[\/ (){|}]/\\&/'g
+#    sed 's/[\/ (){|}]/\\&/'g
+} # shield
+
+
+# Create marker
+mark() {
+local MARK='###'
+#echo "$MARK\ $1\ $MARK"
+echo "$MARK $* $MARK"
+} # mark() ---------------------------------------
+
+# Create full format marker string
+# Paramatars:
+#   $1 - 'BEGIN' / 'END'
+#   $2 - full file name
+fullmark()
+{
+#sed 's/\//\\&/'g <<EOF
+#$(mark "$1\ $grub_mkcfg_dir/$2")
+#EOF
+    echo "$(shield $(mark $1 $grub_mkcfg_dir/$2))"
+    echo "$(mark $1 $grub_mkcfg_dir/$2)"
+} # fullmark() -----------------------------------
+
+
 echo 'Mark'
 
-echo "$(fullmark $BEG $(sect_fn $gen $p))"
-echo "$(fullmark $BEG $(sect_fn $win $e))"
-
+#echo "$(fullmark $BEG $(sect_fn $gen $p))"
+#echo "$(fullmark $BEG $(sect_fn $win $e))"
+#echo "$(shield '### /abc/def/(ghi|klmn) ###')"
+echo "gen: $gen"
+echo "p: $p"
+echo "BEG: $BEG"
+#echo "$(fullmark $BEG _$gen-$p)"
+echo "$(shield "$(fullmark $BEG _$gen-$p)")"
+#echo "$(shield '### /abc/def/(ghi|klmn) ###')"
+#shield '### /abc/def/(ghi|klmn) ###'
+#shield uuu /abc/def/\(ghi\|klmn\) rrr
+#echo '### /abc/def/(ghi|klmn) ###'
+#echo '### /abc/def/(ghi|klmn) ###' | shield
 echo '==[ Remark ]==============================================================================\n'
 
 #echo_remark $win
@@ -114,11 +163,11 @@ echo '==[ Remark ]==============================================================
 
 # Вариант со считыванием опции исполнения сценария из командного комментария.
 # Сценарий в переменной shell.
-#teta="s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\\2 -i /e"
-teta="s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $win $p))\)\([^#]*\)/\\2\\3 /e"
-sed -e "${teta}"
-#sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\2 -i/e"
-echo "${teta}"
+##teta="s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\\2 -i /e"
+#teta="s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $win $p))\)\([^#]*\)/\\2\\3 /e"
+#sed -e "${teta}"
+##sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)\([^#]*\)/\2 -i/e"
+#echo "${teta}"
 
 
 # Вариант: замена сразу обоих типов файлов секций - _[gen,win]-prolog за один проход sed
