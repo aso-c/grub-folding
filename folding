@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.4 by 28.01.2014.							#
+# (c) aso, v.1.9.5 by 03.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.4'
-version="$ver, by 28.01.2014 from aso"
+ver='1.9.5'
+version="$ver, by 03.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -120,23 +120,44 @@ echo_cmd()
 echo_remark()
 {
 cat << EOF
-# entrance
- # if not matched submenu - go to presample
-    /\([^#]*.*submenu\)/! b presample; $ b
-  # resampling of inner sequence
-  b #exit
+## entrance
+# # if not matched submenu - go to presample
+#    /\([^#]*.*submenu\)/! b presample; $ b
+#  # resampling of inner sequence
+#  b #exit
   
-:presample
+#presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
     /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b
-#presample
+  h
+:presample
  # sampling menuentry section in hold
+  n; H
+    /^}/! b presample
+
+# out of first target section, sampling interval between sections
+:presectout
  # if next section is not target
-    # output buffer
-    # exit b exit
+    n; H
+    /### \($BEG\)\|\($EN\)/ b preend	# control comment - end of section, no sequence
+    /[^#]*.*menuentry/! b presectout	# detect that not start of new section
+    /[^#]*.*$(o_name $1)/! b preend	# new section in sequence is started
+
+  # output buffer
+  z
+  g
+  # insert control comment before output buffer
+  i\\$(echo_cmd $1 $p)
+  b consect
+
+:preend
+  # output buffer
+  z
+  g
+  b #exit
  
- # insert control comment before output buffer
-    i\\$(echo_cmd $1 $p)
+# # insert control comment before output buffer
+#    i\\$(echo_cmd $1 $p)
 
 :consect	# continue sampling section
     n; /^}/! b consect
