@@ -85,13 +85,20 @@ set -e
 echo_test()
 {
 cat << EOF
+#n  force "-n" options of sed
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
-    /\([^#]*.*menuentry\)\([^#].*myunit\)/! b; $ b
+    /\([^#]*.*menuentry\)\([^#].*myunit\)/! {p; b}; $ b
   h
 :presample
  # sampling menuentry section in hold
-  z; n; H
+  n; H
+#  z; n; H
+#  s/.*/ /; N; H
+#  N; H
+ #   x
+ #   w ./sect_extracted
+ #   x
     /^}/! b presample
     
 #  c This is my unit menu!
@@ -99,11 +106,12 @@ cat << EOF
   p
   x
   w ./sect_extracted
+  
 #  z
-  s/.*//
+#  s/.*//
 # out of first target section, sampling interval between sections
 EOF
-} # echo_remark() -------------------------------------------------------------------------
+} # echo_test() -------------------------------------------------------------------------
 
 
 ##
@@ -113,6 +121,16 @@ EOF
 #{
 #    echo $1 | sed 's/\//\\&/'g
 #} # shldslash
+
+
+#
+# Shielding
+# for using in sed-scripts
+shield()
+{
+    echo $1 | sed 's/\//\\&/'g
+} # shield
+
 
 #
 # Shielding
@@ -129,7 +147,7 @@ shield1()
 
     echo $* | sed 's/[\/ (){|}]/\\&/'g
 #    sed 's/[\/ (){|}]/\\&/'g
-} # shield
+} # shield1
 
 
 # Create marker
@@ -202,6 +220,7 @@ echo '==[ Remark ]==============================================================
 #sed -e "s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 #echo "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 
+#sed $allopts -ne "$(echo_test)"
 sed $allopts -e "$(echo_test)"
 
 echo '==[ Insert ]==============================================================================\n'
