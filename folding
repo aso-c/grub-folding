@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.5 by 03.06.2014.							#
+# (c) aso, v.1.9.6 by 05.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.5'
-version="$ver, by 03.06.2014 from aso"
+ver='1.9.6'
+version="$ver, by 05.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -132,19 +132,19 @@ cat << EOF
   h
 :presample
  # sampling menuentry section in hold
-  n; H
+  z; n; H
     /^}/! b presample
 
 # out of first target section, sampling interval between sections
 :presectout
  # if next section is not target
-    n; H
+    z; n; H
     /### \($BEG\)\|\($EN\)/ b preend	# control comment - end of section, no sequence
     /[^#]*.*menuentry/! b presectout	# detect that not start of new section
     /[^#]*.*$(o_name $1)/! b preend	# new section in sequence is started
 
   # output buffer
-  z
+#  z
   g
   # insert control comment before output buffer
   i\\$(echo_cmd $1 $p)
@@ -152,7 +152,7 @@ cat << EOF
 
 :preend
   # output buffer
-  z
+#  z
   g
   b #exit
  
