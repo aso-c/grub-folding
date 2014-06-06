@@ -88,20 +88,21 @@ cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
     /\([^#]*.*menuentry\)\([^#].*myunit\)/! b; $ b
-  h
+#  h
 :presample
  # sampling menuentry section in hold
 #  z; n; H
-  z; N; H
-    /}/! b presample
+#  z; N; H
+    N
+    /\n}/! b presample
     
-#  c This is my unit menu!
-  s/.*/This is my unit menu!/
-  p
-  x
   w ./sect_extracted
+  s/.*/This is my unit menu!/
+#  p
+#  x
+#  w ./sect_extracted
 #  z
-  s/.*//
+#  s/.*//
 # out of first target section, sampling interval between sections
 EOF
 } # echo_remark() -------------------------------------------------------------------------
