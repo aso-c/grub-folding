@@ -92,23 +92,20 @@ cat << EOF
   h
 :presample
  # sampling menuentry section in hold
-  n; H
-#  z; n; H
-#  s/.*/ /; N; H
+#  n; H
+#  s/.*//; N; H
 #  N; H
- #   x
- #   w ./sect_extracted
- #   x
-    /^}/! b presample
+  N
+    /}/! b presample
+#    /^}/! b presample
     
+  h
 #  c This is my unit menu!
   s/.*/This is my unit menu!/
   p
   x
   w ./sect_extracted
   
-#  z
-#  s/.*//
 # out of first target section, sampling interval between sections
 EOF
 } # echo_test() -------------------------------------------------------------------------
