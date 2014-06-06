@@ -1,11 +1,11 @@
 #! /bin/sh
 set -e
 
-_dev=1
-export _dev
-
-#. "./foldlib"
-. "./folding"
+# _dev=1
+# export _dev
+#
+# #. "./foldlib"
+# . "./folding"
 
 #grub_mkcfg_dir="cfg-test"
 #grub_mkcfg_dir='/etc/grub.d'
@@ -42,7 +42,7 @@ export _dev
 #} # echo_final()---------------------------------------------------------------
 
 
-## Echoing string for varkup section in config file function
+## Echoing string for markup section in config file function
 ## Parameters:
 ##   $1 - OS class (gen, win...)
 #echo_remark()
@@ -78,6 +78,28 @@ export _dev
 #"
 #
 #} # echo_remark() -------------------------------------------------------------------------
+
+## Echoing string for test regexp & all for section markup
+## Parameters: None
+##   $1 - ...
+echo_test()
+{
+cat << EOF
+#presample
+ # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
+    /\([^#]*.*menuentry\)\([^#].*myunit\)/! b; $ b
+:presample
+ # sampling menuentry section in hold
+    N
+    /\n}/! b presample
+    
+  w ./sect_extracted
+  s/.*/This is my unit menu!/
+#  s/.*//
+# out of first target section, sampling interval between sections
+EOF
+} # echo_remark() -------------------------------------------------------------------------
+
 
 ##
 ## Shielded Slash
@@ -174,6 +196,8 @@ echo '==[ Remark ]==============================================================
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 #sed -e "s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 #echo "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
+
+sed $allopts -e "$(echo_test)"
 
 echo '==[ Insert ]==============================================================================\n'
 
