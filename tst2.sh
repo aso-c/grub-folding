@@ -91,8 +91,9 @@ cat << EOF
   h
 :presample
  # sampling menuentry section in hold
-  z; n; H
-    /^}/! b presample
+#  z; n; H
+  z; N; H
+    /}/! b presample
     
 #  c This is my unit menu!
   s/.*/This is my unit menu!/
