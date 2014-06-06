@@ -129,12 +129,9 @@ cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
     /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b
-#  h
 :presample
  # sampling menuentry section in hold
-#  z; n; H
     N
-#    /^}/! b presample
     /\n}/! b presample
 
 h
@@ -161,9 +158,6 @@ h
   g
   b #exit
  
-# # insert control comment before output buffer
-#    i\\$(echo_cmd $1 $p)
-
 :consect	# continue sampling section
     n; /^}/! b consect
 
