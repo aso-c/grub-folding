@@ -128,34 +128,34 @@ cat << EOF
   
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
-    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b
+    /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
 :presample
- # sampling menuentry section in hold
+  # sampling menuentry section in pattern space
     N
-    /\n}/! b presample
+  /\n}/! b presample
 
-h
+#h
 # out of first target section, sampling interval between sections
 :presectout
-    z; n; H
+    N
  # if next line - control comment, then go out
     /### \($BEG\)\|\($EN\)/ b preend	# control comment - end of section, no sequence
  # if next line - not new section, then continue sampling
-    /[^#]*.*menuentry/! b presectout	# detect that not start of new section
+#    /[^#]*.*menuentry/! b presectout	# detect that not start of new section
+    /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section
  # if next section is not target, then go out
-    /[^#]*.*$(o_name $1)/! b preend	# new section in sequence is started
+#    /[^#]*.*$(o_name $1)/! b preend	# new section in sequence is started
+    /\n[^#\n]*$(o_name $1)/! b preend	# new section in sequence is started
 
   # output buffer
-#  z
-  g
+#  g
   # insert control comment before output buffer
   i\\$(echo_cmd $1 $p)
   b consect
 
 :preend
   # output buffer
-#  z
-  g
+#  g
   b #exit
  
 :consect	# continue sampling section

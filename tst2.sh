@@ -89,9 +89,9 @@ cat << EOF
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
     /\([^#]*.*menuentry\)\([^#].*myunit\)/! b; $ b
 :presample
- # sampling menuentry section in hold
+ # sampling menuentry section in pattern space
     N
-    /\n}/! b presample
+  /\n}/! b presample
     
   w ./sect_extracted
   s/.*/This is my unit menu!/
