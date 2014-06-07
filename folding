@@ -105,11 +105,8 @@ e='epilog'
 #   $2 - tail (prolog, epilog...)
 echo_cmd()
 {
-#    echo "$(fullmark $BEG $(sect_fn $1 $2))\\"
     echo "$(fullmark $BEG _$1-$2)\\"
-#    echo "# exec!$grub_mkcfg_dir/$(sect_fn $1 $2) -i #\\"
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
-#    echo "$(fullmark $EN $(sect_fn $1 $2))\\n"
     echo "$(fullmark $EN _$1-$2)\\n"
 } # echo_cmd
 
@@ -147,20 +144,29 @@ cat << EOF
     /\n[^#\n]*$(o_name $1)/! b #preend	# new section in sequence is started
 
   # insert control comment before output buffer
-  i\\\\
-  i\\$(echo_cmd $1 $p)
+#  i\\\\
+#  i\\$(echo_cmd $1 $p)
+  i\\\\n\\$(echo_cmd $1 $p)
  
 :consect	# continue sampling section
     n; /^}/! b consect
 
 :intersect	# out of section, sampling interval between sections
-    n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+    n
+:blank
+    /[^\n]\+/ b substance			# if current line is not blank
+      N
+      b blank
+:substance
+    /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
     /[^#]*.*menuentry/! b intersect	# detect that not start of new section
     /[^#]*.*$(o_name $1)/ b consect	# new section is started
 
 :close
-    i\\$(echo_cmd $1 $e)
-    i\\\\
+#     i\\$(echo_cmd $1 $e)
+#     i\\\\
+    i\\$(echo_cmd $1 $e)\\n
+
 EOF
 } # echo_remark() -------------------------------------------------------------------------
 
