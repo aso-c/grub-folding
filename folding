@@ -139,24 +139,24 @@ cat << EOF
 :presectout
     N
  # if next line - control comment, then go out
-    /### \($BEG\)\|\($EN\)/ b preend	# control comment - end of section, no sequence
+    /### \($BEG\)\|\($EN\)/ b #preend	# control comment - end of section, no sequence
  # if next line - not new section, then continue sampling
 #    /[^#]*.*menuentry/! b presectout	# detect that not start of new section
     /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section
  # if next section is not target, then go out
 #    /[^#]*.*$(o_name $1)/! b preend	# new section in sequence is started
-    /\n[^#\n]*$(o_name $1)/! b preend	# new section in sequence is started
+    /\n[^#\n]*$(o_name $1)/! b #preend	# new section in sequence is started
 
   # output buffer
 #  g
   # insert control comment before output buffer
   i\\$(echo_cmd $1 $p)
-  b consect
-
-:preend
-  # output buffer
-#  g
-  b #exit
+#   b consect
+#
+# :preend
+#   # output buffer
+# #  g
+#   b #exit
  
 :consect	# continue sampling section
     n; /^}/! b consect
