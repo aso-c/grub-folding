@@ -13,7 +13,7 @@ set -e
 
 
 ver='1.9.7'
-version="$ver, by 07.06.2014 from aso"
+version="v.$ver, by 08.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -89,9 +89,10 @@ esac
 #   $2 - full file name
 fullmark()
 {
-sed 's/\//\\&/'g <<EOF
-$(mark "$1\ $grub_mkcfg_dir/$2")
-EOF
+    shield $(mark "$1\ $grub_mkcfg_dir/$2")
+# sed 's/\//\\&/'g <<EOF
+# $(mark "$1\ $grub_mkcfg_dir/$2")
+# EOF
 } # fullmark() -----------------------------------
 
 
@@ -119,13 +120,13 @@ echo_remark()
 cat << EOF
 ## entrance
 # # if not matched submenu - go to presample
-#    /\([^#]*.*submenu\)/! b presample; $ b
+#  /\([^#]*.*submenu\)/! b presample; $ b
 #  # resampling of inner sequence
 #  b #exit
   
 #presample
- # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
-    /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
+  # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
+  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
 :presample
   # sampling menuentry section in pattern space
     N
@@ -134,9 +135,9 @@ cat << EOF
 # out of first target section, sampling interval between sections
 :presectout
     N
-    /### \($BEG\)\|\($EN\)/ b		# control comment - go out
-    /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
-    /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
+  /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
+  /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
   # insert control comment before output buffer
   i\\\\
@@ -144,21 +145,21 @@ cat << EOF
 #  i\\\\n\\$(echo_cmd $1 $p)
  
 :consect	# continue sampling section
-#    n; /^}/! b consect
+#  n; /^}/! b consect
 
 :intersect	# out of section, sampling interval between sections
-    n
+  n
 :blank
-    /[^\n]\+/ b substance		# if current line is not blank
-      N; b blank
+  /[^\n]\+/ b substance		# if current line is not blank
+    N; b blank
 :substance
-    /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-    /[^#]*menuentry/! b intersect	# detect that not start of new section
-    /[^#]*$(o_name $1)/ b consect	# new section is started
+  /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+  /[^#]*menuentry/! b intersect		# detect that not start of new section
+  /[^#]*$(o_name $1)/ b consect		# new section is started
 
 :close
-     i\\$(echo_cmd $1 $e)
-   /### BEG/! i\\\\
+  i\\$(echo_cmd $1 $e)
+  /### BEG/! i\\\\
 EOF
 } # echo_remark() -------------------------------------------------------------------------
 

@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section prologue GRUB configuration file
-# v.1.8.0 from 14.01.2014. by aso
+# v.1.8.2 from 08.06.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,8 +29,8 @@ set -e
 #
 ####################################################
 
-ver='1.8.0'
-date='14.01.2014'
+ver='1.8.2'
+date='08.06.2014'
 version="$ver, from $date by aso"
 
 #
@@ -94,6 +94,7 @@ done
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
   echo "# This is a win section prologue stub"
+  echo "# It's a test version"
   exit
 fi
 
@@ -112,14 +113,8 @@ echo "Start Windows folding section in menu" >&2
 
 # End of user code section <<<-------------------
 
-## My insertion - aso
-#cat << EOF
-#submenu "MS Windows (all variants)" {
-#EOF
-
 # Insert MS Windows section header if nedeed
 if  [ "${_exclude}" = 0 ] ; then
-#    echo 'submenu "Gentoo Linux (all vaiants)" {'
     echo 'submenu "MS Windows (all variants)" {'
 fi
 
@@ -127,25 +122,12 @@ fi
 # Insert user code below this line, code placed in section after header >>>-----------------
 
 # My insertion - aso
-# Gentoo section - Universal entry from Gentoo Legacy Grub
-#cat << EOF
-#
-#menuentry "Gentoo Linux (all variants, on /dev/sda5)" --class gnu-linux --class gnu --class os {
-#	insmod part_msdos
-#	insmod ext2
-#	set root='(hd2,msdos2)'
-#	search --no-floppy --fs-uuid --set=root 20e9f929-3d53-4814-abbd-2e0a38e0eaae
-#	drivemap -s (hd2) (hd0)
-#	chainloader +1
-#}
-#EOF
-
+# MS Windows section - native boot through System Commander
 cat << EOF
 # Custom entry for System Commander launch
 menuentry "Microsoft Windows (all variants, on /dev/sdb)" --class windows --class os {
 	insmod part_msdos
 	insmod ntfs
-#	search --no-floppy --fs-uuid --set=root 0000000088EECEDE
 	set root='(hd1)'
 	drivemap (hd0) (hd2)
 	drivemap (hd1) (hd0)

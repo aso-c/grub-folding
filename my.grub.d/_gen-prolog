@@ -95,6 +95,7 @@ done
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
   echo "# This is a gentoo section prologue stub"
+  echo "# It's a test version"
   exit
 fi
 
