@@ -160,9 +160,10 @@ cat << EOF
     /[^#]*.*$(o_name $1)/ b consect	# new section is started
 
 :close
-#     i\\$(echo_cmd $1 $e)
-#     i\\\\
-    i\\$(echo_cmd $1 $e)\\n
+     i\\$(echo_cmd $1 $e)
+   /### BEG/ b  
+     i\\\\
+#    i\\$(echo_cmd $1 $e)\\n
 EOF
 } # echo_remark() -------------------------------------------------------------------------
 
