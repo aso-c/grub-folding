@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.6 by 05.06.2014.							#
+# (c) aso, v.1.9.7 by 07.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.6'
-version="$ver, by 05.06.2014 from aso"
+ver='1.9.7'
+version="$ver, by 07.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -149,13 +149,11 @@ cat << EOF
 :intersect	# out of section, sampling interval between sections
     n
 :blank
-    /[^\n]\+/ b substance			# if current line is not blank
+    /[^\n]\+/ b substance		# if current line is not blank
       N; b blank
 :substance
     /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-#    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
     /[^#]*menuentry/! b intersect	# detect that not start of new section
-#    /[^#]*.*$(o_name $1)/ b consect	# new section is started
     /[^#]*$(o_name $1)/ b consect	# new section is started
 
 :close
