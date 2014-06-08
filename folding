@@ -139,9 +139,9 @@ cat << EOF
     /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
   # insert control comment before output buffer
-#  i\\\\
-#  i\\$(echo_cmd $1 $p)
-  i\\\\n\\$(echo_cmd $1 $p)
+  i\\\\
+  i\\$(echo_cmd $1 $p)
+#  i\\\\n\\$(echo_cmd $1 $p)
  
 :consect	# continue sampling section
 #    n; /^}/! b consect
@@ -150,20 +150,17 @@ cat << EOF
     n
 :blank
     /[^\n]\+/ b substance			# if current line is not blank
-      N
-      b blank
+      N; b blank
 :substance
     /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-#     /### \($BEG\)\|\($EN\)/ { i\\$(echo_cmd $1 $e)\n\n ;
-#        b } 	# control comment - close section
-    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
-    /[^#]*.*$(o_name $1)/ b consect	# new section is started
+#    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
+    /[^#]*menuentry/! b intersect	# detect that not start of new section
+#    /[^#]*.*$(o_name $1)/ b consect	# new section is started
+    /[^#]*$(o_name $1)/ b consect	# new section is started
 
 :close
      i\\$(echo_cmd $1 $e)
-   /### BEG/ b  
-     i\\\\
-#    i\\$(echo_cmd $1 $e)\\n
+   /### BEG/! i\\\\
 EOF
 } # echo_remark() -------------------------------------------------------------------------
 
