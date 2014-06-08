@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.7 by 07.06.2014.							#
+# (c) aso, v.2.0.0 by 07.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.7'
+ver='2.0.0'
 version="$ver, by 07.06.2014 from aso"
 
 gen='gen'
@@ -73,7 +73,8 @@ echo "$MARK\ $1\ $MARK"
 o_name()
 {
 case "$1" in
-'win')	  echo 'Microsoft Windows'
+#'win')	  echo 'Microsoft Windows'
+'win')	  echo 'Windows'
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -117,13 +118,6 @@ echo_cmd()
 echo_remark()
 {
 cat << EOF
-## entrance
-# # if not matched submenu - go to presample
-#    /\([^#]*.*submenu\)/! b presample; $ b
-#  # resampling of inner sequence
-#  b #exit
-  
-#presample
  # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
     /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
 :presample
@@ -134,31 +128,27 @@ cat << EOF
 # out of first target section, sampling interval between sections
 :presectout
     N
-    /### \($BEG\)\|\($EN\)/ b		# control comment - go out
-    /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
-    /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
+  /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
+  /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
   # insert control comment before output buffer
   i\\\\
   i\\$(echo_cmd $1 $p)
-#  i\\\\n\\$(echo_cmd $1 $p)
  
-:consect	# continue sampling section
-#    n; /^}/! b consect
-
-:intersect	# out of section, sampling interval between sections
+:consect	# continue sampling section &
     n
 :blank
-    /[^\n]\+/ b substance		# if current line is not blank
+  /[^\n]\+/ b substance		# if current line is not blank
       N; b blank
 :substance
-    /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-    /[^#]*menuentry/! b intersect	# detect that not start of new section
-    /[^#]*$(o_name $1)/ b consect	# new section is started
+  /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+  /[^#]*menuentry/! b consect		# detect that not start of new section
+  /[^#]*$(o_name $1)/ b consect	# new section is started
 
 :close
-     i\\$(echo_cmd $1 $e)
-   /### BEG/! i\\\\
+  i\\$(echo_cmd $1 $e)
+  /### BEG/! i\\\\
 EOF
 } # echo_remark() -------------------------------------------------------------------------
 
@@ -207,7 +197,7 @@ do
 done
 
 
-echo "Folding ($ver) ..." >&2
+echo "Folding (v.$version) ..." >&2
 
 echo "# Folding $version"
 echo "# This is a stub"
