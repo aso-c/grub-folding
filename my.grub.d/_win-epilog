@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section epilogue GRUB configuration file
-# v.1.8.1 from 08.06.2014. by aso
+# v.1.8.2 from 08.06.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,7 +29,7 @@ set -e
 #
 ####################################################
 
-ver='1.8.1'
+ver='1.8.2'
 date='08.06.2014'
 version="$ver, from $date by aso"
 
@@ -95,7 +95,7 @@ done
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
   echo "# This is a win section epilogue stub"
-  echo "# It's a test version"
+  echo "# It's a test version, v.$version"
   exit
 fi
 

@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.7 by 07.06.2014.							#
+# (c) aso, v.1.9.8 by 08.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.7'
+ver='1.9.8'
 version="v.$ver, by 08.06.2014 from aso"
 
 gen='gen'
@@ -73,7 +73,8 @@ echo "$MARK\ $1\ $MARK"
 o_name()
 {
 case "$1" in
-'win')	  echo 'Microsoft Windows'
+# 'win')	  echo 'Microsoft Windows'	# product variant
+'win')	  echo 'Windows'	# for test in laptop
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -90,9 +91,6 @@ esac
 fullmark()
 {
     shield $(mark "$1\ $grub_mkcfg_dir/$2")
-# sed 's/\//\\&/'g <<EOF
-# $(mark "$1\ $grub_mkcfg_dir/$2")
-# EOF
 } # fullmark() -----------------------------------
 
 
@@ -128,13 +126,14 @@ cat << EOF
   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
   /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
 :presample
-  # sampling menuentry section in pattern space
-    N
-  /\n}/! b presample
+  # sampling menuentry section into pattern space
+#    N
+#  /\n}/! b presample
 
 # out of first target section, sampling interval between sections
 :presectout
     N
+   /\n}/! b presample
   /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
@@ -208,7 +207,7 @@ do
 done
 
 
-echo "Folding ($ver) ..." >&2
+echo "Folding (v.$ver) ..." >&2
 
 echo "# Folding $version"
 echo "# This is a stub"
