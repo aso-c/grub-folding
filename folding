@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.8 by 08.06.2014.							#
+# (c) aso, v.1.9.9 by 08.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.8'
+ver='1.9.9'
 version="v.$ver, by 08.06.2014 from aso"
 
 gen='gen'
@@ -125,17 +125,12 @@ cat << EOF
 #presample
   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
   /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
-:presample
-  # sampling menuentry section into pattern space
-#    N
-#  /\n}/! b presample
 
-# out of first target section, sampling interval between sections
-:presectout
-    N
-   /\n}/! b presample
+:presample
+  # presampling menuentry section & intersection gap into pattern space
+    N; /\n}/! b presample
   /### \($BEG\)\|\($EN\)/ b		# control comment - go out
-  /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
+  /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
   # insert control comment before output buffer
