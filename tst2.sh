@@ -112,6 +112,11 @@ EOF
 #
 # Shielding
 # for using in sed-scripts
+#
+# TODO: Замена должна иметь вид:
+# [' ', '(', ');, '|'] -> \[' ', '(', ');, '|'] ; возможно что-то ещё, например '\'
+# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# && -> & ; отменяет действие '&'
 shield1()
 {
     if [ "$1no" = 'no' ] ; then
@@ -122,9 +127,18 @@ shield1()
 	echo
     fi
 
-    echo $* | sed 's/[\/ (){|}]/\\&/'g
+    echo $* | sed 's/\([^&]\|&&\)\([\/ (){|}])/\1\\\2/g; s/\([^&]\)&\([\/ (){|}]\)/\1\2/g; s/&&/&/g'
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
+
+#
+# Shielded Slash
+# for using in sed-scripts
+# in folding script
+# shield()
+# {
+#     echo $* | sed 's/\//\\&/'g
+# } # shldslash
 
 
 # Create marker

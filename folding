@@ -128,7 +128,9 @@ cat << EOF
 
 :presample
   # presampling menuentry section & intersection gap into pattern space
-    N; /\n}/! b presample
+  N
+#  /\n}/! b presample
+  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
   /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
