@@ -87,24 +87,32 @@ echo_test()
 cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
-    /\(^\|\n\)\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
+    /\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
 :presample
  # sampling menuentry section in pattern space
     N
 #  /\n}/! b presample
 #  /{.*}/! b presample
 #  /\(^\|\n\)[^#{]*{\(\([^{]*\n\)\?[^#{]*{\([^}]*\n\)\?[^#}]*}\)*\([^}]*\n\)\?[^#}]*}/! b presample
-  /^\([^{]*\n\)\?[^#{]*{\(.*{.*}\)*[^{]*}/! b presample
+#  /^\([^{]*\n\)\?[^#{]*{\(.*{.*}\)*[^{]*}/! b presample
+#  /^\([^{]*\n\)\?\([^#{\n]\)*{\(\1\?\2*{\1\?\2*}\)*\1\?\2*}/! b presample
+#  /^\(\([^{]*\n\)\?[^#{\n]*\){\(\1\?\2*{\)*\([^{]*\n\)\?\([^#{\n]\)*}/! b presample
+#  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1}/! b presample
+#  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1\?}/! b presample
+  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
+#  /^\([^{]*\n\)\?\([^#{\n]\)*{/! b presample
 #  /\(^\|\n\)[^#]*{\(.*\n\)\?[^#]*}/! b presample
   $ b
 #-------------------------------------
-#  /\n}/! b presample
+	#  /\n}/! b presample
 #  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
 #  /### \($BEG\)\|\($EN\)/ b             # control comment - go out
 #  /\n[^#\n]*menuentry/! b presample     # detect that not start of new section - continue
 #  /\n[^#\n]*$(o_name $1)/! b            # new section is not in sequence - go out
 #-------------------------------------
-    
+
+  w ./sect_extracted
+  s/.*/--= This staff outputed =--\n/
   w ./sect_extracted
   s/.*/This is my unit menu!/
 #  s/.*//
@@ -218,4 +226,5 @@ echo '==[ Insert ]=============================================================\
 #fullmark $win $p
 
 echo '\nsect_extracted content:'
+echo '=========================\n'
 cat sect_extracted
