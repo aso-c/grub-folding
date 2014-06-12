@@ -73,7 +73,8 @@ echo "$MARK\ $1\ $MARK"
 o_name()
 {
 case "$1" in
-'win')	  echo 'Microsoft Windows'
+# 'win')	  echo 'Microsoft Windows'
+'win')	  echo 'Windows'
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;

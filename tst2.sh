@@ -1,11 +1,11 @@
 #! /bin/sh
 set -e
 
-# _dev=1
-# export _dev
+_dev=1
+export _dev
 #
 # #. "./foldlib"
-# . "./folding"
+. "./folding"
 
 #grub_mkcfg_dir="cfg-test"
 #grub_mkcfg_dir='/etc/grub.d'
@@ -87,11 +87,23 @@ echo_test()
 cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
-    /\([^#]*.*menuentry\)\([^#].*myunit\)/! b; $ b
+    /\(^\|\n\)\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
 :presample
  # sampling menuentry section in pattern space
     N
-  /\n}/! b presample
+#  /\n}/! b presample
+#  /{.*}/! b presample
+#  /\(^\|\n\)[^#{]*{\(\([^{]*\n\)\?[^#{]*{\([^}]*\n\)\?[^#}]*}\)*\([^}]*\n\)\?[^#}]*}/! b presample
+  /^\([^{]*\n\)\?[^#{]*{\(.*{.*}\)*[^{]*}/! b presample
+#  /\(^\|\n\)[^#]*{\(.*\n\)\?[^#]*}/! b presample
+  $ b
+#-------------------------------------
+#  /\n}/! b presample
+#  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
+#  /### \($BEG\)\|\($EN\)/ b             # control comment - go out
+#  /\n[^#\n]*menuentry/! b presample     # detect that not start of new section - continue
+#  /\n[^#\n]*$(o_name $1)/! b            # new section is not in sequence - go out
+#-------------------------------------
     
   w ./sect_extracted
   s/.*/This is my unit menu!/
@@ -163,7 +175,7 @@ echo "$(shield "$(fullmark $BEG _$gen-$p)")"
 #shield uuu /abc/def/\(ghi\|klmn\) rrr
 #echo '### /abc/def/(ghi|klmn) ###'
 #echo '### /abc/def/(ghi|klmn) ###' | shield
-echo '==[ Remark ]==============================================================================\n'
+echo '==[ Remark ]=============================================================\n'
 
 #echo_remark $win
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)#.*/\2 -i/e"
@@ -199,8 +211,11 @@ echo '==[ Remark ]==============================================================
 
 sed $allopts -e "$(echo_test)"
 
-echo '==[ Insert ]==============================================================================\n'
+echo '==[ Insert ]=============================================================\n'
 
 #echo_final $win $p
 
 #fullmark $win $p
+
+echo '\nsect_extracted content:'
+cat sect_extracted
