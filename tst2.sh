@@ -88,20 +88,20 @@ cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
     /\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
+  b strtsmpl
 :presample
  # sampling menuentry section in pattern space
     N
+:strtsmpl
 #  /\n}/! b presample
 #  /{.*}/! b presample
 #  /\(^\|\n\)[^#{]*{\(\([^{]*\n\)\?[^#{]*{\([^}]*\n\)\?[^#}]*}\)*\([^}]*\n\)\?[^#}]*}/! b presample
-#  /^\([^{]*\n\)\?[^#{]*{\(.*{.*}\)*[^{]*}/! b presample
-#  /^\([^{]*\n\)\?\([^#{\n]\)*{\(\1\?\2*{\1\?\2*}\)*\1\?\2*}/! b presample
-#  /^\(\([^{]*\n\)\?[^#{\n]*\){\(\1\?\2*{\)*\([^{]*\n\)\?\([^#{\n]\)*}/! b presample
 #  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1}/! b presample
 #  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1\?}/! b presample
-  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
+#  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
+  /^\([^#{\n]*\){\1*}/! b presample
 #  /^\([^{]*\n\)\?\([^#{\n]\)*{/! b presample
-#  /\(^\|\n\)[^#]*{\(.*\n\)\?[^#]*}/! b presample
+#  /\(^\|\n\)[^#]*{\(.*\n\)\\?[^#]*}/! b presample
   $ b
 #-------------------------------------
 	#  /\n}/! b presample
@@ -129,9 +129,15 @@ EOF
 #    echo $1 | sed 's/\//\\&/'g
 #} # shldslash
 
+
 #
 # Shielding
 # for using in sed-scripts
+#
+# TODO: Замена должна иметь вид:
+# [' ', '(', ');, '|'] -> \[' ', '(', ');, '|'] ; возможно что-то ещё, например '\'
+# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# && -> & ; отменяет действие '&'
 shield1()
 {
     if [ "$1no" = 'no' ] ; then
@@ -142,7 +148,7 @@ shield1()
 	echo
     fi
 
-    echo $* | sed 's/[\/ (){|}]/\\&/'g
+    echo $* | sed 's/\([^&]\|&&\)\([\/ (){|}])/\1\\\2/g; s/\([^&]\)&\([\/ (){|}]\)/\1\2/g; s/&&/&/g'
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
 
