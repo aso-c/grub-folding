@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section prologue GRUB configuration file
-# v.1.8.5 from 08.06.2014. by aso
+# v.1.9.1 from 14.06.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,8 +29,8 @@ set -e
 #
 ####################################################
 
-ver='1.8.5'
-date='08.06.2014'
+ver='1.9.1'
+date='14.06.2014'
 version="v.$ver, from $date by aso"
 
 #
@@ -98,13 +98,6 @@ if [ ${_insert} = 0 ] ; then
   echo "# $version"
   exit
 fi
-
-
-## Don't change the next "if" operator
-#if test "x${_infolding}" = "x" ; then
-#  echo "# This is a stub"
-#  exit
-#fi
 
 
 echo "Start Windows folding section in menu" >&2

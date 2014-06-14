@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # Gentoo section epilogue GRUB configuration file
-# v.1.8.5 from 08.06.2014. by aso
+# v.1.9.1 from 14.06.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,8 +29,8 @@ set -e
 #
 ####################################################
 
-ver='1.8.5'
-date='08.06.2014'
+ver='1.9.1'
+date='14.06.2014'
 version="$ver, from $date by aso"
 
 #
@@ -107,11 +107,6 @@ echo "Close Gentoo folding section in menu" >&2
 # Insert user code here, between this lines, code placed in section
 
 # End of user code section <<<-------------------
-
-## My insertion - aso
-#cat << EOF
-#}
-#EOF
 
 # Insert Gentoo section footer if nedeed, close the section
 if  [ "${_exclude}" = 0 ] ; then

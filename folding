@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.9.9 by 08.06.2014.							#
+# (c) aso, v.2.0.0 by 14.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='1.9.9'
-version="v.$ver, by 08.06.2014 from aso"
+ver='2.0.0'
+version="v.$ver, by 14.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -56,6 +56,27 @@ shield()
 {
     echo $* | sed 's/\//\\&/'g
 } # shldslash
+
+#
+# Shielding
+# New version: change [|(+)?] -> \[|(+)?], &[|(+)?] -> [|(+)?], && -> &
+# for using in sed-scripts
+#
+# TODO: Замена должна иметь вид:
+# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
+# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# && -> & ; отменяет действие '&'
+shield1()
+{
+    # The order is important!
+    # The List like '[|(+)?]' - same at all function code.   
+    echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g' |
+	sed "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
+	sed "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e 's/&&/\&/g'
+#    sed 's/[\/ (){|}]/\\&/'g
+} # shield
 
 
 # Create marker
