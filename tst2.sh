@@ -140,6 +140,7 @@ EOF
 # && -> & ; отменяет действие '&'
 shield1()
 {
+	substlst='|(+)?'
     if [ "$1no" = 'no' ] ; then
 	echo 'First parameter is absent'
     else
@@ -147,8 +148,11 @@ shield1()
 	echo $*
 	echo
     fi
+    
+    echo "subst: ${substlst}"
 
-    echo $* | sed 's/\([^&]\|&&\)\([\/ (){|}])/\1\\\2/g; s/\([^&]\)&\([\/ (){|}]\)/\1\2/g; s/&&/&/g'
+    echo $* | sed 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g; s/&&/&/g'
+#    echo $* | sed "s/\([^&]\|&&\)\([${substlst}]\)/\1\\\2/g; s/\([^&]\)&\([${substlst}]\)/\1\2/g; s/&&/&/g"
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
 
@@ -234,3 +238,6 @@ echo '==[ Insert ]=============================================================\
 echo '\nsect_extracted content:'
 echo '=========================\n'
 cat sect_extracted
+echo ''
+echo '==[ Shield1 ]============================================================\n'
+shield1 'abc+cde?rlq+(dfg).(gge|uud)? '
