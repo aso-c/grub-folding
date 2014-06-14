@@ -140,24 +140,13 @@ EOF
 # && -> & ; отменяет действие '&'
 shield1()
 {
-	subst='|(+)?'
-    if [ "$1no" = 'no' ] ; then
-	echo 'First parameter is absent'
-    else
-	echo 'First parameter is present'
-	echo $*
-	echo
-    fi
-    
-    echo "subst: ${subst}"
-    echo '&&'
-
+    # The order is important!
+    # The List like '[|(+)?]' - same at all function code.   
     echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
 	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g' |
 	sed "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
 	sed "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
 	sed -e 's/&&/\&/g'
-#    echo $* | sed "s/\([^&]\|&&\)\([${substlst}]\)/\1\\\2/g; s/\([^&]\)&\([${substlst}]\)/\1\2/g; s/&&/&/g"
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
 
