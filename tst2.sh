@@ -86,18 +86,19 @@ echo_test()
 {
 	fullavoidcmt='/\(\([^{]*\\n\)\?[^#{\\n]\+\)\?/'
 #	blkcmt='([^#{\\n]*)'
-	blkcmt='[^#{]*'
+	blkcmt='((.*\\\\n)?[^#\\n]+)?'
+#	blkcmt='(([^#\\n]+)|(.*\\\\n[^#\\n]+))?'
 	echo "$(shield1 $blkcmt)" >&2
-	echo "/^$(shield1 $blkcmt{$blkcmt})/" >&2
+	echo "/^$(shield1 $blkcmt})/" >&2
 
 cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
-    /\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
+#    /\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
   b strtsmpl
 :presample
  # sampling menuentry section in pattern space
-    N
+#    N
 :strtsmpl
 #  /\n}/! b presample
 #  /{.*}/! b presample
@@ -106,8 +107,8 @@ cat << EOF
 #  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1\?}/! b presample
 #  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
 #  /^[^#{\n]*{[^#{\n]*}/! b presample
-  /^$(shield1 $blkcmt{$blkcmt})/! b presample
-  #/.*[\^cfghi].*/! b
+#  /^$(shield1 $blkcmt{$blkcmt})/! b presample
+  /^$(shield1 $blkcmt})/! b
 #  /\(^\|\n\)[^#]*{\(.*\n\)\\?[^#]*}/! b presample
   $ b
 #-------------------------------------
@@ -149,14 +150,15 @@ EOF
 shield1()
 {
     # The order is important!
-    # The List like '[|(+)?]' - same at all function code.   
-    echo $* | #sed -e 's/\\n/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n/g' |
+    # The List like '[|(+)?]' - same at all function code.
+#    echo $* | #sed -e 's/\\n/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n/g' |
 #    echo $* | sed -e 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-	sed -e 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g' |
+    echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+#	sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g; s/^[|(+)?]/\\&/g' |
 	sed -e "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
 	sed -e "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g' #|	sed -e 's/\\n/\\\\n/g'
+	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
 
@@ -244,6 +246,6 @@ cat sect_extracted
 echo ''
 
 echo '==[ Shield1 ]============================================================\n'
-shield1 '(abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
 aaa=$(shield1 'abba\\nbabba')
 echo "$aaa" >&2
