@@ -84,6 +84,12 @@ export _dev
 ##   $1 - ...
 echo_test()
 {
+	fullavoidcmt='/\(\([^{]*\\n\)\?[^#{\\n]\+\)\?/'
+#	blkcmt='([^#{\\\\n]*)'
+	blkcmt='[^#{]'
+	echo "$(shield1 $blkcmt)" >&2
+	echo "/^$(shield1 $blkcmt*){$(shield1 $blkcmt*)}/" >&2
+
 cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
@@ -99,8 +105,8 @@ cat << EOF
 #  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1}/! b presample
 #  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1\?}/! b presample
 #  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
-  /^\([^#{\n]*\){\1*}/! b presample
-#  /^\([^{]*\n\)\?\([^#{\n]\)*{/! b presample
+#  /^[^#{\n]*{[^#{\n]*}/! b presample
+  /^$(shield1 $blkcmt*){$(shield1 $blkcmt*)}/! b presample
 #  /\(^\|\n\)[^#]*{\(.*\n\)\\?[^#]*}/! b presample
   $ b
 #-------------------------------------
@@ -142,11 +148,13 @@ shield1()
 {
     # The order is important!
     # The List like '[|(+)?]' - same at all function code.   
-    echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+    echo $* | #sed -e 's/\\n/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n/g' |
+#    echo $* | sed -e 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+	sed -e 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
 	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g' |
-	sed "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
-	sed "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g'
+	sed -e "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e 's/&&/\&/g' #|	sed -e 's/\\n/\\\\n/g'
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
 
@@ -183,16 +191,12 @@ echo "BEG: $BEG"
 #echo "$(fullmark $BEG _$gen-$p)"
 echo "$(shield "$(fullmark $BEG _$gen-$p)")"
 #echo "$(shield '### /abc/def/(ghi|klmn) ###')"
-#shield '### /abc/def/(ghi|klmn) ###'
-#shield uuu /abc/def/\(ghi\|klmn\) rrr
-#echo '### /abc/def/(ghi|klmn) ###'
-#echo '### /abc/def/(ghi|klmn) ###' | shield
 echo '==[ Remark ]=============================================================\n'
 
 #echo_remark $win
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)#.*/\2 -i/e"
 
-# Htfkbpfwbz замены имени файла через exec-комментарий (командный комментарий),
+# Реализация замены имени файла через exec-комментарий (командный комментарий),
 # опция исполнения файла задаётся в сценарии
 #sed -e "/aaa/!b;n;s/\(# exec\!\)\($(shldslash '${grub_mkcfg_dir}/$(sect_fn $gen $p)')\)#.*/\2 -i/e"
 #sed -e "s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\2 -i/e"
@@ -223,6 +227,9 @@ echo '==[ Remark ]=============================================================\
 
 sed $allopts -e "$(echo_test)"
 
+#echo '==[ echo_test ]==========================================================\n'
+#echo "$(echo_test)"
+
 echo '==[ Insert ]=============================================================\n'
 
 #echo_final $win $p
@@ -233,5 +240,8 @@ echo '\nsect_extracted content:'
 echo '=========================\n'
 cat sect_extracted
 echo ''
+
 echo '==[ Shield1 ]============================================================\n'
-shield1 'abc+cde?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+shield1 '(abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+aaa=$(shield1 'abba\\nbabba')
+echo "$aaa" >&2
