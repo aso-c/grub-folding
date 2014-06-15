@@ -85,10 +85,10 @@ export _dev
 echo_test()
 {
 	fullavoidcmt='/\(\([^{]*\\n\)\?[^#{\\n]\+\)\?/'
-#	blkcmt='([^#{\\\\n]*)'
-	blkcmt='[^#{]'
+#	blkcmt='([^#{\\n]*)'
+	blkcmt='[^#{]*'
 	echo "$(shield1 $blkcmt)" >&2
-	echo "/^$(shield1 $blkcmt*){$(shield1 $blkcmt*)}/" >&2
+	echo "/^$(shield1 $blkcmt{$blkcmt})/" >&2
 
 cat << EOF
 #presample
@@ -106,7 +106,8 @@ cat << EOF
 #  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1\?}/! b presample
 #  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
 #  /^[^#{\n]*{[^#{\n]*}/! b presample
-  /^$(shield1 $blkcmt*){$(shield1 $blkcmt*)}/! b presample
+  /^$(shield1 $blkcmt{$blkcmt})/! b presample
+  #/.*[\^cfghi].*/! b
 #  /\(^\|\n\)[^#]*{\(.*\n\)\\?[^#]*}/! b presample
   $ b
 #-------------------------------------
@@ -117,6 +118,7 @@ cat << EOF
 #  /\n[^#\n]*$(o_name $1)/! b            # new section is not in sequence - go out
 #-------------------------------------
 
+  =
   w ./sect_extracted
   s/.*/--= This staff outputed =--\n/
   w ./sect_extracted
