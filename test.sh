@@ -94,7 +94,7 @@ echo "$gen insertion"
 
 #echo_final $win $e
 
-#sed -e "$(echo_remark $win)"
+# sed -e "$(echo_remark $win)"
 sed -e "$(echo_remark $win)"	|
 sed -e "$(echo_remark $gen)"	#|
 #remark_insert $win $p	|

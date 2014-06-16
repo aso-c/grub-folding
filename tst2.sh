@@ -1,11 +1,14 @@
 #! /bin/sh
 set -e
 
-# _dev=1
-# export _dev
+#
+# Третий, окончательный вариант выражения для выборки всей секции в pattern space.
+
+_dev=1
+export _dev
 #
 # #. "./foldlib"
-# . "./folding"
+. "./folding"
 
 #grub_mkcfg_dir="cfg-test"
 #grub_mkcfg_dir='/etc/grub.d'
@@ -84,15 +87,44 @@ set -e
 ##   $1 - ...
 echo_test()
 {
+#   первый рабочий вариант выражения, отбрасывающий комментарии
+#	blkcmt='(.*\\n[^#\\n]*)?'
+#   второй работающий вариант регекспа, исключающий комментарии перед обънктом
+#   но допускающий множество произвольных строк до того.
+#	blkcmt='([^#\\n]*(#[^\\n]*)?\\n)*[^#\\n]*'
+#   третий вариант - для вложенных скобок,
+#   не допускает появления '{' и '}' на защищаемых интервалах.
+	blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
+#	blkcmt='([^#\\n]*)|(.*\\n[^#\\n]*)'
+	echo "$(shield1 $blkcmt)" >&2
+	echo "/^$(shield1 $blkcmt})/" >&2
+
 cat << EOF
 #presample
  # if not matched /menuentry <OS_Name>/ - e.g. nedeed section was not started - exit
-    /\([^#]*.*menuentry\)\([^#].*myunit\)/! b; $ b
+    /\([^#]*menuentry\)\([^#].*myunit\)/! b; $ b
+  b strtsmpl
 :presample
  # sampling menuentry section in pattern space
     N
-  /\n}/! b presample
-    
+:strtsmpl
+#  /\n}/! b presample
+#  /{.*}/! b presample
+#  /^$(shield1 $blkcmt{$blkcmt})/! b presample
+  /^$(shield1 "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! b presample
+#  /^$(shield1 $blkcmt})/! b
+  $ b
+#-------------------------------------
+	#  /\n}/! b presample
+#  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
+#  /### \($BEG\)\|\($EN\)/ b             # control comment - go out
+#  /\n[^#\n]*menuentry/! b presample     # detect that not start of new section - continue
+#  /\n[^#\n]*$(o_name $1)/! b            # new section is not in sequence - go out
+#-------------------------------------
+
+  =
+  w ./sect_extracted
+  s/.*/--= This staff outputed =--\n/
   w ./sect_extracted
   s/.*/This is my unit menu!/
 #  s/.*//
@@ -109,36 +141,29 @@ EOF
 #    echo $1 | sed 's/\//\\&/'g
 #} # shldslash
 
+
 #
 # Shielding
 # for using in sed-scripts
 #
 # TODO: Замена должна иметь вид:
-# [' ', '(', ');, '|'] -> \[' ', '(', ');, '|'] ; возможно что-то ещё, например '\'
+# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
 # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
 # && -> & ; отменяет действие '&'
 shield1()
 {
-    if [ "$1no" = 'no' ] ; then
-	echo 'First parameter is absent'
-    else
-	echo 'First parameter is present'
-	echo $*
-	echo
-    fi
-
-    echo $* | sed 's/\([^&]\|&&\)\([\/ (){|}])/\1\\\2/g; s/\([^&]\)&\([\/ (){|}]\)/\1\2/g; s/&&/&/g'
+    # The order is important!
+    # The List like '[|(+)?]' - same at all function code.
+#    echo $* | #sed -e 's/\\n/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n/g' |
+#    echo $* | sed -e 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+    echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+#	sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g; s/^[|(+)?]/\\&/g' |
+	sed -e "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
-
-#
-# Shielded Slash
-# for using in sed-scripts
-# in folding script
-# shield()
-# {
-#     echo $* | sed 's/\//\\&/'g
-# } # shldslash
 
 
 # Create marker
@@ -173,16 +198,12 @@ echo "BEG: $BEG"
 #echo "$(fullmark $BEG _$gen-$p)"
 echo "$(shield "$(fullmark $BEG _$gen-$p)")"
 #echo "$(shield '### /abc/def/(ghi|klmn) ###')"
-#shield '### /abc/def/(ghi|klmn) ###'
-#shield uuu /abc/def/\(ghi\|klmn\) rrr
-#echo '### /abc/def/(ghi|klmn) ###'
-#echo '### /abc/def/(ghi|klmn) ###' | shield
-echo '==[ Remark ]==============================================================================\n'
+echo '==[ Remark ]=============================================================\n'
 
 #echo_remark $win
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)#.*/\2 -i/e"
 
-# Htfkbpfwbz замены имени файла через exec-комментарий (командный комментарий),
+# Реализация замены имени файла через exec-комментарий (командный комментарий),
 # опция исполнения файла задаётся в сценарии
 #sed -e "/aaa/!b;n;s/\(# exec\!\)\($(shldslash '${grub_mkcfg_dir}/$(sect_fn $gen $p)')\)#.*/\2 -i/e"
 #sed -e "s/\(# exec\!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $gen $p))\)#.*/\2 -i/e"
@@ -213,8 +234,21 @@ echo '==[ Remark ]==============================================================
 
 sed $allopts -e "$(echo_test)"
 
-echo '==[ Insert ]==============================================================================\n'
+#echo '==[ echo_test ]==========================================================\n'
+#echo "$(echo_test)"
+
+echo '==[ Insert ]=============================================================\n'
 
 #echo_final $win $p
 
 #fullmark $win $p
+
+echo '\nsect_extracted content:'
+echo '=========================\n'
+cat sect_extracted
+echo ''
+
+echo '==[ Shield1 ]============================================================\n'
+shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+aaa=$(shield1 'abba\\nbabba')
+echo "$aaa" >&2

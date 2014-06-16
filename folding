@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.0 by 14.06.2014.							#
+# (c) aso, v.2.0.1 by 16.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,8 +12,8 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.0'
-version="v.$ver, by 14.06.2014 from aso"
+ver='2.0.1'
+version="v.$ver, by 16.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -57,9 +57,9 @@ shield()
     echo $* | sed 's/\//\\&/'g
 } # shldslash
 
+
 #
 # Shielding
-# New version: change [|(+)?] -> \[|(+)?], &[|(+)?] -> [|(+)?], && -> &
 # for using in sed-scripts
 #
 # TODO: Замена должна иметь вид:
@@ -69,13 +69,12 @@ shield()
 shield1()
 {
     # The order is important!
-    # The List like '[|(+)?]' - same at all function code.   
+    # The List like '[|(+)?]' - same at all function code.
     echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g' |
-	sed "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
-	sed "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g'
-#    sed 's/[\/ (){|}]/\\&/'g
+	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g; s/^[|(+)?]/\\&/g' |
+	sed -e "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
 } # shield
 
 
@@ -136,6 +135,9 @@ echo_cmd()
 #   $1 - OS class (gen, win...)
 echo_remark()
 {
+	# regexp block for using in criteria for sampling full menu srction
+	blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
+
 cat << EOF
 ## entrance
 # # if not matched submenu - go to presample
@@ -145,13 +147,15 @@ cat << EOF
   
 #presample
   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
-  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
-
+#  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
+  /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
+=
 :presample
   # presampling menuentry section & intersection gap into pattern space
   N
 #  /\n}/! b presample
-  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
+#  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
+  /^$(shield1 "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! b presample
   /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
@@ -187,8 +191,6 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-#    sed -e "s/# *exec! *\($(shldslash ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-    #sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
     sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
