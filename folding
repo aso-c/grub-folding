@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.6 by 17.06.2014.							#
+# (c) aso, v.2.0.7 by 17.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.6'
+ver='2.0.7'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
@@ -52,7 +52,8 @@ EOF
 #
 # Shielded Slash
 # for using in sed-scripts
-shield()
+#shield()
+shield0()
 {
     echo $* | sed 's/\//\\&/'g
 } # shldslash
@@ -66,26 +67,27 @@ shield()
 # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
 # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
 # && -> & ; отменяет действие '&'
-shield1()
+#shield1()
+shield()
 {
     # The order is important!
     # The List like '[|(+)?]' - same at all function code.
-    echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g; s/^[|(+)?]/\\&/g' |
-	sed -e "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
-	sed -e "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+    echo $* | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
+	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
+	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
+	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
 	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
 } # shield
 
 
-#
-# Test for shielding space
-# for using in sed-scripts
-shield3()
-{
-#    echo "${*}" | sed 's/ /\\&/'g
-    echo "${*}" | sed 's/[ \/]/\\&/'g
-} # shld3
+# #
+# # Test for shielding space
+# # for using in sed-scripts
+# shield3()
+# {
+# #    echo "${*}" | sed 's/ /\\&/'g
+#     echo "${*}" | sed 's/[ \/]/\\&/'g
+# } # shld3
 
 
 # Create marker
@@ -122,9 +124,10 @@ esac
 #   $2 - full file name
 fullmark()
 {
-#    shield $(mark "$1\ $grub_mkcfg_dir/$2")
-#    shield $(shield3 $(mark "$1 $grub_mkcfg_dir/$2"))
-    shield3 $(mark "$1 $grub_mkcfg_dir/$2")
+#    shield0 $(mark "$1\ $grub_mkcfg_dir/$2")
+#    shield0 $(shield3 $(mark "$1 $grub_mkcfg_dir/$2"))
+#    shield3 $(mark "$1 $grub_mkcfg_dir/$2")
+    shield $(mark "$1 $grub_mkcfg_dir/$2")
 #    mark "$1 $grub_mkcfg_dir/$2"
 } # fullmark() -----------------------------------
 
@@ -144,7 +147,8 @@ echo_cmd()
 #    echo "$(shield3 "$(mark "$BEG $grub_mkcfg_dir/_$1-$2")")"
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
 #    echo "$(fullmark $EN _$1-$2)\\n"
-    shield3 $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
+#    shield3 $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
+    shield $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
 } # echo_cmd
 
 
@@ -170,7 +174,7 @@ cat << EOF
 
 :presample
   # presampling menuentry section & intersection gap into pattern space
-  /^$(shield1 "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
+  /^$(shield "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
 
   N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
@@ -187,8 +191,10 @@ cat << EOF
 :intersect	# out of section, sampling interval between sections
   n
 :blank
-  /[^\n]\+/ b substance		# if current line is not blank
-    N; b blank
+#   /[^\n]\+/ b substance		# if current line is not blank
+#     N; b blank
+  /[^\n]\+/! {N; b blank}		# if current line is blank - continue sampling
+
 :substance
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
   /[^#]*menuentry/! b intersect		# detect that not start of new section
@@ -207,8 +213,12 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
+#    sed -e "s/# *exec! *\($(shield0 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+#    sed -e "s/# *exec! *\($(shield3 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 #    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-    sed -e "s/# *exec! *\($(shield3 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+#    sed -e "s/# *exec! *\(${grub_mkcfg_dir}/_$1-$2\)\([^#]*\)/\1\2 /e"
+#    sed -e "s/# *exec! $(shield "*($(shield0 ${grub_mkcfg_dir}/_$1-$2))([^#]*)")/\1\2 /e"
+    sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
 
