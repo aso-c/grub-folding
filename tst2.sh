@@ -171,7 +171,7 @@ shield1()
 # for using in sed-scripts
 shield3()
 {
-    echo "${*}" | sed 's/ /\\&/'g
+    echo "${*}" | sed 's/[ \/]/\\&/'g
 } # shld3
 
 

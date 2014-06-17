@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.3 by 17.06.2014.							#
+# (c) aso, v.2.0.4 by 17.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.3'
+ver='2.0.4'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
@@ -79,11 +79,11 @@ shield1()
 
 
 #
-# Tesat for shielding space
+# Test for shielding space
 # for using in sed-scripts
 shield3()
 {
-    echo $* | sed 's/ /\\&/'g
+    echo "${*}" | sed 's/ /\\&/'g
 } # shld3
 
 
