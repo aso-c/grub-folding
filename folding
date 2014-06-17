@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.2 by 17.06.2014.							#
+# (c) aso, v.2.0.3 by 17.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.2'
+ver='2.0.3'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
@@ -78,10 +78,20 @@ shield1()
 } # shield
 
 
+#
+# Tesat for shielding space
+# for using in sed-scripts
+shield3()
+{
+    echo $* | sed 's/ /\\&/'g
+} # shld3
+
+
 # Create marker
 mark() {
-local MARK='###'
-echo "$MARK\ $1\ $MARK"
+	local MARK='###'
+    #echo "$MARK\ $1\ $MARK"
+    echo $(shield3 "$MARK $1 $MARK")
 } # mark() ---------------------------------------
 
 
@@ -110,7 +120,8 @@ esac
 #   $2 - full file name
 fullmark()
 {
-    shield $(mark "$1\ $grub_mkcfg_dir/$2")
+#    shield $(mark "$1\ $grub_mkcfg_dir/$2")
+    shield $(shield3 $(mark "$1 $grub_mkcfg_dir/$2"))
 } # fullmark() -----------------------------------
 
 
@@ -136,7 +147,7 @@ echo_cmd()
 echo_remark()
 {
 	# regexp block for using in criteria for sampling full menu srction
-	blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
+	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
 
 cat << EOF
 ## entrance
@@ -149,20 +160,12 @@ cat << EOF
   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
 #  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
   /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
-#=
+
 :presample
   # presampling menuentry section & intersection gap into pattern space
-  #N
-#  /\n}/! b presample
-#  /[\n^][^#]*{\([^#\n]*\)\|\(\n[^#]*\)}/! b presample
   /^$(shield1 "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
- # /^$(shield1 "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/ b nextsample
- # =
-  N
- # b presample
-:nextsample
 
-  /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
