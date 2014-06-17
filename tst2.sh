@@ -166,6 +166,37 @@ shield1()
 } # shield
 
 
+# #
+# # Shielding with parameter analised
+# # for using in sed-scripts
+# #
+# # TODO: Замена должна иметь вид:
+# # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
+# # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# # && -> & ; отменяет действие '&'
+# shield1()
+# {
+# 	local subst='|(+)?'
+#     if [ "$1no" = 'no' ] ; then
+# 	echo 'First parameter is absent'
+#     else
+# 	echo 'First parameter is present'
+# 	echo $*
+# 	echo
+#     fi
+#     
+#     echo "subst: ${subst}"
+#     echo '&&'
+#
+#     echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
+# 	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g' |
+# 	sed "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
+# 	sed "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+# 	sed -e 's/&&/\&/g'
+# #    echo $* | sed "s/\([^&]\|&&\)\([${substlst}]\)/\1\\\2/g; s/\([^&]\)&\([${substlst}]\)/\1\2/g; s/&&/&/g"
+# #    sed 's/[\/ (){|}]/\\&/'g
+# } # shield
+
 #
 # Test for shielding space
 # for using in sed-scripts

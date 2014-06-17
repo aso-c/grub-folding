@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.5 by 17.06.2014.							#
+# (c) aso, v.2.0.6 by 17.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.5'
+ver='2.0.6'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
@@ -140,8 +140,11 @@ e='epilog'
 echo_cmd()
 {
     echo "$(fullmark $BEG _$1-$2)\\"
+#    shield3 $(mark "$BEG $grub_mkcfg_dir/_$1-$2")
+#    echo "$(shield3 "$(mark "$BEG $grub_mkcfg_dir/_$1-$2")")"
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
-    echo "$(fullmark $EN _$1-$2)\\n"
+#    echo "$(fullmark $EN _$1-$2)\\n"
+    shield3 $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
 } # echo_cmd
 
 

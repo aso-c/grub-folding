@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section prologue GRUB configuration file
-# v.1.9.1 from 14.06.2014. by aso
+# v.2.0.1 from 17.06.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,19 +29,11 @@ set -e
 #
 ####################################################
 
-ver='1.9.1'
-date='14.06.2014'
+ver='2.0.1'
+date='17.06.2014'
 version="v.$ver, from $date by aso"
 
-#
-#prefix="/usr"
-#exec_prefix="${prefix}"
-#datarootdir="${prefix}/share"
-#
-#. "${datarootdir}/grub/grub-mkconfig_lib"
-#
-#export TEXTDOMAIN=grub
-#export TEXTDOMAINDIR="${datarootdir}/locale"
+
 usage()
 {
     cat <<EOF
