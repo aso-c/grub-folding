@@ -166,6 +166,15 @@ shield1()
 } # shield
 
 
+#
+# Test for shielding space
+# for using in sed-scripts
+shield3()
+{
+    echo "${*}" | sed 's/ /\\&/'g
+} # shld3
+
+
 # Create marker
 mark() {
 local MARK='###'
@@ -252,3 +261,7 @@ echo '==[ Shield1 ]============================================================\
 shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
 aaa=$(shield1 'abba\\nbabba')
 echo "$aaa" >&2
+
+uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
+echo "${uuu}"
+shield3 "${uuu}"
