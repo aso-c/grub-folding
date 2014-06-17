@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.4 by 17.06.2014.							#
+# (c) aso, v.2.0.5 by 17.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.4'
+ver='2.0.5'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
@@ -83,7 +83,8 @@ shield1()
 # for using in sed-scripts
 shield3()
 {
-    echo "${*}" | sed 's/ /\\&/'g
+#    echo "${*}" | sed 's/ /\\&/'g
+    echo "${*}" | sed 's/[ \/]/\\&/'g
 } # shld3
 
 
@@ -91,7 +92,8 @@ shield3()
 mark() {
 	local MARK='###'
     #echo "$MARK\ $1\ $MARK"
-    echo $(shield3 "$MARK $1 $MARK")
+#    echo $(shield3 "$MARK $1 $MARK")
+    echo "$MARK $1 $MARK"
 } # mark() ---------------------------------------
 
 
@@ -121,7 +123,9 @@ esac
 fullmark()
 {
 #    shield $(mark "$1\ $grub_mkcfg_dir/$2")
-    shield $(shield3 $(mark "$1 $grub_mkcfg_dir/$2"))
+#    shield $(shield3 $(mark "$1 $grub_mkcfg_dir/$2"))
+    shield3 $(mark "$1 $grub_mkcfg_dir/$2")
+#    mark "$1 $grub_mkcfg_dir/$2"
 } # fullmark() -----------------------------------
 
 
@@ -200,7 +204,8 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+#    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+    sed -e "s/# *exec! *\($(shield3 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
 
