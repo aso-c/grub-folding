@@ -3,7 +3,7 @@ set -e
 #***************************************************************************************#
 #											#
 # Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.7 by 17.06.2014.							#
+# (c) aso, v.2.0.9 by 17.06.2014.							#
 #   GPLv3										#
 #											#
 # -t, --pipline           processing input file (stdin) into stdout output file		#
@@ -12,7 +12,7 @@ set -e
 #***************************************************************************************#
 
 
-ver='2.0.7'
+ver='2.0.9'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
@@ -55,7 +55,7 @@ EOF
 #shield()
 shield0()
 {
-    echo $* | sed 's/\//\\&/'g
+    echo "${*}" | sed 's/\//\\&/'g
 } # shldslash
 
 
@@ -72,7 +72,7 @@ shield()
 {
     # The order is important!
     # The List like '[|(+)?]' - same at all function code.
-    echo $* | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
+    echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
 	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
 	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
 	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
@@ -93,8 +93,7 @@ shield()
 # Create marker
 mark() {
 	local MARK='###'
-    #echo "$MARK\ $1\ $MARK"
-#    echo $(shield3 "$MARK $1 $MARK")
+
     echo "$MARK $1 $MARK"
 } # mark() ---------------------------------------
 
@@ -142,12 +141,11 @@ e='epilog'
 #   $2 - tail (prolog, epilog...)
 echo_cmd()
 {
-    echo "$(fullmark $BEG _$1-$2)\\"
+#    echo "$(fullmark $BEG _$1-$2)\\"
 #    shield3 $(mark "$BEG $grub_mkcfg_dir/_$1-$2")
+    shield $(mark "$BEG $grub_mkcfg_dir/_$1-$2")\\
 #    echo "$(shield3 "$(mark "$BEG $grub_mkcfg_dir/_$1-$2")")"
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
-#    echo "$(fullmark $EN _$1-$2)\\n"
-#    shield3 $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
     shield $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
 } # echo_cmd
 
@@ -185,19 +183,13 @@ cat << EOF
   i\\$(echo_cmd $1 $p)
 #  i\\\\n\\$(echo_cmd $1 $p)
  
-:consect	# continue sampling section
-#  n; /^}/! b consect
+:consect; n	# continue sampling section
 
-:intersect	# out of section, sampling interval between sections
-  n
 :blank
-#   /[^\n]\+/ b substance		# if current line is not blank
-#     N; b blank
   /[^\n]\+/! {N; b blank}		# if current line is blank - continue sampling
 
-:substance
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-  /[^#]*menuentry/! b intersect		# detect that not start of new section
+  /[^#]*menuentry/! b consect		# detect that not start of new section
   /[^#]*$(o_name $1)/ b consect		# new section is started
 
 :close

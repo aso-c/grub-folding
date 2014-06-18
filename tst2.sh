@@ -206,25 +206,25 @@ shield3()
 } # shld3
 
 
-# Create marker
-mark() {
-local MARK='###'
-#echo "$MARK\ $1\ $MARK"
-echo "$MARK $* $MARK"
-} # mark() ---------------------------------------
+# # Create marker
+# mark() {
+# local MARK='###'
+# #echo "$MARK\ $1\ $MARK"
+# echo "$MARK $* $MARK"
+# } # mark() ---------------------------------------
 
-# Create full format marker string
-# Paramatars:
-#   $1 - 'BEGIN' / 'END'
-#   $2 - full file name
-fullmark()
-{
-#sed 's/\//\\&/'g <<EOF
-#$(mark "$1\ $grub_mkcfg_dir/$2")
-#EOF
-    echo "$(shield $(mark $1 $grub_mkcfg_dir/$2))"
-    echo "$(mark $1 $grub_mkcfg_dir/$2)"
-} # fullmark() -----------------------------------
+# # Create full format marker string
+# # Paramatars:
+# #   $1 - 'BEGIN' / 'END'
+# #   $2 - full file name
+# fullmark()
+# {
+# #sed 's/\//\\&/'g <<EOF
+# #$(mark "$1\ $grub_mkcfg_dir/$2")
+# #EOF
+#     echo "$(shield $(mark $1 $grub_mkcfg_dir/$2))"
+#     echo "$(mark $1 $grub_mkcfg_dir/$2)"
+# } # fullmark() -----------------------------------
 
 
 echo 'Mark'
@@ -296,3 +296,7 @@ echo "$aaa" >&2
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
 echo "${uuu}"
 shield3 "${uuu}"
+
+echo '==[ echo_cmd() ]=========================================================\n'
+echo
+echo_cmd gen prolog
