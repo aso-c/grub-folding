@@ -98,8 +98,6 @@ mark() {
 } # mark() ---------------------------------------
 
 
-
-
 # Echoing OS name from class
 # Parameter:
 #   #1 - class OS (gentoo, win),
@@ -117,20 +115,6 @@ esac
 } # o_name() -------------------------------------
 
 
-# Create full format marker string
-# Paramatars:
-#   $1 - 'BEGIN' / 'END'
-#   $2 - full file name
-fullmark()
-{
-#    shield0 $(mark "$1\ $grub_mkcfg_dir/$2")
-#    shield0 $(shield3 $(mark "$1 $grub_mkcfg_dir/$2"))
-#    shield3 $(mark "$1 $grub_mkcfg_dir/$2")
-    shield $(mark "$1 $grub_mkcfg_dir/$2")
-#    mark "$1 $grub_mkcfg_dir/$2"
-} # fullmark() -----------------------------------
-
-
 
 p='prolog'
 e='epilog'
@@ -141,10 +125,7 @@ e='epilog'
 #   $2 - tail (prolog, epilog...)
 echo_cmd()
 {
-#    echo "$(fullmark $BEG _$1-$2)\\"
-#    shield3 $(mark "$BEG $grub_mkcfg_dir/_$1-$2")
     shield $(mark "$BEG $grub_mkcfg_dir/_$1-$2")\\
-#    echo "$(shield3 "$(mark "$BEG $grub_mkcfg_dir/_$1-$2")")"
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
     shield $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
 } # echo_cmd
