@@ -5,18 +5,18 @@ grub-folding
 
 ==[ en ]=======================================================================
 
-Config script the grub-folding is provide the sequence of similar GRUB menu entries folding.
+Config script the grub-folding is provide the folding of similar GRUB menu entries sequence.
 Each sequence of entries for Microsoft Windows or Gentoo OS loading separately
 is included into submenu section.
 Submenu section was implemented by insertion output of suitable section file
-before or after sequention body. Configuration scripts output stored before it
-in temporary files. (Early version of grub-folder was inserting
+before or after sequention body. (Early version of grub-folder was inserting
 immediately contents of suitable section files.)
 Sequention of GRUB menu entries was not reordered.
 User can be insert custom code before/after standart text of section file
 (e.g. in or out submenu section with sequence).
+Programm builded around subcommand "e" of sed "s///"-command.
 
-The config script is create separete submenu for each group of consequtive
+The config script is create separate submenu for each group of consequtive
 items GRUB boot menu for each type OS.
 Items will be processed for the GRUB boot menu of operating systems:
  - Microsoft Windows;
@@ -51,6 +51,11 @@ in its original form. Execution in the GRUB configurator context are bypassed.
 Expantion list of supported OS'es is possibly by simple code modification &
 define appropriate section files.
 
+TODO:
+- exclude submenu creation for single menu entry from list of target OS'es;
+- exclude submenu creation if sequence of target OS'es menu entries already
+  enclosed into submenu.
+
 ==[ ru ]=======================================================================
 
 Конфигурационный скрипт "grub-folding" обеспечивает сворачивание последовательности
@@ -60,10 +65,11 @@ Microsoft Windows или несколько вариантов загрузки 
 Последовательность пунктов меню не переупорядочивается.
 Подменю организуется путём вставки перед началом и в конце массива однородных пунктов
 загрузочного меню GRUB вывода соответствующего файла секции.
-Предварительно вывод конфигурационных скриптов сохраняется во временных файлах.
 (Более ранние версии grub-folding вставляли непосредственно содержимое этих файлов).
 Пользователь имеет возможность вставить собственный код/текст/пункты меню
-непосредственно в начале или конце секции подменю.
+непосредственно перед и/или после стандартного кода подменю (т.е. в начале/конце
+секции подменю с последовательностью - либо вне её).
+Программа строится вокруг подкоманды "e" команды "s///". 
 
 Конфигурационный скрипт создаёт отдельные подменю для каждой групы последовательно
 расположенных пунктов загрузочного меню GRUB отдельно для каждого вида ОС.
@@ -104,13 +110,29 @@ Microsoft Windows или несколько вариантов загрузки 
 Возможно расширение списка поддерживаемых ОС путём несложной доработки кода
 сценария folding и создания соответствующих заголовочный файлов секций.
 
+TODO:
+- исключить создание подменю, если встречен одиночный пункт меню из списка обрабатывемых;
+- исключить создание подменю, если последовательность пунктов меню уже заключена в подменю.
+
 ==[ history ]==================================================================
 
 Ранние версии grub-folding использовали непосредственную вставку содержимого файлов секций
-в файл меню загрузки GRUB.
+в файл меню загрузки GRUB, затем была реализована вставка вывода конфигурационных
+скриптов файлов секций при помощи сохранение его во временных файлах.
 ------------------------------------
 Early versions of grub-folding used directly insert of section file contents into
-GRUB boot menu file.
+GRUB boot menu file. It was later implemented insertion of output of section file
+config script into GRUB boot menu file by storing it in a temporary files.
+
+-------------------------------------------------------------------------------
+folding_v.5.0
+(c) aso, v.2.0.0 by 07.06.2014.
+Transition variant to version with exception of re-creating the submenu if it
+has already been created - algorithm based on 'e' subcommand of 's///' command.
+First section in sequence is completly sampled in patternspace - prepare to exclude
+create submenu for single target menu entry.
+
+    Product revision version V.
 
 -------------------------------------------------------------------------------
 folding_v.4.0

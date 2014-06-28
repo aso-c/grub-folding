@@ -1,19 +1,43 @@
 #! /bin/sh
 set -e
-#***************************************************************************************#
-#											#
-# Insert Folding section in GRUB configuration file					#
-# (c) aso, v.1.7.3 by 02.04.2013.							#
-#   GPLv3										#
-#											#
-# -t, --pipline           processing input file (stdin) into stdout output file		#
-# -i, --in-place          processing config file "in place" from stdout; default option	#
-#											#
-#***************************************************************************************#
+
+# grub-mkconfig helper script.
+# (c) aso, v.2.0.0 by 07.06.2014.
+#
+# This config script create separate submenu for each group of consequtive items
+# GRUB boot menu for each type OS.
+# It will be processed to the next operating systems:
+# - Microsoft Windows;
+# - Gentoo.
+#
+# Project files:
+#    - folding - the config script that creates a submenu from sequence of a homogeneous
+#                  menu items.
+#    - _gen-prolog  - Gentoo section prologue file; it can contain custom code,
+# 		      that will be placed immediately before the submenu "Gentoo"
+#		      or inside submenu at the beginning of it.
+#		      Submenu title also given in that file.
+#    - _gen-epilog  - Gentoo section epilogue file; it can contain custom code,
+#		      that will be placed immediately after the submenu "Gentoo"
+#		      or inside submenu at the end of it.
+#    - _win-prolog  - Microsoft Windows section prologue file; it can contain custom code,
+#		      that will be placed immediately before the submenu "Microsoft Windows"
+#		      or inside submenu at the beginning of it.
+#		      Submenu title also given in that file.
+#    - _win-epilog  - Microsoft Windows section epilogue file; it can contain custom code,
+#		      that will be placed immediately after the submenu "Microsoft Windows"
+#		      or inside submenu at the end of it.
+#		      Submenu title also given in that file.
+#
+# All project files placed in /etc/grub.d directory.
+# All project files are executable scripts.
+# The "folding" script in the order of execution must follow after os_prober & # before
+# user scripts (usually exec priority 40 and more), e.g. 31..39. (39_folding, for example).
+# Section files priority is absent, they used in its original form.
 
 
-ver='1.7.3'
-version="$ver, by 01.04.2013 from aso"
+ver='2.0.0'
+version="$ver, by 07.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -27,15 +51,10 @@ GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
 
-# Calling from folding marker
-_infolding='Yes'
-export _infolding
-
 
 
 BEG='BEGIN'
 EN='END'
-
 
 
 usage()
@@ -52,6 +71,15 @@ EOF
 } # usage() --------------------------------------
 
 
+#
+# Shielded Slash
+# for using in sed-scripts
+shield()
+{
+    echo $* | sed 's/\//\\&/'g
+} # shldslash
+
+
 # Create marker
 mark() {
 local MARK='###'
@@ -59,13 +87,6 @@ echo "$MARK\ $1\ $MARK"
 } # mark() ---------------------------------------
 
 
-# Generate section file name
-# Parameters:
-#   #1 - prefix, OS_name (gentoo, win),
-#   #2 - tail {prolog | epilog}
-sect_fn() {
-echo "_$1-$2"
-} # sect_fn() ------------------------------------
 
 
 # Echoing OS name from class
@@ -74,7 +95,8 @@ echo "_$1-$2"
 o_name()
 {
 case "$1" in
-'win')	  echo 'Microsoft Windows'
+#'win')	  echo 'Microsoft Windows'
+'win')	  echo 'Windows'
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -100,21 +122,57 @@ EOF
 p='prolog'
 e='epilog'
 
-# Echoing control string for insert folding section
-# in config file function on file insertion
+# Echoing string of control comment
 # Parameters:
-#   $1 - OS class (win/gentoo)
-#   $2 - sect class (prolog/epilog)
-echo_final()
+#   $1 - OS class (gen, win...)
+#   $2 - tail (prolog, epilog...)
+echo_cmd()
 {
-cat <<-EOF
-    /$(fullmark $BEG $(sect_fn $1 $2))/! b; $ b # stop current line processing
-    h; s/.*//; n	# hold && clear pattern space; read new lone
-    /$(fullmark $EN $(sect_fn $1 $2))/! {x; G; b}
-    # exchange & output file after restored str
-    x; r $tmprefix$(sect_fn $1 $2)
+    echo "$(fullmark $BEG _$1-$2)\\"
+    echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
+    echo "$(fullmark $EN _$1-$2)\\n"
+} # echo_cmd
+
+
+# Echoing string for markup section in config file function
+# Parameters:
+#   $1 - OS class (gen, win...)
+echo_remark()
+{
+cat << EOF
+ # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
+    /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
+:presample
+  # sampling menuentry section in pattern space
+    N
+  /\n}/! b presample
+
+# out of first target section, sampling interval between sections
+:presectout
+    N
+  /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
+  /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
+
+  # insert control comment before output buffer
+  i\\\\
+  i\\$(echo_cmd $1 $p)
+ 
+:consect	# continue sampling section &
+    n
+:blank
+  /[^\n]\+/ b substance		# if current line is not blank
+      N; b blank
+:substance
+  /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+  /[^#]*menuentry/! b consect		# detect that not start of new section
+  /[^#]*$(o_name $1)/ b consect	# new section is started
+
+:close
+  i\\$(echo_cmd $1 $e)
+  /### BEG/! i\\\\
 EOF
-} # echo_final()---------------------------------------------------------------
+} # echo_remark() -------------------------------------------------------------------------
 
 
 # Insert folding section in config file function on file insertion
@@ -123,35 +181,14 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-sed -e "$ a$(fullmark $EN $(sect_fn $1 $2))" << EOF > "$tmprefix$(sect_fn $1 $2)"
-$(${grub_mkcfg_dir}/$(sect_fn $1 $2))
-EOF
-sed $allopts -e "$(echo_final $1 $2)"
-rm -f "$tmprefix$(sect_fn $1 $2)"
+    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
 
-echo_remark()
-{
-cat << EOF
-    /\([^#]*.*menuentry\)\([^#].*$(o_name $1)\)/! b; $ b # if section /menuentry <OS_Name>/ was not started - exit
-    i$(fullmark $BEG $(sect_fn $1 $p))
-    i$(fullmark $EN $(sect_fn $1 $p))\\n
-
-:consect	# continue sampling section
-    n; /^}/! b consect
-
-:intersect	# out of section, sampling iterval between sections
-    n; /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
-    /[^#]*.*menuentry/! b intersect	# detect that not start of new section
-    /[^#]*.*$(o_name $1)/ b consect	# new section is started
-
-:close
-    i$(fullmark $BEG $(sect_fn $1 $e))
-    i$(fullmark $EN $(sect_fn $1 $e))\\n
-EOF
-} # echo_remark() -------------------------------------------------------------------------
-
+#for dev target
+if [ $_dev ] ; then
+    return
+fi
 
 
 # Processing the arguments.
@@ -165,7 +202,6 @@ do
 	usage
 	exit 2 ;;
     -v | --version)
-#	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
 	echo $version
 	exit 0 ;;
     -t | --pipeline)
@@ -180,7 +216,7 @@ do
 done
 
 
-echo "Folding ($ver) ..." >&2
+echo "Folding (v.$version) ..." >&2
 
 echo "# Folding $version"
 echo "# This is a stub"
