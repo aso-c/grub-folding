@@ -1,27 +1,53 @@
 #! /bin/sh
 set -e
-#***************************************************************************************#
-#											#
-# Insert Folding section in GRUB configuration file					#
-# (c) aso, v.2.0.9 by 17.06.2014.							#
+
+#
+# grub-mkconfig helper script.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.0 by 17.06.2014.							#
 #   GPLv3										#
-#											#
-# -t, --pipline           processing input file (stdin) into stdout output file		#
-# -i, --in-place          processing config file "in place" from stdout; default option	#
-#											#
-#***************************************************************************************#
+#
+# -t, --pipline       processing input file (stdin) into stdout output file (for debug)
+# -i, --in-place      processing config file "in place" from stdout; default option
+#
+# This config script create separate submenu for each group of consequtive items
+# GRUB boot menu for each type OS.
+# It will be processed to the next operating systems:
+# - Microsoft Windows;
+# - Gentoo.
+#
+# Project files:
+#    - folding - the config script that creates a submenu from sequence of a homogeneous
+#                  menu items.
+#    - _gen-prolog  - Gentoo section prologue file; it can contain custom code,
+# 		      that will be placed immediately before the submenu "Gentoo"
+#		      or inside submenu at the beginning of it.
+#		      Submenu title also given in that file.
+#    - _gen-epilog  - Gentoo section epilogue file; it can contain custom code,
+#		      that will be placed immediately after the submenu "Gentoo"
+#		      or inside submenu at the end of it.
+#    - _win-prolog  - Microsoft Windows section prologue file; it can contain custom code,
+#		      that will be placed immediately before the submenu "Microsoft Windows"
+#		      or inside submenu at the beginning of it.
+#		      Submenu title also given in that file.
+#    - _win-epilog  - Microsoft Windows section epilogue file; it can contain custom code,
+#		      that will be placed immediately after the submenu "Microsoft Windows"
+#		      or inside submenu at the end of it.
+#		      Submenu title also given in that file.
+#
+# The project files are placed in /etc/grub.d directory.
+# The "folding" script in the order of execution must follow after os_prober and before
+# user scripts (usually exec priority 40 and more), e.g. 31..39. (39_folding, for example).
+# Section files priority is absent, they used in its original form.
+#
 
-
-ver='2.0.9'
+ver='2.1.0'
 version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
 win='win'
 
 sysconfdir="/etc"
-#grub_mkcfg_dir="${sysconfdir}/grub.d"
-# for dev
-grub_mkcfg_dir='./my.grub.d'
+grub_mkcfg_dir="${sysconfdir}/grub.d"
 
 self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
@@ -41,10 +67,12 @@ usage()
 Usage: $self [OPTION]
 Insert Folding section in GRUB configuration file
 
-  -t, --pipline           processing input file (stdin) into stdout output file
-  -i, --in-place          processing config file "in place" from stdout; default option
+  -h, --help            this help
+  -v, --version         version of program
+  -t, --pipline         processing input file (stdin) into stdout output file
+  -i, --in-place        processing config file "in place" from stdout; default option
 
-###Report bugs to <bug-grub@gnu.org>.
+Report bugs to <Solomatov.A.A@gmail.com>.
 EOF
 } # usage() --------------------------------------
 
@@ -52,7 +80,6 @@ EOF
 #
 # Shielded Slash
 # for using in sed-scripts
-#shield()
 shield0()
 {
     echo "${*}" | sed 's/\//\\&/'g
@@ -63,11 +90,6 @@ shield0()
 # Shielding
 # for using in sed-scripts
 #
-# TODO: Замена должна иметь вид:
-# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
-#shield1()
 shield()
 {
     # The order is important!
@@ -78,16 +100,6 @@ shield()
 	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
 	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
 } # shield
-
-
-# #
-# # Test for shielding space
-# # for using in sed-scripts
-# shield3()
-# {
-# #    echo "${*}" | sed 's/ /\\&/'g
-#     echo "${*}" | sed 's/[ \/]/\\&/'g
-# } # shld3
 
 
 # Create marker
@@ -104,8 +116,7 @@ mark() {
 o_name()
 {
 case "$1" in
-# 'win')	  echo 'Microsoft Windows'	# product variant
-'win')	  echo 'Windows'	# for test in laptop
+ 'win')	  echo 'Microsoft Windows'	# product variant
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -140,15 +151,7 @@ echo_remark()
 	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
 
 cat << EOF
-## entrance
-# # if not matched submenu - go to presample
-#  /\([^#]*.*submenu\)/! b presample; $ b
-#  # resampling of inner sequence
-#  b #exit
-  
-#presample
   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
-#  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
   /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
 
 :presample
@@ -162,7 +165,6 @@ cat << EOF
   # insert control comment before output buffer
   i\\\\
   i\\$(echo_cmd $1 $p)
-#  i\\\\n\\$(echo_cmd $1 $p)
  
 :consect; n	# continue sampling section
 
@@ -186,19 +188,9 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-#    sed -e "s/# *exec! *\($(shield0 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! *\($(shield3 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! *\(${grub_mkcfg_dir}/_$1-$2\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! $(shield "*($(shield0 ${grub_mkcfg_dir}/_$1-$2))([^#]*)")/\1\2 /e"
     sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
-
-#for dev target
-if [ $_dev ] ; then
-    return
-fi
 
 
 # Processing the arguments.
@@ -212,7 +204,6 @@ do
 	usage
 	exit 2 ;;
     -v | --version)
-#	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
 	echo $version
 	exit 0 ;;
     -t | --pipeline)
@@ -249,8 +240,6 @@ fi
 
 
 ##************##
-
-
 
 sed $allopts -e "$(echo_remark $win)"	|
 sed $allopts -e "$(echo_remark $gen)"	|
