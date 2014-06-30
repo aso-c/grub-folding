@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section prologue GRUB configuration file
-# v.1.8.7 from 08.06.2014. by aso
+# v.2.0.1 from 17.06.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,9 +29,10 @@ set -e
 #
 ####################################################
 
-ver='1.8.7'
-date='08.06.2014'
-version="$ver, from $date by aso"
+ver='2.0.1'
+date='17.06.2014'
+version="v.$ver, from $date by aso"
+
 
 usage()
 {
@@ -85,6 +86,8 @@ done
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
   echo "# This is a win section prologue stub"
+  echo "# It's a test version,"
+  echo "# $version"
   exit
 fi
 

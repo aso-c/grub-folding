@@ -1,8 +1,13 @@
 #! /bin/sh
 set -e
 
+#
 # grub-mkconfig helper script.
-# (c) aso, v.2.0.0 by 07.06.2014.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.0 by 17.06.2014.							#
+#   GPLv3										#
+#
+# -t, --pipline       processing input file (stdin) into stdout output file (for debug)
+# -i, --in-place      processing config file "in place" from stdout; default option
 #
 # This config script create separate submenu for each group of consequtive items
 # GRUB boot menu for each type OS.
@@ -29,15 +34,14 @@ set -e
 #		      or inside submenu at the end of it.
 #		      Submenu title also given in that file.
 #
-# All project files placed in /etc/grub.d directory.
-# All project files are executable scripts.
-# The "folding" script in the order of execution must follow after os_prober & # before
+# The project files are placed in /etc/grub.d directory.
+# The "folding" script in the order of execution must follow after os_prober and before
 # user scripts (usually exec priority 40 and more), e.g. 31..39. (39_folding, for example).
 # Section files priority is absent, they used in its original form.
+#
 
-
-ver='2.0.0'
-version="$ver, by 07.06.2014 from aso"
+ver='2.1.0'
+version="v.$ver, by 17.06.2014 from aso"
 
 gen='gen'
 win='win'
@@ -63,10 +67,12 @@ usage()
 Usage: $self [OPTION]
 Insert Folding section in GRUB configuration file
 
-  -t, --pipline           processing input file (stdin) into stdout output file
-  -i, --in-place          processing config file "in place" from stdout; default option
+  -h, --help            this help
+  -v, --version         version of program
+  -t, --pipline         processing input file (stdin) into stdout output file
+  -i, --in-place        processing config file "in place" from stdout; default option
 
-###Report bugs to <bug-grub@gnu.org>.
+Report bugs to <Solomatov.A.A@gmail.com>.
 EOF
 } # usage() --------------------------------------
 
@@ -74,19 +80,34 @@ EOF
 #
 # Shielded Slash
 # for using in sed-scripts
+shield0()
+{
+    echo "${*}" | sed 's/\//\\&/'g
+} # shldslash
+
+
+#
+# Shielding
+# for using in sed-scripts
+#
 shield()
 {
-    echo $* | sed 's/\//\\&/'g
-} # shldslash
+    # The order is important!
+    # The List like '[|(+)?]' - same at all function code.
+    echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
+	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
+	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
+	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
+	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
+} # shield
 
 
 # Create marker
 mark() {
-local MARK='###'
-echo "$MARK\ $1\ $MARK"
+	local MARK='###'
+
+    echo "$MARK $1 $MARK"
 } # mark() ---------------------------------------
-
-
 
 
 # Echoing OS name from class
@@ -95,8 +116,7 @@ echo "$MARK\ $1\ $MARK"
 o_name()
 {
 case "$1" in
-#'win')	  echo 'Microsoft Windows'
-'win')	  echo 'Windows'
+ 'win')	  echo 'Microsoft Windows'	# product variant
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -104,18 +124,6 @@ case "$1" in
 	;;
 esac
 } # o_name() -------------------------------------
-
-
-# Create full format marker string
-# Paramatars:
-#   $1 - 'BEGIN' / 'END'
-#   $2 - full file name
-fullmark()
-{
-sed 's/\//\\&/'g <<EOF
-$(mark "$1\ $grub_mkcfg_dir/$2")
-EOF
-} # fullmark() -----------------------------------
 
 
 
@@ -128,9 +136,9 @@ e='epilog'
 #   $2 - tail (prolog, epilog...)
 echo_cmd()
 {
-    echo "$(fullmark $BEG _$1-$2)\\"
+    shield $(mark "$BEG $grub_mkcfg_dir/_$1-$2")\\
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
-    echo "$(fullmark $EN _$1-$2)\\n"
+    shield $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
 } # echo_cmd
 
 
@@ -139,34 +147,33 @@ echo_cmd()
 #   $1 - OS class (gen, win...)
 echo_remark()
 {
-cat << EOF
- # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
-    /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
-:presample
-  # sampling menuentry section in pattern space
-    N
-  /\n}/! b presample
+	# regexp block for using in criteria for sampling full menu srction
+	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
 
-# out of first target section, sampling interval between sections
-:presectout
-    N
-  /### \($BEG\)\|\($EN\)/ b		# control comment - go out
-  /\n[^#\n]*menuentry/! b presectout	# detect that not start of new section - continue
+cat << EOF
+  # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
+  /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
+
+:presample
+  # presampling menuentry section & intersection gap into pattern space
+  /^$(shield "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
+
+  N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
   # insert control comment before output buffer
   i\\\\
   i\\$(echo_cmd $1 $p)
  
-:consect	# continue sampling section &
-    n
+:consect; n	# continue sampling section
+
 :blank
-  /[^\n]\+/ b substance		# if current line is not blank
-      N; b blank
-:substance
+  /[^\n]\+/! {N; b blank}		# if current line is blank - continue sampling
+
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
   /[^#]*menuentry/! b consect		# detect that not start of new section
-  /[^#]*$(o_name $1)/ b consect	# new section is started
+  /[^#]*$(o_name $1)/ b consect		# new section is started
 
 :close
   i\\$(echo_cmd $1 $e)
@@ -181,14 +188,9 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
+    sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
-
-#for dev target
-if [ $_dev ] ; then
-    return
-fi
 
 
 # Processing the arguments.
@@ -216,7 +218,7 @@ do
 done
 
 
-echo "Folding (v.$version) ..." >&2
+echo "Folding (v.$ver) ..." >&2
 
 echo "# Folding $version"
 echo "# This is a stub"
@@ -238,8 +240,6 @@ fi
 
 
 ##************##
-
-
 
 sed $allopts -e "$(echo_remark $win)"	|
 sed $allopts -e "$(echo_remark $gen)"	|
