@@ -1,11 +1,13 @@
 grub-folding
 ============
 
-/etc/grub.d configuration script for folding sequence of similar grub menu entries (as gentoo, gentoo... or Windows, Windows...)
+grub-mkconfig helper script for folding the sequence of similar
+grub menu entries (as gentoo, gentoo... or Windows, Windows...)
 
-###==[ en ]==================================================
+###==[ en ]================================================
 
-Config script the grub-folding is provide the folding of similar GRUB menu entries sequence.
+Config script the grub-folding is provide the folding of similar GRUB menu
+entries sequence.
 Each sequence of entries for Microsoft Windows or Gentoo OS loading separately
 is included into submenu section.
 Submenu section was implemented by insertion output of suitable section file
@@ -115,7 +117,7 @@ Microsoft Windows или несколько вариантов загрузки 
 - ИСПРАВЛЕНО <S>исключить создание подменю, если встречен одиночный пункт меню из списка обрабатывемых;
 - исключить создание подменю, если последовательность пунктов меню уже заключена в подменю.
 
-##==[ history ]===============================
+##==[ history ]=============================
 ####ru
 Ранние версии grub-folding использовали непосредственную вставку содержимого файлов секций
 в файл меню загрузки GRUB, затем была реализована вставка вывода конфигурационных

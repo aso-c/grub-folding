@@ -6,8 +6,7 @@ set -e
 
 _dev=1
 export _dev
-#
-# #. "./foldlib"
+
 . "./folding"
 
 #grub_mkcfg_dir="cfg-test"
@@ -87,13 +86,16 @@ export _dev
 ##   $1 - ...
 echo_test()
 {
+	fullavoidcmt='/\(\([^{]*\\n\)\?[^#{\\n]\+\)\?/'
+#	blkcmt='([^#{\\n]*)'
+#	blkcmt='((.*\\n)?[^#\\n]+)?'
 #   первый рабочий вариант выражения, отбрасывающий комментарии
 #	blkcmt='(.*\\n[^#\\n]*)?'
 #   второй работающий вариант регекспа, исключающий комментарии перед обънктом
 #   но допускающий множество произвольных строк до того.
 #	blkcmt='([^#\\n]*(#[^\\n]*)?\\n)*[^#\\n]*'
 #   третий вариант - для вложенных скобок,
-#   не допускает появления '{' и '}' на защищаемых интервалах.
+#   предовращает появление '{' и '}' на защищаемых интервалах.
 	blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
 #	blkcmt='([^#\\n]*)|(.*\\n[^#\\n]*)'
 	echo "$(shield1 $blkcmt)" >&2
@@ -110,9 +112,15 @@ cat << EOF
 :strtsmpl
 #  /\n}/! b presample
 #  /{.*}/! b presample
+#  /\(^\|\n\)[^#{]*{\(\([^{]*\n\)\?[^#{]*{\([^}]*\n\)\?[^#}]*}\)*\([^}]*\n\)\?[^#}]*}/! b presample
+#  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1}/! b presample
+#  /^\(\([^{]*\n\)\?[^#{\n]\+\)\?{\1\?}/! b presample
+#  /^\([^#{\n]\)*{\([^#{\n]\)*}/! b presample
+#  /^[^#{\n]*{[^#{\n]*}/! b presample
 #  /^$(shield1 $blkcmt{$blkcmt})/! b presample
   /^$(shield1 "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! b presample
 #  /^$(shield1 $blkcmt})/! b
+#  /\(^\|\n\)[^#]*{\(.*\n\)\\?[^#]*}/! b presample
   $ b
 #-------------------------------------
 	#  /\n}/! b presample
@@ -150,17 +158,23 @@ EOF
 # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
 # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
 # && -> & ; отменяет действие '&'
-shield1()
+#shield1()
+shield()
 {
+# 	local subst='|(+)?'
+#     if [ "$1no" = 'no' ] ; then
+# 	echo 'First parameter is absent'
+#     else
+# 	echo 'First parameter is present'
+# 	echo $*
+# 	echo
+#     fi
     # The order is important!
     # The List like '[|(+)?]' - same at all function code.
-#    echo $* | #sed -e 's/\\n/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n/g' |
-#    echo $* | sed -e 's/\(^\|[^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-    echo $* | sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-#	sed -e 's/\([^&]\|&&\)\([|(+)?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+)?]\)\([|(+)?]\)/\1\\\2/g; s/^[|(+)?]/\\&/g' |
-	sed -e "s/\([^&]\)&\([|(+)?]\)/\1\2/g" |
-	sed -e "s/\([|(+)?]\)&\([|(+)?]\)/\1\2/g" |
+    echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
+	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
+	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
+	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
 	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
 #    sed 's/[\/ (){|}]/\\&/'g
 } # shield
@@ -197,34 +211,35 @@ shield1()
 # #    sed 's/[\/ (){|}]/\\&/'g
 # } # shield
 
-#
-# Test for shielding space
-# for using in sed-scripts
-shield3()
-{
-    echo "${*}" | sed 's/[ \/]/\\&/'g
-} # shld3
-
-
-# # Create marker
-# mark() {
-# local MARK='###'
-# #echo "$MARK\ $1\ $MARK"
-# echo "$MARK $* $MARK"
-# } # mark() ---------------------------------------
-
-# # Create full format marker string
-# # Paramatars:
-# #   $1 - 'BEGIN' / 'END'
-# #   $2 - full file name
-# fullmark()
+# #
+# # Test for shielding space
+# # for using in sed-scripts
+# shield3()
 # {
-# #sed 's/\//\\&/'g <<EOF
-# #$(mark "$1\ $grub_mkcfg_dir/$2")
-# #EOF
-#     echo "$(shield $(mark $1 $grub_mkcfg_dir/$2))"
-#     echo "$(mark $1 $grub_mkcfg_dir/$2)"
-# } # fullmark() -----------------------------------
+# #    echo "${*}" | sed 's/ /\\&/'g
+#     echo "${*}" | sed 's/[ \/]/\\&/'g
+# } # shld3
+
+
+# Create marker
+mark() {
+local MARK='###'
+#echo "$MARK\ $1\ $MARK"
+echo "$MARK $* $MARK"
+} # mark() ---------------------------------------
+
+# Create full format marker string
+# Paramatars:
+#   $1 - 'BEGIN' / 'END'
+#   $2 - full file name
+fullmark()
+{
+#sed 's/\//\\&/'g <<EOF
+#$(mark "$1\ $grub_mkcfg_dir/$2")
+#EOF
+    echo "$(shield $(mark $1 $grub_mkcfg_dir/$2))"
+    echo "$(mark $1 $grub_mkcfg_dir/$2)"
+} # fullmark() -----------------------------------
 
 
 echo 'Mark'
@@ -288,9 +303,9 @@ echo '=========================\n'
 cat sect_extracted
 echo ''
 
-echo '==[ Shield1 ]============================================================\n'
-shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
-aaa=$(shield1 'abba\\nbabba')
+echo '==[ Shield ]============================================================\n'
+shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+aaa=$(shield 'abba\\nbabba')
 echo "$aaa" >&2
 
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
