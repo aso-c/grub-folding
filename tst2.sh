@@ -98,7 +98,7 @@ EOF
 # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
 # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
 # && -> & ; отменяет действие '&'
-# -i, --slash-screening - экранирование символа обратной косой (по умолчанию - нет)
+# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 #shield1()
 shield()
@@ -119,18 +119,50 @@ shield()
 
 
     if [ "$1no" = 'no' ] ; then
-# 	echo 'First parameter is absent'
 	# use in pipe-mode
 	main_subst
      else
-# 	echo 'First parameter is present'
-# 	echo $*
-# 	echo
-	# use parameter as inpur
+	# use parameter as input
 	echo "${*}" | main_subst
     fi
-#     echo "${*}" | main_subst
 } # shield
+
+
+#
+# Shielding
+# for using in sed-scripts
+# Simplified sintaxis:
+#	any symbols from set: {| (+ )?} -> \{original_symbol}
+#	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
+#	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
+#       char chain \\                   -> \
+# TODO: Замена должна иметь вид:
+# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
+# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# && -> & ; отменяет действие '&'
+# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
+# -b, --space-ignore - не экранировать пробелы
+shield2()
+{
+# 	local subst='| (+)?'
+
+    main_subst()
+    {
+	# The order is important!
+	# The List like '[|(+)?]' - same at all function code.
+	#sed -e 's/[|(+ )?]/\\&/g'
+	sed -e "s/[|(+ )?]/\\\&/g"
+    } # main_subst()
+
+
+    if [ "$1no" = 'no' ] ; then
+	# use in pipe-mode
+	main_subst
+     else
+	# use parameter as input
+	echo "${*}" | main_subst
+    fi
+} # shield2
 
 
 #
@@ -203,13 +235,16 @@ shield3()
 # echo ''
 
 echo '==[ Shield ]============================================================\n'
-shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
-aaa=$(shield 'abba\\nbabba')
+#shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)\nabba\babba\\bambra\carramba'
+#aaa=$(shield 'abba\\nbabba')
+aaa=$(shield2 'abba\\nbabba')
 echo "$aaa" >&2
 
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
 echo "${uuu}"
 shield3 "${uuu}"
+shield2 "${uuu}"
 
 echo '==[ echo_cmd() ]=========================================================\n'
 echo
