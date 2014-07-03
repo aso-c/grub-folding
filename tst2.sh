@@ -148,11 +148,40 @@ shield2()
 
     main_subst()
     {
+	    local subst='|(+ )?'
+
 	# The order is important!
 	# The List like '[|(+)?]' - same at all function code.
 	#sed -e 's/[|(+ )?]/\\&/g'
-	sed -e "s/[|(+ )?]/\\\&/g"
+	#sed -e "s/[|(+ )?]/\\\&/g"
+	sed -e "s/[${subst}]/\\\&/g"
+#	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
+
+    # Processing the arguments.
+#     while test $# -gt 0
+#     do
+# 	option=$1
+# 	shift
+#
+# 	case "$option" in
+# 	-h | --help)
+# 	    usage
+# 	    exit 2 ;;
+# 	-v | --version)
+# #	    echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
+# 	    echo $version
+# 	    exit 0 ;;
+# 	-t | --pipeline)
+# 	    pipe=${option} ;;
+# 	-i | --in-place)
+# 	    pipe='' ;;
+# 	-*)
+# 	    allopts="$allopts $option"
+# 	    ;;
+# 	# Explicitly ignore non-option arguments, for compatibility.
+# 	esac
+#     done
 
 
     if [ "$1no" = 'no' ] ; then
@@ -242,10 +271,19 @@ aaa=$(shield2 'abba\\nbabba')
 echo "$aaa" >&2
 
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
-echo "${uuu}"
+echo "uuu is: ${uuu}"
+#echo "uuu 2:3 ${uuu:2:3}"
 shield3 "${uuu}"
 shield2 "${uuu}"
+
+[ 10 = 20 ]
+[[ 10 == 20 ]]
+( 10 = 20 )
+(( 10 == 20 ))
 
 echo '==[ echo_cmd() ]=========================================================\n'
 echo
 echo_cmd gen prolog
+
+expr "substr 'abcd' 3 2"
+expr '--abcd' : ^-.*
