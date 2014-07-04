@@ -142,6 +142,7 @@ shield()
 # && -> & ; отменяет действие '&'
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
+# -n, --no-std-subst - не делать стандартную подстановку
 shield2()
 {
 # 	local subst='| (+)?'
@@ -158,30 +159,40 @@ shield2()
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
+    cfg=''
     # Processing the arguments.
 #     while test $# -gt 0
-#     do
-# 	option=$1
-# 	shift
-#
-# 	case "$option" in
-# 	-h | --help)
-# 	    usage
-# 	    exit 2 ;;
-# 	-v | --version)
-# #	    echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
-# 	    echo $version
-# 	    exit 0 ;;
-# 	-t | --pipeline)
-# 	    pipe=${option} ;;
-# 	-i | --in-place)
-# 	    pipe='' ;;
-# 	-*)
+#     while [ $# > 0 ]
+    while [ $(expr "$1" : ^-.*) != 0 ]
+     do
+ 	option=$1
+ 	shift
+
+ 	case "$option" in
+	-b | --space-ignore)
+	    # не экранировать пробелы
+	    echo 'No space screening'
+	    cfg="b$cfg"
+	    ;;
+ 	-i | --slash-screening)
+	    # экранировать косую ('/')
+	    echo "Screening the slash - '/'"
+	    cfg="i$cfg"
+	    ;;
+	-n | --no-std-subst)
+	    # отменить стандартные подстановки
+	    echo 'Std subst is canceled'
+	    cfg="n$cfg"
+	    ;;
+	--)
+ 	    break ;;
+ 	# Explicitly ignore unexpected options, for compatibility.
+ 	-*)
 # 	    allopts="$allopts $option"
-# 	    ;;
-# 	# Explicitly ignore non-option arguments, for compatibility.
-# 	esac
-#     done
+ 	    ;;
+ 	esac
+     done
+
 
 
     if [ "$1no" = 'no' ] ; then
@@ -203,40 +214,6 @@ shield3()
     echo "${*}" | sed 's/[ \/]/\\&/'g
 } # shld3
 
-
-# # Create marker
-# mark() {
-# local MARK='###'
-# #echo "$MARK\ $1\ $MARK"
-# echo "$MARK $* $MARK"
-# } # mark() ---------------------------------------
-#
-# # Create full format marker string
-# # Paramatars:
-# #   $1 - 'BEGIN' / 'END'
-# #   $2 - full file name
-# fullmark()
-# {
-# #sed 's/\//\\&/'g <<EOF
-# #$(mark "$1\ $grub_mkcfg_dir/$2")
-# #EOF
-#     echo "$(shield $(mark $1 $grub_mkcfg_dir/$2))"
-#     echo "$(mark $1 $grub_mkcfg_dir/$2)"
-# } # fullmark() -----------------------------------
-
-
-# echo 'Mark'
-#
-# #echo "$(fullmark $BEG $(sect_fn $gen $p))"
-# #echo "$(fullmark $BEG $(sect_fn $win $e))"
-# #echo "$(shield '### /abc/def/(ghi|klmn) ###')"
-# echo "gen: $gen"
-# echo "p: $p"
-# echo "BEG: $BEG"
-# #echo "$(fullmark $BEG _$gen-$p)"
-# echo "$(shield "$(fullmark $BEG _$gen-$p)")"
-# #echo "$(shield '### /abc/def/(ghi|klmn) ###')"
-# echo '==[ Remark ]=============================================================\n'
 
 #echo_remark $win
 #sed -e "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/$(sect_fn $1 $2))\)#.*/\2 -i/e"
@@ -265,7 +242,7 @@ shield3()
 
 echo '==[ Shield ]============================================================\n'
 #shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
-shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)\nabba\babba\\bambra\carramba'
+shield2 $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)\nabba\babba\\bambra\carramba'
 #aaa=$(shield 'abba\\nbabba')
 aaa=$(shield2 'abba\\nbabba')
 echo "$aaa" >&2
@@ -276,10 +253,12 @@ echo "uuu is: ${uuu}"
 shield3 "${uuu}"
 shield2 "${uuu}"
 
-[ 10 = 20 ]
-[[ 10 == 20 ]]
-( 10 = 20 )
-(( 10 == 20 ))
+#[ 10 = 20 ]
+#[[ 10 == 20 ]]
+#( 10 = 20 )
+#(( 10 == 20 ))
+echo $? # код возврата
+
 
 echo '==[ echo_cmd() ]=========================================================\n'
 echo
@@ -287,3 +266,14 @@ echo_cmd gen prolog
 
 expr "substr 'abcd' 3 2"
 expr '--abcd' : ^-.*
+
+echo -n "\$1 is $1;\nis option? - "
+#if [ '-' = $(expr substr "${1}" 1 1) ] ; then
+if [ $(expr "$1" : ^-.*) != 0 ] ; then
+#if [ -z $(expr "$1" : ^-.*) ] ; then
+ echo 'Yes'
+else
+ echo 'No'
+fi
+
+echo Options is: $-
