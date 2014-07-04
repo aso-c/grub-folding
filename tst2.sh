@@ -147,9 +147,14 @@ shield2()
 {
 # 	local subst='| (+)?'
 
+	    local subst_base='|(+)?'
+	    local subst=" ${subst_base}"
+#	    local subst='|(+ )?'
+
     main_subst()
     {
-	    local subst='|(+ )?'
+# 	    local subst_base='|(+)?'
+# 	    local subst="$(subst_base) "
 
 	# The order is important!
 	# The List like '[|(+)?]' - same at all function code.
@@ -193,15 +198,33 @@ shield2()
  	esac
      done
 
-
-
-    if [ "$1no" = 'no' ] ; then
-	# use in pipe-mode
-	main_subst
-     else
-	# use parameter as input
-	echo "${*}" | main_subst
+#    expr index ublia n
+    if [ "$(expr index ${cfg}u n)" != 0 ] ; then
+	# echo 'Stdandard subst canceled'
+#	subst="$(echo "${subst}")"
+	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
     fi
+
+   if [ "$(expr index u$cfg b)" != 0 ] ; then
+	# echo 'Space screening is cancelled'
+#	subst="$(echo "${subst}" | sed -e 's/ //g')"
+	subst="$(echo $subst)"
+    fi
+
+    if [ "$(expr index u$cfg i)" != 0 ] ; then
+	# echo "Screening the slash - '/'"
+	subst="/$subst"
+    fi
+
+    echo "subst is [${subst}]"
+
+#     if [ "$1no" = 'no' ] ; then
+# 	# use in pipe-mode
+# 	main_subst
+#      else
+# 	# use parameter as input
+# 	echo "${*}" | main_subst
+#     fi
 } # shield2
 
 
@@ -264,16 +287,16 @@ echo '==[ echo_cmd() ]=========================================================\
 echo
 echo_cmd gen prolog
 
-expr "substr 'abcd' 3 2"
-expr '--abcd' : ^-.*
-
-echo -n "\$1 is $1;\nis option? - "
-#if [ '-' = $(expr substr "${1}" 1 1) ] ; then
-if [ $(expr "$1" : ^-.*) != 0 ] ; then
-#if [ -z $(expr "$1" : ^-.*) ] ; then
- echo 'Yes'
-else
- echo 'No'
-fi
+# expr "substr 'abcd' 3 2"
+# expr '--abcd' : ^-.*
+#
+# echo -n "\$1 is $1;\nis option? - "
+# #if [ '-' = $(expr substr "${1}" 1 1) ] ; then
+# if [ $(expr "$1" : ^-.*) != 0 ] ; then
+# #if [ -z $(expr "$1" : ^-.*) ] ; then
+#  echo 'Yes'
+# else
+#  echo 'No'
+# fi
 
 echo Options is: $-
