@@ -176,17 +176,17 @@ shield2()
 	b)
 	    # не экранировать пробелы
 	    echo '--=** No space screening **=--'
-#	    cfg="b$cfg"
+	    cfg="b$cfg"
 	    ;;
 	i)
 	    # экранировать косую ('/')
 	    echo "--=** Screening the slash - '/' **=--"
-#	    cfg="i$cfg"
+	    cfg="i$cfg"
 	    ;;
 	n)
 	    # отменить стандартные подстановки
 	    echo '--=** Std subst is canceled **=--'
-#	    cfg="n$cfg"
+	    cfg="n$cfg"
 	    ;;
 # 	--)
 #  	    break ;;
@@ -199,40 +199,7 @@ shield2()
     shift `expr $OPTIND - 1`
 
     echo "\noptions out: $*\n"
-
-
-    # Processing the arguments.
-#     while test $# -gt 0
-#     while [ $# > 0 ]
-#     while [ $(expr "$1" : ^-.*) != 0 ]
-#      do
-#  	option=$1
-#  	shift
-#
-#  	case "$option" in
-# 	-b | --space-ignore)
-# 	    # не экранировать пробелы
-# 	    echo 'No space screening'
-# 	    cfg="b$cfg"
-# 	    ;;
-#  	-i | --slash-screening)
-# 	    # экранировать косую ('/')
-# 	    echo "Screening the slash - '/'"
-# 	    cfg="i$cfg"
-# 	    ;;
-# 	-n | --no-std-subst)
-# 	    # отменить стандартные подстановки
-# 	    echo 'Std subst is canceled'
-# 	    cfg="n$cfg"
-# 	    ;;
-# 	--)
-#  	    break ;;
-#  	# Explicitly ignore unexpected options, for compatibility.
-#  	-*)
-# # 	    allopts="$allopts $option"
-#  	    ;;
-#  	esac
-#      done
+    echo "cfg is: $cfg"
 
 #    expr index ublia n
     if [ "$(expr index ${cfg}u n)" != 0 ] ; then
@@ -243,8 +210,8 @@ shield2()
 
    if [ "$(expr index u$cfg b)" != 0 ] ; then
 	# echo 'Space screening is cancelled'
-#	subst="$(echo "${subst}" | sed -e 's/ //g')"
-	subst="$(echo $subst)"
+	subst="$(echo "${subst}" | sed -e 's/ //g')"
+#	subst="$(echo $subst)"
     fi
 
     if [ "$(expr index u$cfg i)" != 0 ] ; then
@@ -315,7 +282,7 @@ shield2 $* "${uuu}"
 #[ 10 = 20 ]
 #[[ 10 == 20 ]]
 #( 10 = 20 )
-#(( 10 == 20 ))
+echo "arifmeical expr: $(( 10 == 20 ))"
 echo $? # код возврата
 
 
@@ -334,5 +301,3 @@ echo_cmd gen prolog
 # else
 #  echo 'No'
 # fi
-
-echo Options is: $-
