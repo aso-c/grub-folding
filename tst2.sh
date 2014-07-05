@@ -148,8 +148,8 @@ shield2()
 # 	local subst='| (+)?'
 
 	    local subst_base='|(+)?'
-	    local subst=" ${subst_base}"
-#	    local subst='|(+ )?'
+#	    local subst=" ${subst_base}"
+	    local subst='|(+ )?'
 
     main_subst()
     {
@@ -203,31 +203,31 @@ shield2()
 
 #    expr index ublia n
     if [ "$(expr index ${cfg}u n)" != 0 ] ; then
-	# echo 'Stdandard subst canceled'
+	echo 'Stdandard subst canceled'
 #	subst="$(echo "${subst}")"
 	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
     fi
 
    if [ "$(expr index u$cfg b)" != 0 ] ; then
-	# echo 'Space screening is cancelled'
+	echo 'Space screening is cancelled'
 	subst="$(echo "${subst}" | sed -e 's/ //g')"
 #	subst="$(echo $subst)"
     fi
 
     if [ "$(expr index u$cfg i)" != 0 ] ; then
-	# echo "Screening the slash - '/'"
+	echo "Screening the slash - '/'"
 	subst="/$subst"
     fi
 
     echo "subst is [${subst}]"
 
-#     if [ "$1no" = 'no' ] ; then
-# 	# use in pipe-mode
-# 	main_subst
-#      else
-# 	# use parameter as input
-# 	echo "${*}" | main_subst
-#     fi
+    if [ "$1no" = 'no' ] ; then
+	# use in pipe-mode
+	main_subst
+     else
+	# use parameter as input
+	echo "${*}" | main_subst
+    fi
 } # shield2
 
 
