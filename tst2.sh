@@ -164,39 +164,75 @@ shield2()
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
+    echo "options in: ${*}"
+    echo '\n'
+
+
     cfg=''
+    # Processing the arguments.
+    while getopts ibn f
+    do
+	case $f in
+	b)
+	    # не экранировать пробелы
+	    echo '--=** No space screening **=--'
+#	    cfg="b$cfg"
+	    ;;
+	i)
+	    # экранировать косую ('/')
+	    echo "--=** Screening the slash - '/' **=--"
+#	    cfg="i$cfg"
+	    ;;
+	n)
+	    # отменить стандартные подстановки
+	    echo '--=** Std subst is canceled **=--'
+#	    cfg="n$cfg"
+	    ;;
+# 	--)
+#  	    break ;;
+#  	# Explicitly ignore unexpected options, for compatibility.
+#  	-*)
+#  	    #allopts="$allopts $option"
+#  	    ;;
+	esac
+    done
+    shift `expr $OPTIND - 1`
+
+    echo "\noptions out: $*\n"
+
+
     # Processing the arguments.
 #     while test $# -gt 0
 #     while [ $# > 0 ]
-    while [ $(expr "$1" : ^-.*) != 0 ]
-     do
- 	option=$1
- 	shift
-
- 	case "$option" in
-	-b | --space-ignore)
-	    # не экранировать пробелы
-	    echo 'No space screening'
-	    cfg="b$cfg"
-	    ;;
- 	-i | --slash-screening)
-	    # экранировать косую ('/')
-	    echo "Screening the slash - '/'"
-	    cfg="i$cfg"
-	    ;;
-	-n | --no-std-subst)
-	    # отменить стандартные подстановки
-	    echo 'Std subst is canceled'
-	    cfg="n$cfg"
-	    ;;
-	--)
- 	    break ;;
- 	# Explicitly ignore unexpected options, for compatibility.
- 	-*)
-# 	    allopts="$allopts $option"
- 	    ;;
- 	esac
-     done
+#     while [ $(expr "$1" : ^-.*) != 0 ]
+#      do
+#  	option=$1
+#  	shift
+#
+#  	case "$option" in
+# 	-b | --space-ignore)
+# 	    # не экранировать пробелы
+# 	    echo 'No space screening'
+# 	    cfg="b$cfg"
+# 	    ;;
+#  	-i | --slash-screening)
+# 	    # экранировать косую ('/')
+# 	    echo "Screening the slash - '/'"
+# 	    cfg="i$cfg"
+# 	    ;;
+# 	-n | --no-std-subst)
+# 	    # отменить стандартные подстановки
+# 	    echo 'Std subst is canceled'
+# 	    cfg="n$cfg"
+# 	    ;;
+# 	--)
+#  	    break ;;
+#  	# Explicitly ignore unexpected options, for compatibility.
+#  	-*)
+# # 	    allopts="$allopts $option"
+#  	    ;;
+#  	esac
+#      done
 
 #    expr index ublia n
     if [ "$(expr index ${cfg}u n)" != 0 ] ; then
@@ -267,14 +303,14 @@ echo '==[ Shield ]============================================================\n
 #shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
 shield2 $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)\nabba\babba\\bambra\carramba'
 #aaa=$(shield 'abba\\nbabba')
-aaa=$(shield2 'abba\\nbabba')
+aaa=$(shield2 $* 'abba\\nbabba')
 echo "$aaa" >&2
 
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
 echo "uuu is: ${uuu}"
 #echo "uuu 2:3 ${uuu:2:3}"
 shield3 "${uuu}"
-shield2 "${uuu}"
+shield2 $* "${uuu}"
 
 #[ 10 = 20 ]
 #[[ 10 == 20 ]]
