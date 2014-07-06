@@ -151,6 +151,7 @@ shield2()
 #	    local subst=" ${subst_base}"
 	    local subst='|(+ )?'
 
+    # parameter - substitution string
     main_subst()
     {
 # 	    local subst_base='|(+)?'
@@ -160,7 +161,8 @@ shield2()
 	# The List like '[|(+)?]' - same at all function code.
 	#sed -e 's/[|(+ )?]/\\&/g'
 	#sed -e "s/[|(+ )?]/\\\&/g"
-	sed -e "s/[${subst}]/\\\&/g"
+	#sed -e "s/[${subst}]/\\\&/g"
+	sed -e "s/[${1}]/\\\&/g;" -e 's/\\\\//g'
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
@@ -223,10 +225,10 @@ shield2()
 
     if [ "$1no" = 'no' ] ; then
 	# use in pipe-mode
-	main_subst
+	main_subst "${subst}"
      else
 	# use parameter as input
-	echo "${*}" | main_subst
+	echo "${*}" | main_subst "${subst}"
     fi
 } # shield2
 
@@ -276,28 +278,13 @@ echo "$aaa" >&2
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
 echo "uuu is: ${uuu}"
 #echo "uuu 2:3 ${uuu:2:3}"
-shield3 "${uuu}"
+#shield3 "${uuu}"
 shield2 $* "${uuu}"
 
-#[ 10 = 20 ]
-#[[ 10 == 20 ]]
-#( 10 = 20 )
-echo "arifmeical expr: $(( 10 == 20 ))"
-echo $? # код возврата
+# echo "arifmeical expr: $(( 10 == 20 ))"
+# echo $? # код возврата
 
 
-echo '==[ echo_cmd() ]=========================================================\n'
-echo
-echo_cmd gen prolog
-
-# expr "substr 'abcd' 3 2"
-# expr '--abcd' : ^-.*
-#
-# echo -n "\$1 is $1;\nis option? - "
-# #if [ '-' = $(expr substr "${1}" 1 1) ] ; then
-# if [ $(expr "$1" : ^-.*) != 0 ] ; then
-# #if [ -z $(expr "$1" : ^-.*) ] ; then
-#  echo 'Yes'
-# else
-#  echo 'No'
-# fi
+# echo '==[ echo_cmd() ]=========================================================\n'
+# echo
+# echo_cmd gen prolog
