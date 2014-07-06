@@ -162,7 +162,10 @@ shield2()
 	#sed -e 's/[|(+ )?]/\\&/g'
 	#sed -e "s/[|(+ )?]/\\\&/g"
 	#sed -e "s/[${subst}]/\\\&/g"
-	sed -e "s/[${1}]/\\\&/g;" -e 's/\\\\//g'
+	sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+	# -e 's/\\\\/\&/g'
+	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
+	# -e "s/\\\+[^${1}]/\\\&/g"
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
@@ -272,14 +275,20 @@ echo '==[ Shield ]============================================================\n
 #shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
 shield2 $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)\nabba\babba\\bambra\carramba'
 #aaa=$(shield 'abba\\nbabba')
-aaa=$(shield2 $* 'abba\\nbabba')
-echo "$aaa" >&2
-
-uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
-echo "uuu is: ${uuu}"
+# aaa=$(shield2 $* 'abba\\nbabba')
+# echo "$aaa" >&2
+#
+# uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
+# echo "uuu is: ${uuu}"
 #echo "uuu 2:3 ${uuu:2:3}"
 #shield3 "${uuu}"
-shield2 $* "${uuu}"
+#shield2 $* "${uuu}"
+echo '\I
+\\II
+\\\III
+\\\\IIII
+\\\\\V
+\\\\\\VI' | shield2 $*
 
 # echo "arifmeical expr: $(( 10 == 20 ))"
 # echo $? # код возврата
