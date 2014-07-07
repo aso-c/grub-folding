@@ -131,21 +131,21 @@ config script into GRUB boot menu file by storing it in a temporary files.
 
 -------------------------------------------------------------------------------
 
-####folding_v.5.1
+####folding_5.1
 #####(c) aso, v.2.1.0 by 17.06.2014.
 
     Transition variant 2 to exclusion re-creating submenu if it existing.
-    Insertion output of the configuration script of section into the GRUB boot
-    menu file uses 'e' subcommand of 's///' sed's command.
-    The first section in the sequence completely sampled in pattern space with
-    'N' command. Terminal criterion to fetch the first menu item is a sampling
-    full block '{..}' with any number of internal groups '{..}' and up to
-    3 levels of nesting.
-    Create submenus for a single menu item is excluded.
+    Used 'e' subcommand of 's///' sed's command for insertion output of the
+    configuration script into the output file
+    The first section in the sequence completely sampled in pattern space
+    with 'N' command, new criteria for correct full sampling of the menu item.
+    is completed block '{..}' with any quantity inner group '{..}'
+    up to 3 level nesting.
+    Excludes create submenus for a single menu item.
     The 'shield' function provide escaping chars for simplify expressions.
-    The 'shield0' function provide uncompatible part of functionality 'shield0'.
+    The 'shield0' function provide uncompatible part of functionality 'shield'.
 
-        Product revision version V-1.
+        Product revision version V-1
 -------------------------------------------------------------------------------
 
 ####folding_v.5.0

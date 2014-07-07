@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.2 by 07.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.3 by 07.07.2014.							#
 #   GPLv3										#
 #
 # -t, --pipline       processing input file (stdin) into stdout output file (for debug)
@@ -40,7 +40,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.1.2'
+ver='2.1.3'
 version="v.$ver, by 07.07.2014 from aso"
 
 gen='gen'
@@ -77,37 +77,6 @@ Insert Folding section in GRUB configuration file
 Report bugs to <Solomatov.A.A@gmail.com>.
 EOF
 } # usage() --------------------------------------
-
-
-# #
-# # Shielded Slash
-# # for using in sed-scripts
-# #shield()
-# shield0()
-# {
-#     echo "${*}" | sed 's/\//\\&/'g
-# } # shldslash
-
-
-# #
-# # Shielding
-# # for using in sed-scripts
-# #
-# # TODO: Замена должна иметь вид:
-# # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# # && -> & ; отменяет действие '&'
-# shield1()
-# #shield()
-# {
-#     # The order is important!
-#     # The List like '[|(+)?]' - same at all function code.
-#     echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-# 	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
-# 	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
-# 	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
-# 	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
-# } # shield1
 
 
 #
@@ -166,7 +135,8 @@ shield()
 #  	    ;;
 	esac
     done
-    shift `expr $OPTIND - 1`
+#    shift `expr $OPTIND - 1`
+    shift $(expr $OPTIND - 1)
 
     if [ "$(expr index ${cfg}u n)" != 0 ] ; then
 	# echo 'Stdandard subst canceled'
@@ -190,14 +160,15 @@ shield()
 	# use parameter as input
 	echo "${*}" | main_subst "${subst}"
     fi
-} # shield2
+} # shield
 
 
 # Create marker
 mark() {
 	local MARK='###'
 
-    echo "$MARK $1 $MARK"
+#    echo "$MARK $1 $MARK"
+    echo "### $1 ###"
 } # mark() ---------------------------------------
 
 
@@ -216,7 +187,6 @@ case "$1" in
 	;;
 esac
 } # o_name() -------------------------------------
-
 
 
 p='prolog'
@@ -259,6 +229,7 @@ cat << EOF
   /^$(shield "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
 
   N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  /\n[^#\n]*submenu/ b			# other submenu section was started
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
@@ -273,6 +244,7 @@ cat << EOF
   /[^\n]\+/! {N; b blank}		# if current line is blank - continue sampling
 
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+  /[^#]*submenu/ b close		# other subsection started
   /[^#]*menuentry/! b consect		# detect that not start of new section
   /[^#]*$(o_name $1)/ b consect		# new section is started
 
