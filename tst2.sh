@@ -298,7 +298,7 @@ echo "gen: $gen"
 echo "p: $p"
 echo "BEG: $BEG"
 #echo "$(fullmark $BEG _$gen-$p)"
-echo "$(shield "$(fullmark $BEG _$gen-$p)")"
+#echo "$(shield "$(fullmark $BEG _$gen-$p)")"
 #echo "$(shield '### /abc/def/(ghi|klmn) ###')"
 echo '==[ Remark ]=============================================================\n'
 
@@ -334,7 +334,7 @@ echo '==[ Remark ]=============================================================\
 #sed -e "s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 #echo "/aaa/!b;n;s/\(# exec!\)\($(shldslash ${grub_mkcfg_dir}/)\)_\($gen\|$win\)-\($p\)#.*/\2_\3-\4 -i/e"
 
-sed $allopts -e "$(echo_test)"
+#sed $allopts -e "$(echo_test)"
 
 #echo '==[ echo_test ]==========================================================\n'
 #echo "$(echo_test)"
@@ -350,8 +350,10 @@ sed $allopts -e "$(echo_test)"
 # cat sect_extracted
 # echo ''
 
-echo '==[ Shield1 ]============================================================\n'
-shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+echo '==[ Shield2 ]============================================================\n'
+#shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
+shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
+echo "$(shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
 #aaa=$(shield 'abba\\nbabba')
 # aaa=$(shield2 $* 'abba\\nbabba')
 # echo "$aaa" >&2
@@ -361,12 +363,12 @@ shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(p
 #echo "uuu 2:3 ${uuu:2:3}"
 #shield3 "${uuu}"
 #shield2 $* "${uuu}"
-echo '\I
+echo "$(shield2 $* '\I
 \\II
 \\\III
 \\\\IIII
 \\\\\V
-\\\\\\VI' | shield2 $*
+\\\\\\VI')"
 
 # echo "arifmeical expr: $(( 10 == 20 ))"
 # echo $? # код возврата

@@ -74,12 +74,17 @@ grub_mkcfg_dir="./my.grub.d"
 
 
 echo '==========================================================================================\n'
+
+# echo 'win remark'
+# echo "$(echo_remark $win)"
+
+
 #echo "$win insertion"
 
 #echo_final $win $p
 
 #echo '---------------------------------------------------\n'
-echo "$gen insertion"
+#echo "$gen insertion"
 
 #echo_cmd 'gen' 'prolog'
 
