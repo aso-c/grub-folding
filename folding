@@ -121,19 +121,19 @@ shield()
 
     shift $(expr $OPTIND - 1)
 
-    if [ "$(expr index ${cfg}u n)" != 0 ] ; then
+    if [ "$(expr index ${cfg}u n)" != 0 ]; then
 	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
     fi
 
-    if [ "$(expr index u$cfg b)" != 0 ] ; then
+    if [ "$(expr index u$cfg b)" != 0 ]; then
 	subst="$(echo "${subst}" | sed -e 's/ //g')"
     fi
 
-    if [ "$(expr index u$cfg i)" != 0 ] ; then
+    if [ "$(expr index u$cfg i)" != 0 ]; then
 	subst="/$subst"
     fi
 
-    if [ "$1no" = 'no' ] ; then
+    if [ "$1no" = 'no' ]; then
 	# use in pipe-mode
 	main_subst "${subst}"
      else
@@ -156,8 +156,7 @@ mark()
 o_name()
 {
 case "$1" in
-# 'win')	  echo 'Microsoft Windows'	# product variant
-'win')	  echo 'Windows'	# for test in laptop
+'win')	  echo 'Microsoft Windows'
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -236,7 +235,7 @@ remark_insert()
 
 
 #for dev target
-if [ $_dev ] ; then
+if [ $_dev ]; then
     return
 fi
 
@@ -273,7 +272,7 @@ echo "# This is a stub"
 echo "# Output of this module was placed bypass the main flow"
 
 
-if ! [ $pipe ] ; then
+if ! [ $pipe ]; then
 
   tmpbuf='/tmp/$$$sect$$$'
   exec 4<&0	# store stdin into #4
@@ -300,7 +299,7 @@ remark_insert $gen $e
 ##************##
 
 
-if ! [ $pipe ] ; then
+if ! [ $pipe ]; then
 	#restore all files
   exec 1>&-		# close stdout
   exec 0<&-		# close stdin
