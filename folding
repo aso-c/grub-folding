@@ -79,35 +79,35 @@ EOF
 } # usage() --------------------------------------
 
 
-#
-# Shielded Slash
-# for using in sed-scripts
-#shield()
-shield0()
-{
-    echo "${*}" | sed 's/\//\\&/'g
-} # shldslash
+# #
+# # Shielded Slash
+# # for using in sed-scripts
+# #shield()
+# shield0()
+# {
+#     echo "${*}" | sed 's/\//\\&/'g
+# } # shldslash
 
 
-#
-# Shielding
-# for using in sed-scripts
-#
-# TODO: Замена должна иметь вид:
-# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
-shield1()
-#shield()
-{
-    # The order is important!
-    # The List like '[|(+)?]' - same at all function code.
-    echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
-	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
-} # shield1
+# #
+# # Shielding
+# # for using in sed-scripts
+# #
+# # TODO: Замена должна иметь вид:
+# # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
+# # &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# # && -> & ; отменяет действие '&'
+# shield1()
+# #shield()
+# {
+#     # The order is important!
+#     # The List like '[|(+)?]' - same at all function code.
+#     echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
+# 	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
+# 	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
+# 	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
+# 	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
+# } # shield1
 
 
 #
@@ -137,43 +137,25 @@ shield()
     # parameter - substitution string
     main_subst()
     {
-# 	    local subst_base='|(+)?'
-# 	    local subst="$(subst_base) "
-
 	# The order is important!
-	# The List like '[|(+)?]' - same at all function code.
-	#sed -e 's/[|(+ )?]/\\&/g'
-	#sed -e "s/[|(+ )?]/\\\&/g"
-	#sed -e "s/[${subst}]/\\\&/g"
 	sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
-	# -e 's/\\\\/\&/g'
-	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
-	# -e "s/\\\+[^${1}]/\\\&/g"
-#	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
-
-#     echo "options in: ${*}"
-#     echo '\n'
-
 
     cfg=''
     # Processing the arguments.
-    while getopts ibn f
+    while getopts bin f
     do
 	case $f in
 	b)
 	    # не экранировать пробелы
-#	    echo '--=** No space screening **=--'
 	    cfg="b$cfg"
 	    ;;
 	i)
 	    # экранировать косую ('/')
-#	    echo "--=** Screening the slash - '/' **=--"
 	    cfg="i$cfg"
 	    ;;
 	n)
 	    # отменить стандартные подстановки
-#	    echo '--=** Std subst is canceled **=--'
 	    cfg="n$cfg"
 	    ;;
 # 	--)
@@ -186,28 +168,20 @@ shield()
     done
     shift `expr $OPTIND - 1`
 
-#    echo "\noptions out: $*\n"
-#    echo "cfg is: $cfg"
-
-#    expr index ublia n
     if [ "$(expr index ${cfg}u n)" != 0 ] ; then
 	# echo 'Stdandard subst canceled'
-#	subst="$(echo "${subst}")"
 	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
     fi
 
    if [ "$(expr index u$cfg b)" != 0 ] ; then
 	# echo 'Space screening is cancelled'
 	subst="$(echo "${subst}" | sed -e 's/ //g')"
-#	subst="$(echo $subst)"
     fi
 
     if [ "$(expr index u$cfg i)" != 0 ] ; then
 	# echo "Screening the slash - '/'"
 	subst="/$subst"
     fi
-
-#    echo "subst is [${subst}]"
 
     if [ "$1no" = 'no' ] ; then
 	# use in pipe-mode
@@ -320,7 +294,8 @@ remark_insert()
 #    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
 #    sed -e "s/# *exec! *\(${grub_mkcfg_dir}/_$1-$2\)\([^#]*\)/\1\2 /e"
 #    sed -e "s/# *exec! $(shield "*($(shield0 ${grub_mkcfg_dir}/_$1-$2))([^#]*)")/\1\2 /e"
-    sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
+#    sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
+    sed -e "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
 
