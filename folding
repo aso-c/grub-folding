@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.3 by 07.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.1 by 07.07.2014.							#
 #   GPLv3										#
 #
 # -t, --pipline       processing input file (stdin) into stdout output file (for debug)
@@ -40,7 +40,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.1.3'
+ver='2.2.1'
 version="v.$ver, by 07.07.2014 from aso"
 
 gen='gen'
@@ -82,7 +82,7 @@ EOF
 #
 # Shielding with parameter analyses
 # for using in sed-scripts
-# Simplified sintaxis:
+# Simplified sintax:
 #	any symbols from set: {| (+ )?} -> \{original_symbol}
 #	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
 #	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')

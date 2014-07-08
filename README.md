@@ -54,7 +54,6 @@ Expanding the list of supported OS'es is possibly by simple code modification &
 define appropriate section files.
 
 ####TODO:
-- FIXED <S>exclude submenu creation for single menu entry from list of target OS'es;
 - exclude submenu creation if sequence of target OS'es menu entries already
   enclosed into submenu.
 
@@ -114,7 +113,6 @@ Microsoft Windows или несколько вариантов загрузки 
 сценария folding и создания соответствующих заголовочный файлов секций.
 
 ####TODO:
-- ИСПРАВЛЕНО <S>исключить создание подменю, если встречен одиночный пункт меню из списка обрабатывемых;
 - исключить создание подменю, если последовательность пунктов меню уже заключена в подменю.
 
 ##==[ history ]=============================
@@ -131,7 +129,19 @@ config script into GRUB boot menu file by storing it in a temporary files.
 
 -------------------------------------------------------------------------------
 
-####folding_5.1
+####folding_v.5.2
+#####(c) aso, v.2.2.0 by 07.07.2014.
+
+    Transition variant 2 with exclusion re-creating submenu if it existing.
+    The universal 'shield' function - with parameter analyse, two form of calling -
+    input parameters or input file and using one func for all substitutions.
+    The simplified sintax at the 'shield' function: provide '\' as escaping chars.
+    New keyword 'submenu' for breaking section sampling was added. 
+
+        Product revision version V-2
+-------------------------------------------------------------------------------
+
+####folding_v.5.1
 #####(c) aso, v.2.1.0 by 17.06.2014.
 
     Transition variant 2 to exclusion re-creating submenu if it existing.
