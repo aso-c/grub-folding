@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section epilogue GRUB configuration file
-# v.2.0.1 from 17.06.2014. by aso
+# v.2.0.6 from 07.07.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,8 +29,8 @@ set -e
 #
 ####################################################
 
-ver='2.0.1'
-date='17.06.2014'
+ver='2.0.6'
+date='07.07.2014'
 version="v.$ver, from $date by aso"
 
 
@@ -53,35 +53,56 @@ EOF
 _insert=0
 _exclude=0
 
-# Processing the arguments.
-while test $# -gt 0
-do
-    option=$1
-    shift
+## Processing the arguments.
+#while test $# -gt 0
+#do
+#    option=$1
+#    shift
+#
+#    case "$option" in
+#    -h | --help)
+#	usage
+#	exit 2 ;;
+#    -v | --version)
+#	echo $version
+#	exit 1 ;;
+#    -i | --insert)
+#	_insert=1
+#	;;
+#    -x | --exclude)
+#	_exclude=1
+#	;;
+#    -ix | -xi)
+#	_insert=1
+#	_exclude=1
+#	;;
+#    -*)
+#	echo "Unrecognized options: $option"
+#	;;
+#    # Explicitly ignore non-option arguments, for compatibility.
+#    esac
+#done
 
-    case "$option" in
-    -h | --help)
+# Processing the arguments.
+while getopts hvix f
+do
+    case $f in
+    h | --help)
 	usage
 	exit 2 ;;
-    -v | --version)
+    v | --version)
 	echo $version
 	exit 1 ;;
-    -i | --insert)
+    i | --insert)
 	_insert=1
 	;;
-    -x | --exclude)
+    x | --exclude)
 	_exclude=1
 	;;
-    -ix | -xi)
-	_insert=1
-	_exclude=1
-	;;
-    -*)
-	echo "Unrecognized options: $option"
-	;;
-    # Explicitly ignore non-option arguments, for compatibility.
     esac
 done
+#shift $(expr $OPTIND - 1)
+shift $(($OPTIND - 1))
 
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
