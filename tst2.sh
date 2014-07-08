@@ -143,7 +143,7 @@ EOF
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 #shield1()
-shield()
+shield1()
 {
 # 	local subst='|(+)?'
 
@@ -167,13 +167,13 @@ shield()
 	# use parameter as input
 	echo "${*}" | main_subst
     fi
-} # shield
+} # shield1
 
 
 #
 # Shielding with parameter analyses
 # for using in sed-scripts
-# Simplified sintaxis:
+# Simplified sintax:
 #	any symbols from set: {| (+ )?} -> \{original_symbol}
 #	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
 #	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
@@ -185,7 +185,7 @@ shield()
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
-shield2()
+shield()
 {
 # 	local subst='| (+)?'
 
@@ -222,18 +222,21 @@ shield2()
 	case $f in
 	b)
 	    # не экранировать пробелы
-	    echo '--=** No space screening **=--'
-	    cfg="b$cfg"
+	    echo '--=** No space screening **=--' >&2
+	#    cfg="b$cfg"
+	    subst="$(echo "${subst}" | sed -e 's/ //g')"
 	    ;;
 	i)
 	    # экранировать косую ('/')
-	    echo "--=** Screening the slash - '/' **=--"
-	    cfg="i$cfg"
+	    echo "--=** Screening the slash - '/' **=--" >&2
+	#    cfg="i$cfg"
+	    subst="/$subst"
 	    ;;
 	n)
 	    # отменить стандартные подстановки
-	    echo '--=** Std subst is canceled **=--'
-	    cfg="n$cfg"
+	    echo '--=** Std subst is canceled **=--' >&2
+	#    cfg="n$cfg"
+	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
 	    ;;
 # 	--)
 #  	    break ;;
@@ -243,30 +246,32 @@ shield2()
 #  	    ;;
 	esac
     done
-    shift `expr $OPTIND - 1`
+#    shift `expr $OPTIND - 1`
+#    shift $(expr $OPTIND - 1)
+    shift $(($OPTIND - 1))
 
-    echo "\noptions out: $*\n"
-    echo "cfg is: $cfg"
+    echo "\noptions out: $*\n" >&2
+#    echo "cfg is: $cfg" >&2
 
-#    expr index ublia n
-    if [ "$(expr index ${cfg}u n)" != 0 ] ; then
-	echo 'Stdandard subst canceled'
-#	subst="$(echo "${subst}")"
-	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
-    fi
+##    expr index ublia n
+#    if [ "$(expr index ${cfg}u n)" != 0 ]; then
+#	echo 'Stdandard subst canceled' >&2
+##	subst="$(echo "${subst}")"
+#	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
+#    fi
+#
+#   if [ "$(expr index u$cfg b)" != 0 ]; then
+#	echo 'Space screening is cancelled' >&2
+#	subst="$(echo "${subst}" | sed -e 's/ //g')"
+##	subst="$(echo $subst)"
+#    fi
+#
+#    if [ "$(expr index u$cfg i)" != 0 ]; then
+#	echo "Screening the slash - '/'" >&2
+#	subst="/$subst"
+#    fi
 
-   if [ "$(expr index u$cfg b)" != 0 ] ; then
-	echo 'Space screening is cancelled'
-	subst="$(echo "${subst}" | sed -e 's/ //g')"
-#	subst="$(echo $subst)"
-    fi
-
-    if [ "$(expr index u$cfg i)" != 0 ] ; then
-	echo "Screening the slash - '/'"
-	subst="/$subst"
-    fi
-
-    echo "subst is [${subst}]"
+    echo "subst is [${subst}]" >&2
 
     if [ "$1no" = 'no' ] ; then
 	# use in pipe-mode
@@ -275,7 +280,7 @@ shield2()
 	# use parameter as input
 	echo "${*}" | main_subst "${subst}"
     fi
-} # shield2
+} # shield
 
 
 #
@@ -350,10 +355,10 @@ echo '==[ Remark ]=============================================================\
 # cat sect_extracted
 # echo ''
 
-echo '==[ Shield2 ]============================================================\n'
+echo '==[ Shield ]============================================================\n'
 #shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
-shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
-echo "$(shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
+shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
+echo "$(shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
 #aaa=$(shield 'abba\\nbabba')
 # aaa=$(shield2 $* 'abba\\nbabba')
 # echo "$aaa" >&2
@@ -363,7 +368,7 @@ echo "$(shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qq
 #echo "uuu 2:3 ${uuu:2:3}"
 #shield3 "${uuu}"
 #shield2 $* "${uuu}"
-echo "$(shield2 $* '\I
+echo "$(shield $* '\I
 \\II
 \\\III
 \\\\IIII
