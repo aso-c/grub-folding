@@ -102,9 +102,15 @@ echo '==========================================================================
 # sed -e "$(echo_remark $win)"
 sed -e "$(echo_remark $win)"	|
 sed -e "$(echo_remark $gen)"	|
-remark_insert $win $p	|
-remark_insert $win $e	|
-remark_insert $gen $p	|
-remark_insert $gen $e
+#remark_insert $win $p	|
+#remark_insert $win $e	|
+#remark_insert $gen $p	|
+#remark_insert $gen $e
+sed -e "$(echo_final win prolog)" |
+sed -e "$(echo_final $win $e)" |
+sed -e "$(echo_final $gen $p)" |
+sed -e "$(echo_final $gen $e)"
+#sed -e "$(echo_final $win $e)"
 
 #sed -e "$(remark_insert3 $win $e)" |...
+#echo "$(echo_final $win $p)"

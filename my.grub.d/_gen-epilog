@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # Gentoo section epilogue GRUB configuration file
-# v.2.0.6 from 07.07.2014. by aso
+# v.2.0.7 from 07.07.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,7 +29,7 @@ set -e
 #
 ####################################################
 
-ver='2.0.6'
+ver='2.0.7'
 date='07.07.2014'
 version="$ver, from $date by aso"
 
@@ -52,36 +52,6 @@ EOF
 
 _insert=0
 _exclude=0
-
-## Processing the arguments.
-#while test $# -gt 0
-#do
-#    option=$1
-#    shift
-#
-#    case "$option" in
-#    -h | --help)
-#	usage
-#	exit 2 ;;
-#    -v | --version)
-#	echo $version
-#	exit 1 ;;
-#    -i | --insert)
-#	_insert=1
-#	;;
-#    -x | --exclude)
-#	_exclude=1
-#	;;
-#    -ix | -xi)
-#	_insert=1
-#	_exclude=1
-#	;;
-#    -*)
-#	echo "Unrecognized options: $option"
-#	;;
-#    # Explicitly ignore non-option arguments, for compatibility.
-#    esac
-#done
 
 # Processing the arguments.
 while getopts hvix f

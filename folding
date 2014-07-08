@@ -271,6 +271,16 @@ remark_insert()
 } # remark_insert()------------------------------------------------------------
 
 
+# Insert folding section in config file function on file insertion
+# Parameters:
+#   $1 - OS class (win/gentoo)
+#   $2 - sect class (prolog/epilog)
+echo_final()
+{
+    echo "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\\\1\\\2 /e"
+} # echo_final()---------------------------------------------------------------
+
+
 #for dev target
 if [ $_dev ] ; then
     return
