@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.0 by 17.06.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.0 by 07.07.2014.							#
 #   GPLv3										#
 #
 # -t, --pipline       processing input file (stdin) into stdout output file (for debug)
@@ -40,8 +40,8 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.1.0'
-version="v.$ver, by 17.06.2014 from aso"
+ver='2.2.0'
+version="v.$ver, by 07.07.2014 from aso"
 
 gen='gen'
 win='win'
@@ -78,35 +78,68 @@ EOF
 
 
 #
-# Shielded Slash
+# Shielding with parameter analyses
 # for using in sed-scripts
-shield0()
-{
-    echo "${*}" | sed 's/\//\\&/'g
-} # shldslash
-
-
-#
-# Shielding
-# for using in sed-scripts
-#
+# Simplified sintax:
+#	any symbols from set: {| (+ )?} -> \{original_symbol}
+#	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
 shield()
 {
-    # The order is important!
-    # The List like '[|(+)?]' - same at all function code.
-    echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
-	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
+
+	    local subst='|(+ )?'
+
+    # parameter - substitution string
+    main_subst()
+    {
+	# The order is important!
+	sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+    } # main_subst()
+
+    cfg=''
+    # Processing the arguments.
+    while getopts bin f
+    do
+	case $f in
+	b)
+	    # не экранировать пробелы
+	    cfg="b$cfg" ;;
+	i)
+	    # экранировать косую ('/')
+	    cfg="i$cfg"	;;
+	n)
+	    # отменить стандартные подстановки
+	    cfg="n$cfg"	;;
+	esac
+    done
+
+    shift $(expr $OPTIND - 1)
+
+    if [ "$(expr index ${cfg}u n)" != 0 ]; then
+	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
+    fi
+
+    if [ "$(expr index u$cfg b)" != 0 ]; then
+	subst="$(echo "${subst}" | sed -e 's/ //g')"
+    fi
+
+    if [ "$(expr index u$cfg i)" != 0 ]; then
+	subst="/$subst"
+    fi
+
+    if [ "$1no" = 'no' ]; then
+	# use in pipe-mode
+	main_subst "${subst}"
+     else
+	# use parameter as input
+	echo "${*}" | main_subst "${subst}"
+    fi
 } # shield
 
 
 # Create marker
-mark() {
-	local MARK='###'
-
-    echo "$MARK $1 $MARK"
+mark()
+{
+    echo "### $1 ###"
 } # mark() ---------------------------------------
 
 
@@ -116,7 +149,7 @@ mark() {
 o_name()
 {
 case "$1" in
- 'win')	  echo 'Microsoft Windows'	# product variant
+'win')	  echo 'Microsoft Windows'
 	;;
 'gentoo') echo 'Gentoo Linux'
 	;;
@@ -124,7 +157,6 @@ case "$1" in
 	;;
 esac
 } # o_name() -------------------------------------
-
 
 
 p='prolog'
@@ -151,7 +183,8 @@ echo_remark()
 	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
 
 cat << EOF
-  # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
+  
+#presample
   /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
 
 :presample
@@ -159,6 +192,7 @@ cat << EOF
   /^$(shield "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
 
   N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+  /\n[^#\n]*submenu/ b			# other submenu section was started
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
 
@@ -172,6 +206,7 @@ cat << EOF
   /[^\n]\+/! {N; b blank}		# if current line is blank - continue sampling
 
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+  /[^#]*submenu/ b close		# other subsection started
   /[^#]*menuentry/! b consect		# detect that not start of new section
   /[^#]*$(o_name $1)/ b consect		# new section is started
 
@@ -188,7 +223,7 @@ EOF
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
-    sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
+    sed -e "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
 
@@ -225,7 +260,7 @@ echo "# This is a stub"
 echo "# Output of this module was placed bypass the main flow"
 
 
-if ! [ $pipe ] ; then
+if ! [ $pipe ]; then
 
   tmpbuf='/tmp/$$$sect$$$'
   exec 4<&0	# store stdin into #4
@@ -241,6 +276,7 @@ fi
 
 ##************##
 
+
 sed $allopts -e "$(echo_remark $win)"	|
 sed $allopts -e "$(echo_remark $gen)"	|
 remark_insert $win $p	|
@@ -251,7 +287,7 @@ remark_insert $gen $e
 ##************##
 
 
-if ! [ $pipe ] ; then
+if ! [ $pipe ]; then
 	#restore all files
   exec 1>&-		# close stdout
   exec 0<&-		# close stdin
