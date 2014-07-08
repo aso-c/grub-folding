@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.1.3 by 07.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.0 by 07.07.2014.							#
 #   GPLv3										#
 #
 # -t, --pipline       processing input file (stdin) into stdout output file (for debug)
@@ -40,16 +40,14 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.1.3'
+ver='2.2.0'
 version="v.$ver, by 07.07.2014 from aso"
 
 gen='gen'
 win='win'
 
 sysconfdir="/etc"
-#grub_mkcfg_dir="${sysconfdir}/grub.d"
-# for dev
-grub_mkcfg_dir='./my.grub.d'
+grub_mkcfg_dir="${sysconfdir}/grub.d"
 
 self=`basename $0`
 GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
@@ -84,9 +82,7 @@ EOF
 # for using in sed-scripts
 # Simplified sintaxis:
 #	any symbols from set: {| (+ )?} -> \{original_symbol}
-#	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
 #	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
-#       char chain \\                   -> \
 shield()
 {
 
@@ -106,16 +102,13 @@ shield()
 	case $f in
 	b)
 	    # не экранировать пробелы
-	    cfg="b$cfg"
-	    ;;
+	    cfg="b$cfg" ;;
 	i)
 	    # экранировать косую ('/')
-	    cfg="i$cfg"
-	    ;;
+	    cfg="i$cfg"	;;
 	n)
 	    # отменить стандартные подстановки
-	    cfg="n$cfg"
-	    ;;
+	    cfg="n$cfg"	;;
 	esac
     done
 
@@ -233,11 +226,6 @@ remark_insert()
     sed -e "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\1\2 /e"
 } # remark_insert()------------------------------------------------------------
 
-
-#for dev target
-if [ $_dev ]; then
-    return
-fi
 
 
 # Processing the arguments.
