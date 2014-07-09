@@ -4,9 +4,9 @@ set -e
 #
 # grub-mkconfig helper script.
 # (c) aso<Solomatov.A.A@gmail.com>, v.2.2.1 by 07.07.2014.							#
-#   GPLv3										#
+#   GPLv3
 #
-# -t, --pipline       processing input file (stdin) into stdout output file (for debug)
+# -t, --pipeline       processing input file (stdin) into stdout output file (for debug)
 # -i, --in-place      processing config file "in place" from stdout; default option
 #
 # This config script create separate submenu for each group of consequtive items
@@ -71,10 +71,12 @@ Insert Folding section in GRUB configuration file
 
   -h, --help            this help
   -v, --version         version of program
-  -t, --pipline         processing input file (stdin) into stdout output file
+  -t, --pipeline, pipe  processing input file (stdin) into stdout output file
   -i, --in-place        processing config file "in place" from stdout; default option
 
 Report bugs to <Solomatov.A.A@gmail.com>.
+
+$version
 EOF
 } # usage() --------------------------------------
 
@@ -281,6 +283,7 @@ echo_final()
 } # echo_final()---------------------------------------------------------------
 
 
+
 #for dev target
 if [ $_dev ] ; then
     return
@@ -288,30 +291,95 @@ fi
 
 
 # Processing the arguments.
-while test $# -gt 0
-do
-    option=$1
-    shift
 
-    case "$option" in
-    -h | --help)
+#---------------------------------------------------
+# Note that we use `"$@"' to let each command-line parameter expand to a
+# separate word. The quotes around `$@' are essential!
+# We need TEMP as the `eval set --' would nuke the return value of getopt.
+#TEMP=`getopt -o ab:c:: --long a-long,b-long:,c-long:: \
+#     -n 'example.bash' -- "$@"`
+TEMP=`getopt -o hvti --long help,version,pipeline,in-place \
+     -s sh -n 'folding' -- "$@"`
+
+#echo "options is: $@"
+#echo "TEMP is $TEMP"
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+echo "options 2 is: $@"
+
+while true ; do
+#    echo "current option is: $1"
+    case "$1" in
+#     -a|--a-long) echo "Option a" ; shift ;;
+#     -b|--b-long) echo "Option b, argument \`$2'" ; shift 2 ;;
+#     -c|--c-long)
+# 	# c has an optional argument. As we are in quoted mode,
+# 	# an empty parameter will be generated if its optional
+# 	# argument is not found.
+# 	case "$2" in
+# 	"") echo "Option c, no argument"; shift 2 ;;
+# 	*)  echo "Option c, argument \`$2'" ; shift 2 ;;
+# 	esac ;;
+#     --) shift ; break ;;
+#     *) echo "Internal error!" ; exit 1 ;;
+
+    -h|--help)
 	usage
 	exit 2 ;;
-    -v | --version)
+    -v|--version)
 #	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
 	echo $version
 	exit 0 ;;
-    -t | --pipeline)
-	pipe=${option} ;;
-    -i | --in-place)
+    -t|--pipeline)
+#	pipe=${option} ;;
+	pipe=${1} ;;
+    -i|--in-place)
 	pipe='' ;;
+    --)
+        shift
+	break ;;
     -*)
-	allopts="$allopts $option"
-	;;
+#	allopts="$allopts $option" ;;
+	allopts="$allopts ${1}" ;;
     # Explicitly ignore non-option arguments, for compatibility.
     esac
+    shift
 done
+# echo "Remaining arguments:"
+# for arg do echo '--> '"\`$arg'" ; done
+#---------------------------------------------------
 
+# # Processing the arguments.
+# while test $# -gt 0
+# do
+#     option=$1
+#     shift
+#
+#     case "$option" in
+#     -h | --help)
+# 	usage
+# 	exit 2 ;;
+#     -v | --version)
+# #	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
+# 	echo $version
+# 	exit 0 ;;
+#     -t | --pipeline)
+# 	pipe=${option} ;;
+#     -i | --in-place)
+# 	pipe='' ;;
+#     -*)
+# 	allopts="$allopts $option"
+# 	;;
+#     # Explicitly ignore non-option arguments, for compatibility.
+#     esac
+# done
+
+#echo "pipe is: $pipe"
+#echo "allopts is: $allopts"
+#exit 1
 
 echo "Folding (v.$ver) ..." >&2
 
@@ -339,10 +407,15 @@ fi
 
 sed $allopts -e "$(echo_remark $win)"	|
 sed $allopts -e "$(echo_remark $gen)"	|
-remark_insert $win $p	|
-remark_insert $win $e	|
-remark_insert $gen $p	|
-remark_insert $gen $e
+sed $allopts -e "$(echo_final $win $p)" |
+sed $allopts -e "$(echo_final $win $e)" |
+sed $allopts -e "$(echo_final $gen $p)" |
+sed $allopts -e "$(echo_final $gen $e)"
+
+# remark_insert $win $p	|
+# remark_insert $win $e	|
+# remark_insert $gen $p	|
+# remark_insert $gen $e
 
 ##************##
 

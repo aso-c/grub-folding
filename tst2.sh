@@ -173,7 +173,7 @@ shield()
 #
 # Shielding with parameter analyses
 # for using in sed-scripts
-# Simplified sintaxis:
+# Simplified sintax:
 #	any symbols from set: {| (+ )?} -> \{original_symbol}
 #	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
 #	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')

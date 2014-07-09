@@ -2,176 +2,19 @@
 set -e
 ####################################################
 #
-# Interactive launch of Sectioneer
-# v.0.4.0 from 29.12.2012. by aso
 #
-# -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
-# -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
-# -i, --in-place          generate config from FILE & to FILE [input or output]
-#                           [if both or file omitted - output prcedency]
-#                         file is allowed after any flag, separated by a space
+# Interactive launch of folding, the grub-mkconfig helper script.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.1 by 07.07.2014.							#
+#   GPLv3										#
+#
+# -t, --pipeline,     processing input file (stdin) into stdout output file (for debug)
+#     --pipe
+# -i, --in-place      processing config file "in place" from stdout; default option
 # -h, --help              print this message and exit
 # -v, --version           print the version information and exit
 #
 ####################################################
 
-sysconfdir="/etc"
-grub_mkconfig_dir="${sysconfdir}"/grub.d
+inputname='aaa1'
 
-self=`basename $0`
-GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
-
-
-
-
-usage () {
-    cat <<EOF
-Usage: $self [OPTION]
-Generate a grub config file
-
-# -f, --input=FILE        input for generate config from FILE, FILE [if omitted - input from stdin]
-# -o, --output=FILE       output generated config to FILE [if omitted - output to stdout]
-# -i, --in-place          generate config from FILE & to FILE [input or output]
-#                           [if both or file omitted - output prcedency]
-#                         file is allowed after any flag, separated by a space
-# -h, --help              print this message and exit
-# -v, --version           print the version information and exit
-
-Report bugs to <bug-grub@gnu.org>.
-EOF
-}
-
-
-argument () {
-  opt=$1
-  shift
-
-  if test $# -eq 0; then
-      echo "$0: option requires an argument -- '$opt'" 1>&2
-      exit 1
-  fi
-  echo $1
-}
-
-
-piped='--pipeline'
-
-# Processing the arguments.
-while test $# -gt 0
-do
-    option=$1
-    shift
-
-    case "$option" in
-    -h | --help)
-	usage
-	exit 2 ;;
-    -v | --version)
-	echo "v.0.4.0, 27.12.2012."
-	exit 0 ;;
-    -f | --input)
-	in_cfg=`argument $option "$@"`; shift;;
-    --input=*)
-	in_cfg=$(echo "$option" | sed 's/--input=//');;
-    -o | --output)
-	out_cfg=`argument $option "$@"`; shift;;
-    --output=*)
-	out_cfg=$(echo "$option" | sed 's/--output=//')
-	;;
-    -i | --in-place)
-	inplace="$option"
-	piped=''
-	if [ "$1" ] ; then
-	  if ! expr "$1" : "-."> /dev/null; then
-	    if test "x${out_cfg}" = "x"; then
-	      out_cfg=$(echo "$1" | sed 's/--in-place=//')
-	    fi
-	    shift
-	  fi
-	fi
-	;;
-    --in-place=*)
-	inplace=$(echo "$option" | sed 's/=.*//')
-	piped=''
-	if ! [ ${out_cfg} ]; then
-	  out_cfg=$(echo "$option" | sed 's/--in-place=//')
-	fi
-	;;
-    -*)
-	allopts="$allopts $option"
-	;;
-    # Explicitly ignore non-option arguments, for compatibility.
-    esac
-done
-
-
-#if [ $inplace ] ; then
-if ! [ $piped ] ; then
-  if ! [ $out_cfg ]; then
-    out_cfg=$in_cfg
-  fi
-
-  if [ "$out_cfg" ]; then
-    in_cfg='/tmp/$$$sect$$$'
-    cat $out_cfg > $in_cfg
-  fi
-fi
-
-
-echo "Interactive wrapper for sectioning..." >&2
-
-
-echo "################################################################"
-echo "input file in_cfg   = $in_cfg"
-echo "output file out_cfg = $out_cfg"
-echo "inplace?         = $inplace"
-echo "Other options is:     $allopts"
-
-
-
-if [ "$in_cfg" ]; then
-#  echo "set input to $in_cfg" >&2
-  exec 4<&0	    # Связать дескр. #5 со stdin, сохраняя stdout.
-  exec < $in_cfg    # stdout замещается файлом "logfile.txt".
-fi
-
-if [ "$out_cfg" ]; then
-#  echo "set output to $out_cfg" >&2
-  exec 6>&1	    # Связать дескр. #6 со stdout, сохраняя stdout.
-  exec > $out_cfg   # stdout замещается файлом "logfile.txt".
-fi
-
-
-echo "execute ./sectioneer $allopts" >&2
-./sectioneer --in-place $allopts
-
-##./sectioneer "$inplace $allopts"
-#echo "execute ./sectioneer $inplace $allopts" >&2
-
-###------>cat
-
-
-if [ "$out_cfg" ]; then
-#  echo "Restore default output" >&2
-  exec 1>&6 6>&-    # Восстановить stdout и закрыть дескр. #6.
-fi
-
-if [ "$in_cfg" ]; then
-#  echo "Restore default input" >&2
-  exec 0<&4 4<&-    # Восстановить stdin.
-fi
-
-
-
-#if [ $inplace ] ; then
-if ! [ $piped ] ; then
-#  echo ''
-#  echo "######### Return that all #########"
-#  echo ''
-  if [ $out_cfg ]; then
-#    echo "rm \"$in_cfg\""
-    rm "$in_cfg"
-  fi
-fi
-
-
+./folding < ${inputname} | most
