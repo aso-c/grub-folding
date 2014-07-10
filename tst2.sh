@@ -132,42 +132,6 @@ EOF
 } # echo_remark() -------------------------------------------------------------------------
 
 
-#
-# Shielding
-# for using in sed-scripts
-#
-# TODO: Замена должна иметь вид:
-# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
-# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
-# -b, --space-ignore - не экранировать пробелы
-#shield1()
-shield1()
-{
-# 	local subst='|(+)?'
-
-    main_subst()
-    {
-	# The order is important!
-	# The List like '[|(+)?]' - same at all function code.
-#	echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-	sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
-	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
-    } # main_subst()
-
-
-    if [ "$1no" = 'no' ] ; then
-	# use in pipe-mode
-	main_subst
-     else
-	# use parameter as input
-	echo "${*}" | main_subst
-    fi
-} # shield1
 
 
 #
@@ -223,74 +187,74 @@ shield()
 	b)
 	    # не экранировать пробелы
 	    echo '--=** No space screening **=--' >&2
-	#    cfg="b$cfg"
-	    subst="$(echo "${subst}" | sed -e 's/ //g')"
-	    ;;
+	    subst="$(echo "${subst}" | sed -e 's/ //g')" ;;
 	i)
 	    # экранировать косую ('/')
 	    echo "--=** Screening the slash - '/' **=--" >&2
-	#    cfg="i$cfg"
-	    subst="/$subst"
-	    ;;
+	    subst="/$subst" ;;
 	n)
 	    # отменить стандартные подстановки
 	    echo '--=** Std subst is canceled **=--' >&2
-	#    cfg="n$cfg"
-	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
-	    ;;
-# 	--)
-#  	    break ;;
-#  	# Explicitly ignore unexpected options, for compatibility.
-#  	-*)
-#  	    #allopts="$allopts $option"
-#  	    ;;
+	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')" ;;
 	esac
     done
-#    shift `expr $OPTIND - 1`
-#    shift $(expr $OPTIND - 1)
     shift $(($OPTIND - 1))
 
     echo "\noptions out: $*\n" >&2
 #    echo "cfg is: $cfg" >&2
 
-##    expr index ublia n
-#    if [ "$(expr index ${cfg}u n)" != 0 ]; then
-#	echo 'Stdandard subst canceled' >&2
-##	subst="$(echo "${subst}")"
-#	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
-#    fi
-#
-#   if [ "$(expr index u$cfg b)" != 0 ]; then
-#	echo 'Space screening is cancelled' >&2
-#	subst="$(echo "${subst}" | sed -e 's/ //g')"
-##	subst="$(echo $subst)"
-#    fi
-#
-#    if [ "$(expr index u$cfg i)" != 0 ]; then
-#	echo "Screening the slash - '/'" >&2
-#	subst="/$subst"
-#    fi
-
     echo "subst is [${subst}]" >&2
 
-    if [ "$1no" = 'no' ] ; then
-	# use in pipe-mode
-	main_subst "${subst}"
-     else
-	# use parameter as input
-	echo "${*}" | main_subst "${subst}"
+	fifonm='rqpp'
+	ex=''
+    if [ "$1no" != 'no' ] ; then
+	echo '# send parameter to pipe' >&2
+#mkfifo $fifonm	# temporary - for test only
+	#tmpbuf='/tmp/$$$sect$$$'
+	#exec 4<&0	# store stdin into #4
+#	exec 7<&0	# store stdin into #7
+	#exec 6>&1	# store stdout into #6
+	#outfile=$(readlink /proc/self/fd/6)
+	#set -- $(du -b $outfile); fsz1=$1
+	#exec 1>&-		# close stdout
+	#exec 0< $outfile
+	#exec 0< $outfile
+#	exec 0< $fifonm
+	#exec 1> $tmpbuf
+	ex="echo ${*} | "
+
     fi
+
+#     if [ "$1no" = 'no' ] ; then
+# 	# use in pipe-mode
+# 	main_subst "${subst}"
+#      else
+# 	# use parameter as input
+# 	echo "${*}" | main_subst "${subst}"
+#     fi
+
+    $ex main_subst "${subst}"
+
+
+    if [ "$1no" != 'no' ] ; then
+	echo '# clear after the send parameter to pipe' >&2
+
+	echo "$@" > @fifonm
+	#exec 1>&-		# close stdout
+	#exec 0<&-		# close stdin
+#	exec 0<&-		# close stdin
+	#set -- $(du -b $tmpbuf); fsz2=$1
+	#cat $tmpbuf > $outfile
+	#exec 0<&4
+#	exec 0<&7
+	#exec 1>&6
+	#tail -c $(($fsz2 - $fsz1)) $tmpbuf
+	#rm "$tmpbuf"	# remove tmpbuf
+#rm $fifonm	# remove named pipe (for testing only)
+
+    fi
+
 } # shield
-
-
-#
-# Test for shielding space
-# for using in sed-scripts
-shield3()
-{
-#    echo "${*}" | sed 's/ /\\&/'g
-    echo "${*}" | sed 's/[ \/]/\\&/'g
-} # shld3
 
 
 
@@ -357,17 +321,17 @@ echo '==[ Remark ]=============================================================\
 
 echo '==[ Shield ]============================================================\n'
 #shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
-shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
-echo "$(shield '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
-#aaa=$(shield 'abba\\nbabba')
-# aaa=$(shield2 $* 'abba\\nbabba')
-# echo "$aaa" >&2
+shield $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
+echo "$(shield $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
+# aaa=$(shield 'abba\\nbabba')
+aaa=$(shield $* 'abba\\nbabba')
+echo "$aaa" >&2
 #
-# uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
-# echo "uuu is: ${uuu}"
+uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
+echo "uuu is: ${uuu}"
 #echo "uuu 2:3 ${uuu:2:3}"
 #shield3 "${uuu}"
-#shield2 $* "${uuu}"
+shield $* "${uuu}"
 echo "$(shield $* '\I
 \\II
 \\\III
@@ -378,6 +342,22 @@ echo "$(shield $* '\I
 # echo "arifmeical expr: $(( 10 == 20 ))"
 # echo $? # код возврата
 
+test_expand()
+{
+	local gen='Gentoo'
+	local win='Microsoft Windows'
+	local slaka='Slackware'
+	local suse='Nowell SuSE'
+
+    eval echo "--=== $1 is: \$$1 ===--"
+#    eval "bb=\"--=== $1 is: \$$1 ===--\""
+#    echo $bb
+}
+
+test_expand slaka
+test_expand suse
+test_expand win
+test_expand gen
 
 # echo '==[ echo_cmd() ]=========================================================\n'
 # echo
