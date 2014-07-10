@@ -205,54 +205,20 @@ shield()
 
     echo "subst is [${subst}]" >&2
 
-	fifonm='rqpp'
 	ex=''
     if [ "$1no" != 'no' ] ; then
 	echo '# send parameter to pipe' >&2
-#mkfifo $fifonm	# temporary - for test only
-	#tmpbuf='/tmp/$$$sect$$$'
-	#exec 4<&0	# store stdin into #4
-#	exec 7<&0	# store stdin into #7
-	#exec 6>&1	# store stdout into #6
-	#outfile=$(readlink /proc/self/fd/6)
-	#set -- $(du -b $outfile); fsz1=$1
-	#exec 1>&-		# close stdout
-	#exec 0< $outfile
-	#exec 0< $outfile
-#	exec 0< $fifonm
-	#exec 1> $tmpbuf
 	ex="echo ${*} | "
-
     fi
 
-#     if [ "$1no" = 'no' ] ; then
-# 	# use in pipe-mode
-# 	main_subst "${subst}"
-#      else
-# 	# use parameter as input
-# 	echo "${*}" | main_subst "${subst}"
-#     fi
+#    $ex main_subst "${subst}"
 
-    $ex main_subst "${subst}"
+	#sed -e "s/[|(+ )?]/\\\&/g"
+	#sed -e "s/[${subst}]/\\\&/g"
+	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+	# -e 's/\\\\/\&/g'
+	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
 
-
-    if [ "$1no" != 'no' ] ; then
-	echo '# clear after the send parameter to pipe' >&2
-
-	echo "$@" > @fifonm
-	#exec 1>&-		# close stdout
-	#exec 0<&-		# close stdin
-#	exec 0<&-		# close stdin
-	#set -- $(du -b $tmpbuf); fsz2=$1
-	#cat $tmpbuf > $outfile
-	#exec 0<&4
-#	exec 0<&7
-	#exec 1>&6
-	#tail -c $(($fsz2 - $fsz1)) $tmpbuf
-	#rm "$tmpbuf"	# remove tmpbuf
-#rm $fifonm	# remove named pipe (for testing only)
-
-    fi
 
 } # shield
 
