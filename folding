@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.4 by 11.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.5 by 12.07.2014.							#
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,8 +41,8 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.4'
-version="v.$ver, by 11.07.2014 from aso"
+ver='2.2.5'
+version="v.$ver, by 15.07.2014 from aso"
 
 gen='gen'
 win='win'
@@ -247,7 +247,7 @@ shield()
 #    $ex main_subst "${subst}"
 #    eval "${ex} main_subst \"${subst}\""
 #    eval $ex
-    eval $ex 'main_subst "${subst}"'
+    eval $ex main_subst '"${subst}"'
 
 } # shield
 
