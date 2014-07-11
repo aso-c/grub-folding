@@ -97,8 +97,10 @@ echo '==========================================================================
 #remark_insert2 $win $p | remark_insert2 $win $e |
 #remark_insert2 $gen $p | remark_insert2 $gen $e
 
+#echo "$(echo_remark win)"
 #echo_remark win
 #echo_final $win $e
+#echo "$(echo_final win $e)"
 
 #sed -e "$(echo_remark win)"
 sed -e "$(echo_remark win)"	|

@@ -210,13 +210,11 @@ shield()
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
-    echo "options in: ${*}"
-    echo '\n'
 
+    echo "***###>> options in: ${*}"
 
-    cfg=''
     # Processing the arguments.
-    while getopts ibn f
+    while getopts bin f
     do
 	case $f in
 	b)
@@ -235,19 +233,22 @@ shield()
     done
     shift $(($OPTIND - 1))
 
-    echo "\noptions out: $*\n" >&2
-#    echo "cfg is: $cfg" >&2
+    echo "****###>> options out: $*" >&2
 
     echo "subst is [${subst}]" >&2
 
 	ex=''
+    ex="main_subst \"${subst}\""
     if [ "$1no" != 'no' ] ; then
-	echo '# send parameter to pipe' >&2
-	ex="echo \"${*}\" | "
+	echo '####!!! send parameter to pipe' >&2
+#	ex="echo \"${*}\" | "
+	ex="echo \"${*}\" | $ex"
     fi
 
 #    $ex main_subst "${subst}"
-    eval "${ex} main_subst \"${subst}\""
+#    eval "${ex} main_subst \"${subst}\""
+    echo "==>>> exec string is: $ex" >&2
+    eval "${ex}"
 
 	#sed -e "s/[|(+ )?]/\\\&/g"
 	#sed -e "s/[${subst}]/\\\&/g"
@@ -322,11 +323,12 @@ echo '==[ Remark ]=============================================================\
 # echo ''
 
 echo '==[ Shield ]============================================================\n'
-#shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
 shield $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
+echo
 echo "$(shield $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
-# aaa=$(shield 'abba\\nbabba')
+echo
 aaa=$(shield $* 'abba\\nbabba')
+echo
 echo "$aaa" >&2
 #
 uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
@@ -334,6 +336,7 @@ echo "uuu is: ${uuu}"
 #echo "uuu 2:3 ${uuu:2:3}"
 #shield3 "${uuu}"
 shield $* "${uuu}"
+echo
 echo "$(shield $* '\I
 \\II
 \\\III

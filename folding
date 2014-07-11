@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.2 by 11.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.3 by 11.07.2014.							#
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.2'
+ver='2.2.3'
 version="v.$ver, by 11.07.2014 from aso"
 
 gen='gen'
@@ -60,8 +60,6 @@ tmprefix="$tmpdir/fold$$$"
 
 
 
-BEG='BEGIN'
-EN='END'
 
 
 usage()
@@ -97,8 +95,8 @@ EOF
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
-#shield2()
-shield()
+shield2()
+#shield()
 {
 # 	local subst='| (+)?'
 
@@ -181,8 +179,8 @@ shield()
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
-shield1()
-#shield()
+#shield1()
+shield()
 {
 # 	local subst='| (+)?'
 
@@ -208,11 +206,10 @@ shield1()
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
-    echo "options in: ${*}" >&2
+    echo "shield last v.1 options in: ${@}" >&2
     echo '\n' >&2
 
 
-    #cfg=''
     # Processing the arguments.
     while getopts ibn f
     do
@@ -233,15 +230,17 @@ shield1()
     done
     shift $(($OPTIND - 1))
 
-    echo "\noptions out: $*\n" >&2
+    echo "\noptions out: ${@}\n" >&2
 #    echo "cfg is: $cfg" >&2
 
     echo "subst is [${subst}]" >&2
 
 	ex=''
+#    ex="main_subst \"${subst}\""
     if [ "$1no" != 'no' ] ; then
-	echo '# send parameter to pipe' >&2
-	ex="echo ${*} | "
+	echo '####!!! send parameter to pipe' >&2
+	ex='echo ${@} | '
+#	ex="echo \"${*}\" | $ex"
     fi
 
 #    $ex main_subst "${subst}"
@@ -258,9 +257,6 @@ shield1()
 
 # Create marker
 mark() {
-	local MARK='###'
-
-#    echo "$MARK $1 $MARK"
     echo "### $1 ###"
 } # mark() ---------------------------------------
 
@@ -284,6 +280,9 @@ esac
 
 p='prolog'
 e='epilog'
+
+BEG='BEGIN'
+EN='END'
 
 # Echoing string of control comment
 # Parameters:
@@ -350,7 +349,7 @@ EOF
 
 # Insert folding section in config file function on file insertion
 # Parameters:
-#   $1 - OS class (win/gentoo)
+#   $1 - OS class (win/gen\gentoo\)
 #   $2 - sect class (prolog/epilog)
 remark_insert()
 {
@@ -366,7 +365,7 @@ remark_insert()
 
 # Insert folding section in config file function on file insertion
 # Parameters:
-#   $1 - OS class (win/gentoo)
+#   $1 - OS class (win/gen\gentoo\)
 #   $2 - sect class (prolog/epilog)
 echo_final()
 {
@@ -389,8 +388,10 @@ fi
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
 #TEMP=`getopt -o ab:c:: --long a-long,b-long:,c-long:: \
 #     -n 'example.bash' -- "$@"`
-TEMP=`getopt -o hvti --long help,version,pipeline,in-place \
-     -s sh -n 'folding' -- "$@"`
+#TEMP=`getopt -o hvti --long help,version,pipeline,in-place \
+#     -s sh -n 'folding' -- "$@"`
+TEMP=$(getopt -o hvti --long help,version,pipeline,in-place \
+     -s sh -n 'folding' -- "$@")
 
 #echo "options is: $@"
 #echo "TEMP is $TEMP"
@@ -399,7 +400,7 @@ if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
 
-echo "options 2 is: $@"
+echo "options 2 is: $@" >&2
 
 while true ; do
 #    echo "current option is: $1"
@@ -425,7 +426,6 @@ while true ; do
 	echo $version
 	exit 0 ;;
     -t|--pipeline)
-#	pipe=${option} ;;
 	pipe=${1} ;;
     -i|--in-place)
 	pipe='' ;;
@@ -433,44 +433,12 @@ while true ; do
         shift
 	break ;;
     -*)
-#	allopts="$allopts $option" ;;
 	allopts="$allopts ${1}" ;;
     # Explicitly ignore non-option arguments, for compatibility.
     esac
     shift
 done
-# echo "Remaining arguments:"
-# for arg do echo '--> '"\`$arg'" ; done
-#---------------------------------------------------
 
-# # Processing the arguments.
-# while test $# -gt 0
-# do
-#     option=$1
-#     shift
-#
-#     case "$option" in
-#     -h | --help)
-# 	usage
-# 	exit 2 ;;
-#     -v | --version)
-# #	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
-# 	echo $version
-# 	exit 0 ;;
-#     -t | --pipeline)
-# 	pipe=${option} ;;
-#     -i | --in-place)
-# 	pipe='' ;;
-#     -*)
-# 	allopts="$allopts $option"
-# 	;;
-#     # Explicitly ignore non-option arguments, for compatibility.
-#     esac
-# done
-
-#echo "pipe is: $pipe"
-#echo "allopts is: $allopts"
-#exit 1
 
 echo "Folding (v.$ver) ..." >&2
 
@@ -496,17 +464,12 @@ fi
 ##************##
 
 
-sed $allopts -e "$(echo_remark $win)"	|
-sed $allopts -e "$(echo_remark $gen)"	|
-sed $allopts -e "$(echo_final $win $p)" |
-sed $allopts -e "$(echo_final $win $e)" |
-sed $allopts -e "$(echo_final $gen $p)" |
-sed $allopts -e "$(echo_final $gen $e)"
-
-# remark_insert $win $p	|
-# remark_insert $win $e	|
-# remark_insert $gen $p	|
-# remark_insert $gen $e
+sed $allopts -e "$(echo_remark win)"	|
+sed $allopts -e "$(echo_remark gen)"	|
+sed $allopts -e "$(echo_final win $p)" |
+sed $allopts -e "$(echo_final win $e)" |
+sed $allopts -e "$(echo_final gen $p)" |
+sed $allopts -e "$(echo_final gen $e)"
 
 ##************##
 
