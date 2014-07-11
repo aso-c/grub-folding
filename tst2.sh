@@ -142,8 +142,7 @@ EOF
 # && -> & ; отменяет действие '&'
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
-#shield1()
-shield()
+shield1()
 {
 # 	local subst='|(+)?'
 
@@ -167,7 +166,7 @@ shield()
 	# use parameter as input
 	echo "${*}" | main_subst
     fi
-} # shield
+} # shield1
 
 
 #
@@ -185,7 +184,7 @@ shield()
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
-shield2()
+shield()
 {
 # 	local subst='| (+)?'
 
@@ -222,70 +221,40 @@ shield2()
 	case $f in
 	b)
 	    # не экранировать пробелы
-	    echo '--=** No space screening **=--'
-	    cfg="b$cfg"
-	    ;;
+	    echo '--=** No space screening **=--' >&2
+	    subst="$(echo "${subst}" | sed -e 's/ //g')" ;;
 	i)
 	    # экранировать косую ('/')
-	    echo "--=** Screening the slash - '/' **=--"
-	    cfg="i$cfg"
-	    ;;
+	    echo "--=** Screening the slash - '/' **=--" >&2
+	    subst="/$subst" ;;
 	n)
 	    # отменить стандартные подстановки
-	    echo '--=** Std subst is canceled **=--'
-	    cfg="n$cfg"
-	    ;;
-# 	--)
-#  	    break ;;
-#  	# Explicitly ignore unexpected options, for compatibility.
-#  	-*)
-#  	    #allopts="$allopts $option"
-#  	    ;;
+	    echo '--=** Std subst is canceled **=--' >&2
+	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')" ;;
 	esac
     done
-    shift `expr $OPTIND - 1`
+    shift $(($OPTIND - 1))
 
-    echo "\noptions out: $*\n"
-    echo "cfg is: $cfg"
+    echo "\noptions out: $*\n" >&2
+#    echo "cfg is: $cfg" >&2
 
-#    expr index ublia n
-    if [ "$(expr index ${cfg}u n)" != 0 ] ; then
-	echo 'Stdandard subst canceled'
-#	subst="$(echo "${subst}")"
-	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
+    echo "subst is [${subst}]" >&2
+
+	ex=''
+    if [ "$1no" != 'no' ] ; then
+	echo '# send parameter to pipe' >&2
+	ex="echo ${*} | "
     fi
 
-   if [ "$(expr index u$cfg b)" != 0 ] ; then
-	echo 'Space screening is cancelled'
-	subst="$(echo "${subst}" | sed -e 's/ //g')"
-#	subst="$(echo $subst)"
-    fi
+#    $ex main_subst "${subst}"
 
-    if [ "$(expr index u$cfg i)" != 0 ] ; then
-	echo "Screening the slash - '/'"
-	subst="/$subst"
-    fi
+	#sed -e "s/[|(+ )?]/\\\&/g"
+	#sed -e "s/[${subst}]/\\\&/g"
+	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+	# -e 's/\\\\/\&/g'
+	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
 
-    echo "subst is [${subst}]"
-
-    if [ "$1no" = 'no' ] ; then
-	# use in pipe-mode
-	main_subst "${subst}"
-     else
-	# use parameter as input
-	echo "${*}" | main_subst "${subst}"
-    fi
-} # shield2
-
-
-#
-# Test for shielding space
-# for using in sed-scripts
-shield3()
-{
-#    echo "${*}" | sed 's/ /\\&/'g
-    echo "${*}" | sed 's/[ \/]/\\&/'g
-} # shld3
+} # shield
 
 
 
@@ -350,20 +319,20 @@ echo '==[ Remark ]=============================================================\
 # cat sect_extracted
 # echo ''
 
-echo '==[ Shield2 ]============================================================\n'
+echo '==[ Shield ]============================================================\n'
 #shield1 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc&+cde&?&+&(gfk&|dfe&)\n&&qqq&&+&&(ppp&&|mrm?&)'
-shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
-echo "$(shield2 '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
-#aaa=$(shield 'abba\\nbabba')
-# aaa=$(shield2 $* 'abba\\nbabba')
-# echo "$aaa" >&2
+shield $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)'
+echo "$(shield $* '(+abc+cde)?rlq+(dfg)(gge|uud)?\n abc\+cde\?\+\(gfk\|dfe\)\n\\qqq\\+\\(ppp\\|mrm?\)')"
+# aaa=$(shield 'abba\\nbabba')
+aaa=$(shield $* 'abba\\nbabba')
+echo "$aaa" >&2
 #
-# uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
-# echo "uuu is: ${uuu}"
+uuu=" aaa bbb/ccc ddd/eee fghe  uuuuuuu!!!"
+echo "uuu is: ${uuu}"
 #echo "uuu 2:3 ${uuu:2:3}"
 #shield3 "${uuu}"
-#shield2 $* "${uuu}"
-echo "$(shield2 $* '\I
+shield $* "${uuu}"
+echo "$(shield $* '\I
 \\II
 \\\III
 \\\\IIII
@@ -373,6 +342,22 @@ echo "$(shield2 $* '\I
 # echo "arifmeical expr: $(( 10 == 20 ))"
 # echo $? # код возврата
 
+test_expand()
+{
+	local gen='Gentoo'
+	local win='Microsoft Windows'
+	local slaka='Slackware'
+	local suse='Nowell SuSE'
+
+    eval echo "--=== $1 is: \$$1 ===--"
+#    eval "bb=\"--=== $1 is: \$$1 ===--\""
+#    echo $bb
+}
+
+test_expand slaka
+test_expand suse
+test_expand win
+test_expand gen
 
 # echo '==[ echo_cmd() ]=========================================================\n'
 # echo
