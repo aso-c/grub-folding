@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section prologue GRUB configuration file
-# v.2.0.7 from 07.07.2014. by aso
+# v.2.0.8 from 11.07.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,8 +29,8 @@ set -e
 #
 ####################################################
 
-ver='2.0.7'
-date='07.07.2014'
+ver='2.0.8'
+date='11.07.2014'
 version="v.$ver, from $date by aso"
 
 
@@ -100,7 +100,7 @@ fi
 # My insertion - aso
 # MS Windows section - native boot through System Commander
 cat << EOF
-# Custom entry for System Commander launch
+# Custom entry for Standard MS booting.
 menuentry "Microsoft Windows (all variants, on /dev/sdb)" --class windows --class os {
 	insmod part_msdos
 	insmod ntfs

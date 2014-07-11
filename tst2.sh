@@ -243,14 +243,16 @@ shield()
 	ex=''
     if [ "$1no" != 'no' ] ; then
 	echo '# send parameter to pipe' >&2
-	ex="echo ${*} | "
+	ex="echo \"${*}\" | "
     fi
 
 #    $ex main_subst "${subst}"
+    eval "${ex} main_subst \"${subst}\""
 
 	#sed -e "s/[|(+ )?]/\\\&/g"
 	#sed -e "s/[${subst}]/\\\&/g"
-	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+#	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\\2/g"
+#	$ex sed -e "s/[${1}]/\\\&/g; s/\(\\\\\\\\\)\([${1}]\)/\\2/g"
 	# -e 's/\\\\/\&/g'
 	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
 

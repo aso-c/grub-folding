@@ -7,8 +7,8 @@ set -e
 # (c) aso<Solomatov.A.A@gmail.com>, v.2.2.1 by 07.07.2014.							#
 #   GPLv3										#
 #
-# -t, --pipeline,     processing input file (stdin) into stdout output file (for debug)
-#     --pipe
+# -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
+#     --pipe              and saved into stdout output file (intended for debug)
 # -i, --in-place      processing config file "in place" from stdout; default option
 # -h, --help              print this message and exit
 # -v, --version           print the version information and exit
@@ -17,4 +17,4 @@ set -e
 
 inputname='aaa1'
 
-./folding < ${inputname} | most
+./folding --pipeline < ${inputname} | most

@@ -3,10 +3,11 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.1 by 07.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.2 by 11.07.2014.							#
 #   GPLv3
 #
-# -t, --pipeline       processing input file (stdin) into stdout output file (for debug)
+# -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
+#     --pipe              and saved into stdout output file (intended for debug)
 # -i, --in-place      processing config file "in place" from stdout; default option
 #
 # This config script create separate submenu for each group of consequtive items
@@ -40,8 +41,8 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.1'
-version="v.$ver, by 07.07.2014 from aso"
+ver='2.2.2'
+version="v.$ver, by 11.07.2014 from aso"
 
 gen='gen'
 win='win'
@@ -69,10 +70,10 @@ usage()
 Usage: $self [OPTION]
 Insert Folding section in GRUB configuration file
 
-  -h, --help            this help
-  -v, --version         version of program
-  -t, --pipeline, pipe  processing input file (stdin) into stdout output file
-  -i, --in-place        processing config file "in place" from stdout; default option
+  -h, --help             this help
+  -v, --version          version of the program
+  -t, --pipeline, --pipe processing input file (stdin) into stdout output file
+  -i, --in-place         processing config file "in place" from stdout; default option
 
 Report bugs to <Solomatov.A.A@gmail.com>.
 
@@ -162,6 +163,96 @@ shield()
 	# use parameter as input
 	echo "${*}" | main_subst "${subst}"
     fi
+} # shield2
+
+
+#
+# Shielding with parameter analyses
+# for using in sed-scripts
+# Simplified sintax:
+#	any symbols from set: {| (+ )?} -> \{original_symbol}
+#	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
+#	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
+#       char chain \\                   -> \
+# TODO: Замена должна иметь вид:
+# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
+# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# && -> & ; отменяет действие '&'
+# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
+# -b, --space-ignore - не экранировать пробелы
+# -n, --no-std-subst - не делать стандартную подстановку
+shield1()
+#shield()
+{
+# 	local subst='| (+)?'
+
+	    local subst_base='|(+)?'
+#	    local subst=" ${subst_base}"
+	    local subst='|(+ )?'
+
+    # parameter - substitution string
+    main_subst()
+    {
+# 	    local subst_base='|(+)?'
+# 	    local subst="$(subst_base) "
+
+	# The order is important!
+	# The List like '[|(+)?]' - same at all function code.
+	#sed -e 's/[|(+ )?]/\\&/g'
+	#sed -e "s/[|(+ )?]/\\\&/g"
+	#sed -e "s/[${subst}]/\\\&/g"
+	sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+	# -e 's/\\\\/\&/g'
+	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
+	# -e "s/\\\+[^${1}]/\\\&/g"
+#	echo "s/[${subst}]/\\\&/g"
+    } # main_subst()
+
+    echo "options in: ${*}" >&2
+    echo '\n' >&2
+
+
+    #cfg=''
+    # Processing the arguments.
+    while getopts ibn f
+    do
+	case $f in
+	b)
+	    # не экранировать пробелы
+	    echo '--=** No space screening **=--' >&2
+	    subst="$(echo "${subst}" | sed -e 's/ //g')" ;;
+	i)
+	    # экранировать косую ('/')
+	    echo "--=** Screening the slash - '/' **=--" >&2
+	    subst="/$subst" ;;
+	n)
+	    # отменить стандартные подстановки
+	    echo '--=** Std subst is canceled **=--' >&2
+	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')" ;;
+	esac
+    done
+    shift $(($OPTIND - 1))
+
+    echo "\noptions out: $*\n" >&2
+#    echo "cfg is: $cfg" >&2
+
+    echo "subst is [${subst}]" >&2
+
+	ex=''
+    if [ "$1no" != 'no' ] ; then
+	echo '# send parameter to pipe' >&2
+	ex="echo ${*} | "
+    fi
+
+#    $ex main_subst "${subst}"
+    eval "${ex} main_subst \"${subst}\""
+
+	#sed -e "s/[|(+ )?]/\\\&/g"
+	#sed -e "s/[${subst}]/\\\&/g"
+#	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+	# -e 's/\\\\/\&/g'
+	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
+
 } # shield
 
 

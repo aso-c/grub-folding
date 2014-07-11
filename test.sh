@@ -97,19 +97,16 @@ echo '==========================================================================
 #remark_insert2 $win $p | remark_insert2 $win $e |
 #remark_insert2 $gen $p | remark_insert2 $gen $e
 
+#echo_remark win
 #echo_final $win $e
 
-# sed -e "$(echo_remark $win)"
-sed -e "$(echo_remark $win)"	|
-sed -e "$(echo_remark $gen)"	|
-#remark_insert $win $p	|
-#remark_insert $win $e	|
-#remark_insert $gen $p	|
-#remark_insert $gen $e
-sed -e "$(echo_final win prolog)" |
-sed -e "$(echo_final $win $e)" |
-sed -e "$(echo_final $gen $p)" |
-sed -e "$(echo_final $gen $e)"
+#sed -e "$(echo_remark win)"
+sed -e "$(echo_remark win)"	|
+sed -e "$(echo_remark gen)"	|
+sed -e "$(echo_final win $p)" |
+sed -e "$(echo_final win $e)" |
+sed -e "$(echo_final gen $p)" |
+sed -e "$(echo_final gen $e)"
 #sed -e "$(echo_final $win $e)"
 
 #sed -e "$(remark_insert3 $win $e)" |...
