@@ -211,7 +211,7 @@ shield()
     } # main_subst()
 
 
-    echo "***###>> options in: ${*}"
+    echo "**###>> shield last v.2 options in: ${@}" >&2
 
     # Processing the arguments.
     while getopts bin f
@@ -233,22 +233,31 @@ shield()
     done
     shift $(($OPTIND - 1))
 
-    echo "****###>> options out: $*" >&2
+    echo "****###>> options out: ""${@}" >&2
 
     echo "subst is [${subst}]" >&2
 
+# 	ex=''
+#     ex="main_subst \"${subst}\""
+#     if [ "$1no" != 'no' ] ; then
+# 	echo '####!!! send parameter to pipe' >&2
+# #	ex="echo \"${*}\" | "
+# #	ex="echo \"${*}\" | $ex"
+# 	ex='echo \"${*}\" | ''$ex'
+#     fi
+
 	ex=''
-    ex="main_subst \"${subst}\""
+    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
-#	ex="echo \"${*}\" | "
-	ex="echo \"${*}\" | $ex"
+#	ex='echo ${@} | '
+	ex='echo "${*}" | '$ex
     fi
 
-#    $ex main_subst "${subst}"
-#    eval "${ex} main_subst \"${subst}\""
     echo "==>>> exec string is: $ex" >&2
-    eval "${ex}"
+#    $ex main_subst "${subst}"
+    eval "${ex} main_subst \"${subst}\""
+#    eval "${ex}"
 
 	#sed -e "s/[|(+ )?]/\\\&/g"
 	#sed -e "s/[${subst}]/\\\&/g"
@@ -337,6 +346,16 @@ echo "uuu is: ${uuu}"
 #shield3 "${uuu}"
 shield $* "${uuu}"
 echo
+
+tt="(a+b?c)*(c+d-e) (e?f|g)
+?g h e? \(t|t|u\)
+==\(r+b|d\)?"
+echo "tt is: ${tt}"
+echo "**! ##tt## is: $(shield $tt)"
+echo
+echo
+shield "${tt}"
+
 echo "$(shield $* '\I
 \\II
 \\\III
