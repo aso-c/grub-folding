@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.3 by 11.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.4 by 11.07.2014.							#
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.3'
+ver='2.2.4'
 version="v.$ver, by 11.07.2014 from aso"
 
 gen='gen'
@@ -164,6 +164,7 @@ shield2()
 } # shield2
 
 
+
 #
 # Shielding with parameter analyses
 # for using in sed-scripts
@@ -179,7 +180,6 @@ shield2()
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
-#shield1()
 shield()
 {
 # 	local subst='| (+)?'
@@ -206,12 +206,11 @@ shield()
 #	echo "s/[${subst}]/\\\&/g"
     } # main_subst()
 
-    echo "shield last v.1 options in: ${@}" >&2
-    echo '\n' >&2
 
+    echo "**###>> shield last v.2 options in: ${@}" >&2
 
     # Processing the arguments.
-    while getopts ibn f
+    while getopts bin f
     do
 	case $f in
 	b)
@@ -228,29 +227,27 @@ shield()
 	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')" ;;
 	esac
     done
+
     shift $(($OPTIND - 1))
 
-    echo "\noptions out: ${@}\n" >&2
-#    echo "cfg is: $cfg" >&2
+    echo "****###>> options out: ""${@}" >&2
 
     echo "subst is [${subst}]" >&2
 
+
 	ex=''
-#    ex="main_subst \"${subst}\""
+#    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
-	ex='echo ${@} | '
-#	ex="echo \"${*}\" | $ex"
+	ex='echo "${@}" | '
+#	ex='echo "${*}" | '$ex
     fi
 
+    echo "==>>> exec string is: $ex" >&2
 #    $ex main_subst "${subst}"
-    eval "${ex} main_subst \"${subst}\""
-
-	#sed -e "s/[|(+ )?]/\\\&/g"
-	#sed -e "s/[${subst}]/\\\&/g"
-#	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
-	# -e 's/\\\\/\&/g'
-	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
+#    eval "${ex} main_subst \"${subst}\""
+#    eval $ex
+    eval $ex 'main_subst "${subst}"'
 
 } # shield
 

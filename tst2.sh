@@ -247,7 +247,7 @@ shield()
 #     fi
 
 	ex=''
-    ex='main_subst ${subst}'
+#    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
 #	ex='echo ${@} | '
@@ -256,8 +256,9 @@ shield()
 
     echo "==>>> exec string is: $ex" >&2
 #    $ex main_subst "${subst}"
-    eval "${ex} main_subst \"${subst}\""
-#    eval "${ex}"
+#    eval "${ex} main_subst \"${subst}\""
+#    eval $ex
+    eval $ex 'main_subst "${subst}"'
 
 	#sed -e "s/[|(+ )?]/\\\&/g"
 	#sed -e "s/[${subst}]/\\\&/g"
