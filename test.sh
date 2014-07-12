@@ -97,19 +97,19 @@ echo '==========================================================================
 #remark_insert2 $win $p | remark_insert2 $win $e |
 #remark_insert2 $gen $p | remark_insert2 $gen $e
 
-echo "$(echo_remark win)"
+#echo "$(echo_remark win)"
 # echo_remark win
 # echo_final win $e
 #echo "$(echo_final win $e)"
 
 # #sed -e "$(echo_remark win)"
-# sed -e "$(echo_remark win)"	|
-# sed -e "$(echo_remark gen)"	|
-# sed -e "$(echo_final win $p)" |
-# sed -e "$(echo_final win $e)" |
-# sed -e "$(echo_final gen $p)" |
-# sed -e "$(echo_final gen $e)"
-# sed -e "$(echo_final win $e)"
+sed -e "$(echo_remark win)"	|
+sed -e "$(echo_remark gen)"	|
+sed -e "$(echo_final win $p)" |
+sed -e "$(echo_final win $e)" |
+sed -e "$(echo_final gen $p)" |
+sed -e "$(echo_final gen $e)"
+# #sed -e "$(echo_final win $e)"
 
 #sed -e "$(remark_insert3 $win $e)" |...
 #echo "$(echo_final win $p)"

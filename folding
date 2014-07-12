@@ -239,8 +239,9 @@ shield()
 #    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
-	exe="echo \"${@}\" | "
+#	exe="echo \"${@}\" | "
 #	ex='echo "${*}" | '$ex
+	exe='echo $* | '
     fi
 
     echo "==>>> exec string is: $exe" >&2
