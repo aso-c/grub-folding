@@ -7,7 +7,7 @@ set -e
 _dev=1
 export _dev
 
-. "./folding"
+#. "./folding"
 
 #grub_mkcfg_dir="cfg-test"
 #grub_mkcfg_dir='/etc/grub.d'
@@ -179,8 +179,8 @@ shield1()
 #       char chain \\                   -> \
 # TODO: Замена должна иметь вид:
 # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
+# \[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# \\ -> \ ; отменяет действие '&'
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
@@ -250,20 +250,31 @@ shield()
 #    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
-	ex='echo ${@} | '
-#	ex='echo "${*}" | '$ex
+#	exe='echo ${@} | '
+#	exe='echo $@ | '
+#	ex='echo ${*} | '
+	exe='echo $* | '
     fi
 
-    echo "==>>> exec string is: $ex" >&2
+    echo "==>>> exec string is: $exe" >&2
 #    $ex main_subst "${subst}"
 #    eval "${ex} main_subst \"${subst}\""
 #    eval $ex
-    eval $ex main_subst '"${subst}"'
+#    eval $ex main_subst '"${subst}"'
+#    eval $exe sed -e 's/[|(+ )]/\\\&/g'
+#    eval $exe sed -e '"s/[$subst]/\\\&/g"'
+#    eval echo '"s/[$subst]/\\\&/g"'
+#    eval echo '"s/[|(+ )]/\\\&/g"'
+  #  echo abcdefghe
+#    $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\\2/g"'
+    eval $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\\2/g"'
+#    eval $exe sed -e 's/[$subst]/\\\&/g;'
+    # -e '"s/\(\\\\\\\\\)\([${subst}]\)/\\2/g"'
 
 	#sed -e "s/[|(+ )?]/\\\&/g"
 	#sed -e "s/[${subst}]/\\\&/g"
 #	$ex sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\\2/g"
-#	$ex sed -e "s/[${1}]/\\\&/g; s/\(\\\\\\\\\)\([${1}]\)/\\2/g"
+#	$ex sed -e "s/[${1}]/\\\&/g;      s/\(\\\\\\\\\)\([${1}]\)/\\2/g"
 	# -e 's/\\\\/\&/g'
 	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
 
@@ -351,18 +362,19 @@ echo
 tt="(a+b?c)*(c+d-e) (e?f|g)
 ?g h e? \(t|t|u\)
 ==\(r+b|d\)?"
+
 echo "tt is: ${tt}"
 echo "**! ##tt## is: $(shield $tt)"
 echo
 echo
 shield "${tt}"
 
-echo "$(shield $* '\I
-\\II
-\\\III
-\\\\IIII
-\\\\\V
-\\\\\\VI')"
+# echo "$(shield $* '\I
+# \\II
+# \\\III
+# \\\\IIII
+# \\\\\V
+# \\\\\\VI')"
 
 # echo "arifmeical expr: $(( 10 == 20 ))"
 # echo $? # код возврата
@@ -379,10 +391,10 @@ test_expand()
 #    echo $bb
 }
 
-test_expand slaka
-test_expand suse
-test_expand win
-test_expand gen
+# test_expand slaka
+# test_expand suse
+# test_expand win
+# test_expand gen
 
 # echo '==[ echo_cmd() ]=========================================================\n'
 # echo
