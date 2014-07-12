@@ -99,8 +99,8 @@ echo '==========================================================================
 
 echo "$(echo_remark win)"
 # echo_remark win
-# echo_final $win $e
-echo "$(echo_final win $e)"
+# echo_final win $e
+#echo "$(echo_final win $e)"
 
 # #sed -e "$(echo_remark win)"
 # sed -e "$(echo_remark win)"	|
@@ -109,7 +109,7 @@ echo "$(echo_final win $e)"
 # sed -e "$(echo_final win $e)" |
 # sed -e "$(echo_final gen $p)" |
 # sed -e "$(echo_final gen $e)"
-sed -e "$(echo_final $win $e)"
+# sed -e "$(echo_final win $e)"
 
 #sed -e "$(remark_insert3 $win $e)" |...
-#echo "$(echo_final $win $p)"
+#echo "$(echo_final win $p)"
