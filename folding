@@ -235,19 +235,23 @@ shield()
     echo "subst is [${subst}]" >&2
 
 
-	ex=''
+	exe=''
 #    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
-	ex='echo "${@}" | '
+	exe="echo \"${@}\" | "
 #	ex='echo "${*}" | '$ex
     fi
 
-    echo "==>>> exec string is: $ex" >&2
+    echo "==>>> exec string is: $exe" >&2
 #    $ex main_subst "${subst}"
 #    eval "${ex} main_subst \"${subst}\""
 #    eval $ex
-    eval $ex main_subst '"${subst}"'
+#    eval $ex main_subst '"${subst}"'
+#    eval $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\\(\\\\\\)\\([${subst}]\\)/\\2/g"'
+    eval $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
+  #  $exe sed -e "s/[${subst}]/\\\&/g;"
+    # -e '"s/\(\\\\\\\\\)\([${subst}]\)/\\2/g"'
 
 } # shield
 
@@ -367,6 +371,7 @@ remark_insert()
 echo_final()
 {
     echo "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\\\1\\\2 /e"
+#    echo "s/# *exec! $(shield -i \"*(${grub_mkcfg_dir}/_$1-$2)([^#]*)\")/\\\1\\\2 /e"
 } # echo_final()---------------------------------------------------------------
 
 
