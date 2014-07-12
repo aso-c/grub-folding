@@ -239,8 +239,7 @@ shield()
 #    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
-	exe="echo \"${@}\" | "
-#	ex='echo "${*}" | '$ex
+	exe='echo $* | '
     fi
 
     echo "==>>> exec string is: $exe" >&2
@@ -249,7 +248,7 @@ shield()
 #    eval $ex
 #    eval $ex main_subst '"${subst}"'
 #    eval $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\\(\\\\\\)\\([${subst}]\\)/\\2/g"'
-    eval $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
+    eval $exe sed -e '"s/[${subst}]/\\\&/g"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
   #  $exe sed -e "s/[${subst}]/\\\&/g;"
     # -e '"s/\(\\\\\\\\\)\([${subst}]\)/\\2/g"'
 
