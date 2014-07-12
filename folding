@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.6 by 12.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.7 by 12.07.2014.
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.6'
+ver='2.2.7'
 version="v.$ver, by 15.07.2014 from aso"
 
 gen='gen'
@@ -97,62 +97,27 @@ EOF
 # -n, --no-std-subst - не делать стандартную подстановку
 shield()
 {
-# 	local subst='| (+)?'
-
-	    local subst_base='|(+)?'
-#	    local subst=" ${subst_base}"
-	    local subst='|(+ )?'
-
-    # parameter - substitution string
-#     main_subst()
-#     {
-# # 	    local subst_base='|(+)?'
-# # 	    local subst="$(subst_base) "
-#
-# 	# The order is important!
-# 	# The List like '[|(+)?]' - same at all function code.
-# 	#sed -e 's/[|(+ )?]/\\&/g'
-# 	#sed -e "s/[|(+ )?]/\\\&/g"
-# 	#sed -e "s/[${subst}]/\\\&/g"
-# 	sed -e "s/[${1}]/\\\&/g" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
-#     } # main_subst()
-
-
-    echo "**###>> shield last v.2 options in: ${@}" >&2
+	local subst='| (+)?'	# substitution chars
 
     # Processing the arguments.
     while getopts bin f
     do
 	case $f in
-	b)
-	    # не экранировать пробелы
-	    echo '--=** No space screening **=--' >&2
+	b)  # не экранировать пробелы
 	    subst="$(echo "${subst}" | sed -e 's/ //g')" ;;
-	i)
-	    # экранировать косую ('/')
-	    echo "--=** Screening the slash - '/' **=--" >&2
+	i)  # экранировать косую ('/')
 	    subst="/$subst" ;;
-	n)
-	    # отменить стандартные подстановки
-	    echo '--=** Std subst is canceled **=--' >&2
+	n)  # отменить стандартные подстановки
 	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')" ;;
 	esac
     done
-
     shift $(($OPTIND - 1))
 
-    echo "****###>> options out: ""${@}" >&2
-
-    echo "subst is [${subst}]" >&2
-
-
-	exe=''
-    if [ "$1no" != 'no' ] ; then
-	echo '####!!! send parameter to pipe' >&2
-	exe='echo $* | '
-    fi
-
-    echo "==>>> exec string is: $exe" >&2
+    exe=''
+#     if [ "$1no" != 'no' ] ; then
+# 	exe='echo $* | '
+#     fi
+    if [ "$1no" != 'no' ]; then exe='echo $* | '; fi
 
     eval $exe sed -e '"s/[${subst}]/\\\&/g"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
 

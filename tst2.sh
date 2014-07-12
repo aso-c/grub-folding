@@ -7,7 +7,7 @@ set -e
 _dev=1
 export _dev
 
-#. "./folding"
+. "./folding"
 
 #grub_mkcfg_dir="cfg-test"
 #grub_mkcfg_dir='/etc/grub.d'
