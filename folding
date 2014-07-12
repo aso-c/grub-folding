@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.7 by 12.07.2014.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.8 by 12.07.2014.
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.7'
+ver='2.2.8'
 version="v.$ver, by 15.07.2014 from aso"
 
 gen='gen'
@@ -57,8 +57,6 @@ GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
-
-
 
 
 
@@ -220,22 +218,6 @@ EOF
 # Parameters:
 #   $1 - OS class (win/gen\gentoo\)
 #   $2 - sect class (prolog/epilog)
-remark_insert()
-{
-#    sed -e "s/# *exec! *\($(shield0 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! *\($(shield3 ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! *\($(shield ${grub_mkcfg_dir}/_$1-$2)\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! *\(${grub_mkcfg_dir}/_$1-$2\)\([^#]*\)/\1\2 /e"
-#    sed -e "s/# *exec! $(shield "*($(shield0 ${grub_mkcfg_dir}/_$1-$2))([^#]*)")/\1\2 /e"
-#    sed -e "s/# *exec! $(shield $(shield0 "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)"))/\1\2 /e"
-    sed -e "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\1\2 /e"
-} # remark_insert()------------------------------------------------------------
-
-
-# Insert folding section in config file function on file insertion
-# Parameters:
-#   $1 - OS class (win/gen\gentoo\)
-#   $2 - sect class (prolog/epilog)
 echo_final()
 {
     echo "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\\\1\\\2 /e"
@@ -263,17 +245,14 @@ fi
 TEMP=$(getopt -o hvti --long help,version,pipeline,in-place \
      -s sh -n 'folding' -- "$@")
 
-#echo "options is: $@"
-#echo "TEMP is $TEMP"
-
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 # Note the quotes around `$TEMP': they are essential!
-eval set -- "$TEMP"
+#eval set -- "$TEMP"
+eval set -- "$(getopt -o hvti --long help,version,pipeline,in-place \
+     -s sh -n 'folding' -- $@)"
 
-echo "options 2 is: $@" >&2
 
 while true ; do
-#    echo "current option is: $1"
     case "$1" in
 
     -h|--help)
