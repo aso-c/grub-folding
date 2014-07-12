@@ -132,42 +132,6 @@ EOF
 } # echo_remark() -------------------------------------------------------------------------
 
 
-#
-# Shielding
-# for using in sed-scripts
-#
-# TODO: Замена должна иметь вид:
-# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
-# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
-# -b, --space-ignore - не экранировать пробелы
-shield1()
-{
-# 	local subst='|(+)?'
-
-    main_subst()
-    {
-	# The order is important!
-	# The List like '[|(+)?]' - same at all function code.
-#	echo "${*}" | sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-	sed -e 's/\([^&]\|&&\)\([|(+ )?]\)/\1\\\2/g' |
-	sed -e 's/\([|(+ )?]\)\([|(+ )?]\)/\1\\\2/g; s/^[|(+ )?]/\\&/g' |
-	sed -e "s/\([^&]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e "s/\([|(+ )?]\)&\([|(+ )?]\)/\1\2/g" |
-	sed -e 's/&&/\&/g' #|	sed -e 's/\n/\\\\n/g'
-    } # main_subst()
-
-
-    if [ "$1no" = 'no' ] ; then
-	# use in pipe-mode
-	main_subst
-     else
-	# use parameter as input
-	echo "${*}" | main_subst
-    fi
-} # shield1
-
 
 #
 # Shielding with parameter analyses

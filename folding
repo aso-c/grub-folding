@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.5 by 12.07.2014.							#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.6 by 12.07.2014.							#
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.5'
+ver='2.2.6'
 version="v.$ver, by 15.07.2014 from aso"
 
 gen='gen'
@@ -90,93 +90,8 @@ EOF
 #       char chain \\                   -> \
 # TODO: Замена должна иметь вид:
 # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
-# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
-# -b, --space-ignore - не экранировать пробелы
-# -n, --no-std-subst - не делать стандартную подстановку
-shield2()
-#shield()
-{
-# 	local subst='| (+)?'
-
-	    local subst_base='|(+)?'
-#	    local subst=" ${subst_base}"
-	    local subst='|(+ )?'
-
-    # parameter - substitution string
-    main_subst()
-    {
-	# The order is important!
-	sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
-    } # main_subst()
-
-    cfg=''
-    # Processing the arguments.
-    while getopts bin f
-    do
-	case $f in
-	b)
-	    # не экранировать пробелы
-	    cfg="b$cfg"
-	    ;;
-	i)
-	    # экранировать косую ('/')
-	    cfg="i$cfg"
-	    ;;
-	n)
-	    # отменить стандартные подстановки
-	    cfg="n$cfg"
-	    ;;
-# 	--)
-#  	    break ;;
-#  	# Explicitly ignore unexpected options, for compatibility.
-#  	-*)
-#  	    #allopts="$allopts $option"
-#  	    ;;
-	esac
-    done
-#    shift `expr $OPTIND - 1`
-    shift $(expr $OPTIND - 1)
-
-    if [ "$(expr index ${cfg}u n)" != 0 ] ; then
-	# echo 'Stdandard subst canceled'
-	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
-    fi
-
-   if [ "$(expr index u$cfg b)" != 0 ] ; then
-	# echo 'Space screening is cancelled'
-	subst="$(echo "${subst}" | sed -e 's/ //g')"
-    fi
-
-    if [ "$(expr index u$cfg i)" != 0 ] ; then
-	# echo "Screening the slash - '/'"
-	subst="/$subst"
-    fi
-
-    if [ "$1no" = 'no' ] ; then
-	# use in pipe-mode
-	main_subst "${subst}"
-     else
-	# use parameter as input
-	echo "${*}" | main_subst "${subst}"
-    fi
-} # shield2
-
-
-
-#
-# Shielding with parameter analyses
-# for using in sed-scripts
-# Simplified sintax:
-#	any symbols from set: {| (+ )?} -> \{original_symbol}
-#	single symbol \ w/o {| (+ )?}   -> \\{original_symbol}
-#	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
-#       char chain \\                   -> \
-# TODO: Замена должна иметь вид:
-# [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# &[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# && -> & ; отменяет действие '&'
+# /[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# // -> / ; отменяет действие '&'
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
@@ -189,22 +104,18 @@ shield()
 	    local subst='|(+ )?'
 
     # parameter - substitution string
-    main_subst()
-    {
-# 	    local subst_base='|(+)?'
-# 	    local subst="$(subst_base) "
-
-	# The order is important!
-	# The List like '[|(+)?]' - same at all function code.
-	#sed -e 's/[|(+ )?]/\\&/g'
-	#sed -e "s/[|(+ )?]/\\\&/g"
-	#sed -e "s/[${subst}]/\\\&/g"
-	sed -e "s/[${1}]/\\\&/g" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
-	# -e 's/\\\\/\&/g'
-	# -e 's/\(\\\\\)\([${1}]\)/\2/g'
-	# -e "s/\\\+[^${1}]/\\\&/g"
-#	echo "s/[${subst}]/\\\&/g"
-    } # main_subst()
+#     main_subst()
+#     {
+# # 	    local subst_base='|(+)?'
+# # 	    local subst="$(subst_base) "
+#
+# 	# The order is important!
+# 	# The List like '[|(+)?]' - same at all function code.
+# 	#sed -e 's/[|(+ )?]/\\&/g'
+# 	#sed -e "s/[|(+ )?]/\\\&/g"
+# 	#sed -e "s/[${subst}]/\\\&/g"
+# 	sed -e "s/[${1}]/\\\&/g" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
+#     } # main_subst()
 
 
     echo "**###>> shield last v.2 options in: ${@}" >&2
@@ -236,21 +147,14 @@ shield()
 
 
 	exe=''
-#    ex='main_subst ${subst}'
     if [ "$1no" != 'no' ] ; then
 	echo '####!!! send parameter to pipe' >&2
 	exe='echo $* | '
     fi
 
     echo "==>>> exec string is: $exe" >&2
-#    $ex main_subst "${subst}"
-#    eval "${ex} main_subst \"${subst}\""
-#    eval $ex
-#    eval $ex main_subst '"${subst}"'
-#    eval $exe sed -e '"s/[${subst}]/\\\&/g;"' -e '"s/\\(\\\\\\)\\([${subst}]\\)/\\2/g"'
+
     eval $exe sed -e '"s/[${subst}]/\\\&/g"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
-  #  $exe sed -e "s/[${subst}]/\\\&/g;"
-    # -e '"s/\(\\\\\\\\\)\([${subst}]\)/\\2/g"'
 
 } # shield
 
