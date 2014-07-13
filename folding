@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.8 by 12.07.2014.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.9 by 14.07.2014.
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,8 +41,8 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.8'
-version="v.$ver, by 15.07.2014 from aso"
+ver='2.2.9'
+version="v.$ver, by 14.07.2014 from aso"
 
 gen='gen'
 win='win'
@@ -57,6 +57,11 @@ GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
+
+#win='Microsoft Windows'	# product variant
+win='Windows'	# for test in laptop
+gen='Gentoo Linux'
+gentoo='Gentoo Linux'
 
 
 
@@ -88,8 +93,8 @@ EOF
 #       char chain \\                   -> \
 # TODO: Замена должна иметь вид:
 # [' ', '(', ');, '|'] -> ['\ ', '\(', '\)', '\|'] ; возможно что-то ещё, например '\'
-# /[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
-# // -> / ; отменяет действие '&'
+# \[' ', '(', ');, '|'] -> [' ', '(', ');, '|'] ; отменяет действие, сохраняет первоначальный вид 
+# \\ -> \ ; отменяет действие '&'
 # -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
 # -b, --space-ignore - не экранировать пробелы
 # -n, --no-std-subst - не делать стандартную подстановку
@@ -112,9 +117,6 @@ shield()
     shift $(($OPTIND - 1))
 
     exe=''
-#     if [ "$1no" != 'no' ] ; then
-# 	exe='echo $* | '
-#     fi
     if [ "$1no" != 'no' ]; then exe='echo $* | '; fi
 
     eval $exe sed -e '"s/[${subst}]/\\\&/g"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
@@ -128,21 +130,21 @@ mark() {
 } # mark() ---------------------------------------
 
 
-# Echoing OS name from class
-# Parameter:
-#   #1 - class OS (gentoo, win),
-o_name()
-{
-case "$1" in
-# 'win')	  echo 'Microsoft Windows'	# product variant
-'win')	  echo 'Windows'	# for test in laptop
-	;;
-'gentoo') echo 'Gentoo Linux'
-	;;
-'gen')	  echo 'Gentoo Linux'
-	;;
-esac
-} # o_name() -------------------------------------
+# # Echoing OS name from class
+# # Parameter:
+# #   #1 - class OS (gentoo, win),
+# o_name()
+# {
+# case "$1" in
+# # 'win')	  echo 'Microsoft Windows'	# product variant
+# 'win')	  echo 'Windows'	# for test in laptop
+# 	;;
+# 'gentoo') echo 'Gentoo Linux'
+# 	;;
+# 'gen')	  echo 'Gentoo Linux'
+# 	;;
+# esac
+# } # o_name() -------------------------------------
 
 
 p='prolog'
@@ -170,6 +172,8 @@ echo_remark()
 {
 	# regexp block for using in criteria for sampling full menu srction
 	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
+	eval os="\$$1"
+	echo "OS name is: $os" >&2
 
 cat << EOF
 ## entrance
@@ -180,8 +184,8 @@ cat << EOF
   
 #presample
   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
-#  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
-  /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
+#  /\([^#]*menuentry\)\([^#]\+${os}\)/! b; $ b
+  /^[ \t]*menuentry[^#]\+${os}/! b; $ b
 
 :presample
   # presampling menuentry section & intersection gap into pattern space
@@ -190,7 +194,7 @@ cat << EOF
   N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*submenu/ b			# other submenu section was started
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
-  /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
+  /\n[^#\n]*${os}/! b			# new section is not in sequence - go out
 
   # insert control comment before output buffer
   i\\\\
@@ -205,13 +209,63 @@ cat << EOF
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
   /[^#]*submenu/ b close		# other subsection started
   /[^#]*menuentry/! b consect		# detect that not start of new section
-  /[^#]*$(o_name $1)/ b consect		# new section is started
+  /[^#]*${os}/ b consect		# new section is started
 
 :close
   i\\$(echo_cmd $1 $e)
   /### BEG/! i\\\\
 EOF
 } # echo_remark() -------------------------------------------------------------------------
+
+# # Echoing string for markup section in config file function
+# # Parameters:
+# #   $1 - OS class (gen, win...)
+# echo_remark-1()
+# {
+# 	# regexp block for using in criteria for sampling full menu srction
+# 	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
+#
+# cat << EOF
+# ## entrance
+# # # if not matched submenu - go to presample
+# #  /\([^#]*.*submenu\)/! b presample; $ b
+# #  # resampling of inner sequence
+# #  b #exit
+#   
+# #presample
+#   # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
+# #  /\([^#]*menuentry\)\([^#]\+$(o_name $1)\)/! b; $ b
+#   /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
+#
+# :presample
+#   # presampling menuentry section & intersection gap into pattern space
+#   /^$(shield "$blkcmt{($blkcmt{($blkcmt{$blkcmt})*$blkcmt})*$blkcmt}")/! { N; b presample}
+#
+#   N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
+#   /\n[^#\n]*submenu/ b			# other submenu section was started
+#   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
+#   /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
+#
+#   # insert control comment before output buffer
+#   i\\\\
+#   i\\$(echo_cmd $1 $p)
+# #  i\\\\n\\$(echo_cmd $1 $p)
+#  
+# :consect; n	# continue sampling section
+#
+# :blank
+#   /[^\n]\+/! {N; b blank}		# if current line is blank - continue sampling
+#
+#   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
+#   /[^#]*submenu/ b close		# other subsection started
+#   /[^#]*menuentry/! b consect		# detect that not start of new section
+#   /[^#]*$(o_name $1)/ b consect		# new section is started
+#
+# :close
+#   i\\$(echo_cmd $1 $e)
+#   /### BEG/! i\\\\
+# EOF
+# } # echo_remark() -------------------------------------------------------------------------
 
 
 # Insert folding section in config file function on file insertion
@@ -220,7 +274,8 @@ EOF
 #   $2 - sect class (prolog/epilog)
 echo_final()
 {
-    echo "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\\\1\\\2 /e"
+    echo "s\/# *exec! *(${grub_mkcfg_dir}/_$1-$2)([^#]*)\/\\\1\\\2 \/e" | shield -i
+#    echo "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\\\1\\\2 /e"
 #    echo "s/# *exec! $(shield -i \"*(${grub_mkcfg_dir}/_$1-$2)([^#]*)\")/\\\1\\\2 /e"
 } # echo_final()---------------------------------------------------------------
 
@@ -238,8 +293,6 @@ fi
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-#TEMP=`getopt -o ab:c:: --long a-long,b-long:,c-long:: \
-#     -n 'example.bash' -- "$@"`
 #TEMP=`getopt -o hvti --long help,version,pipeline,in-place \
 #     -s sh -n 'folding' -- "$@"`
 TEMP=$(getopt -o hvti --long help,version,pipeline,in-place \
