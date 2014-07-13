@@ -131,12 +131,11 @@ config script into GRUB boot menu file by storing it in a temporary files.
 
 ####folding_v.5.2
 #####(c) aso, v.2.2.0 by 07.07.2014.
-
     Transition variant 2 with exclusion re-creating submenu if it existing.
     The universal 'shield' function - with parameter analyse, two form of calling -
-    input parameters or input file and using one func for all substitutions.
+    input from parameters or input file. Using one func for all substitutions.
     The simplified sintax at the 'shield' function: provide '\' as escaping chars.
-    New keyword 'submenu' for breaking section sampling was added. 
+    New keyword 'submenu' for breaking section sampling was added.
 
         Product revision version V-2
 -------------------------------------------------------------------------------
