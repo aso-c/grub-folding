@@ -44,8 +44,7 @@ set -e
 ver='2.3.0'
 version="v.$ver, by 14.07.2014 from aso"
 
-#win='Microsoft Windows'	# product variant
-win='Windows'	# for test in laptop
+win='Microsoft Windows'
 gen='Gentoo Linux'
 gentoo='Gentoo Linux'
 
@@ -54,9 +53,7 @@ e='epilog'
 
 
 sysconfdir="/etc"
-#grub_mkcfg_dir="${sysconfdir}/grub.d"
-# for dev target
-grub_mkcfg_dir='./grub.d'
+grub_mkcfg_dir="${sysconfdir}/grub.d"
 
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
@@ -192,11 +189,6 @@ shield()
 
 
 #==============================================================================
-
-#for dev target
-if [ $_dev ] ; then
-    return
-fi
 
 
 # Processing the arguments.
