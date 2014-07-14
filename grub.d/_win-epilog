@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # MS Windows section epilogue GRUB configuration file
-# v.2.0.7 from 07.07.2014. by aso
+# v.2.0.9 from 14.07.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,16 +29,18 @@ set -e
 #
 ####################################################
 
-ver='2.0.7'
-date='07.07.2014'
+ver='2.0.9'
+date='14.07.2014'
 version="v.$ver, from $date by aso"
 
 
 usage()
 {
     cat <<EOF
-Usage: $self [OPTION]
-Insert Folding section in GRUB configuration file
+_win-epilog: grub-mkconfig helper script.
+version $version
+Insert MS Windows section epilogue into GRUB configuration file
+Usage: _win-epilog [OPTIONS]
 
   -i, --insert            output section data into stdout
   -x, --exclude           exclude folding header

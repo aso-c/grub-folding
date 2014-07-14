@@ -58,8 +58,8 @@ define appropriate section files.
  - choose the OS "short name", for example 'win' - it will be used in script;
  - create section files in the GRUB config dir; by default - /etc/grub.d;
     - section files must be execution shell script and should have names as:
->      `_<short_name_OS>-prolog`,
->      `_<short_name_ОС>-epilog`
+        `_<short_name_OS>-prolog`,
+        `_<short_name_ОС>-epilog`
        (for example: `_win-prolog`, `_win-epilog`);
     - section files may be created by copying an existing file;
     - in section file needed define submenu name, and enter custom text if necessary;
@@ -143,8 +143,8 @@ Microsoft Windows или несколько вариантов загрузки 
      использоваться пограммой;
  - создать файлы секций в каталоге конфигурации GRUB - /etc/grub.d по умолчанию;
      - файлы секций должны быть исполняемыми сценариями оболочки и должны иметь имена вида:
->       `_<короткое_имя_ОС>-prolog`,
->       `_<короткое_имя_ОС>-epilog`
+         `_<короткое_имя_ОС>-prolog`,
+         `_<короткое_имя_ОС>-epilog`
        (например: `_win-prolog`, `_win-epilog`);
      - файлы секций могут быть созданы путём копирования существующих;
      - в файле необходимо определить имя секции подменю и, при необходимости -
@@ -178,6 +178,24 @@ Microsoft Windows или несколько вариантов загрузки 
 Early versions of grub-folding used directly insert of section file contents into
 GRUB boot menu file. It was later implemented insertion of output of section file
 config script into GRUB boot menu file by storing it in a temporary files.
+
+-------------------------------------------------------------------------------
+
+####folding_v.5.3
+#####(c) aso, v.2.3.0 by 14.07.2014.
+    Transition variant 3 with exclusion re-creating submenu if it existing.
+    - Mutable the 'shield' function - input from parameter, if position parameter
+    (not flag) is not empty.
+    - Simplify any using the 'shield' function.
+    - Exclude the function 'o_name' - convert short name to long name.
+        Use instead of them set variables with short names and contens the long names.
+    - Reordered function - the 'shield' function is shifted to the end of
+        all function definitions.
+    - Changed place creation of tmp buffer - now it's created in /tmp/folding{$$$} dir.
+    - Change dev mk.config dir from ./my.grub.d to ./grub.d
+    
+        Product revision version V-3
+       (c) aso, v.2.3.0 by 14.07.2014.
 
 -------------------------------------------------------------------------------
 
