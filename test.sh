@@ -15,7 +15,7 @@ export _dev
 
 #sysconfdir="/etc"
 #grub_mkcfg_dir="${sysconfdir}/grub.d"
-grub_mkcfg_dir="./my.grub.d"
+#grub_mkcfg_dir="./grub.d"
 
 ## Generate section file name
 ## Parameters:
