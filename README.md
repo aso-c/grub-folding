@@ -53,6 +53,31 @@ Execution in the GRUB configurator context are bypassed.
 Expanding the list of supported OS'es is possibly by simple code modification &
 define appropriate section files.
 
+####For appending support of new OS needed:
+
+ - choose the OS "short name", for example 'win' - it will be used in script;
+ - create section files in the GRUB config dir; by default - /etc/grub.d;
+    - section files must be execution shell script and should have names as:
+>      `_<short_name_OS>-prolog`,
+>      `_<short_name_ОС>-epilog`
+       (for example: `_win-prolog`, `_win-epilog`);
+    - section files may be created by copying an existing file;
+    - in section file needed define submenu name, and enter custom text if necessary;
+      (output of this files executions will be placed into grub.cfg; output into stderr
+      (redirection >&2) - will be printed to screen).
+ - define OS "long name", which will be determined that the menu item refers to this OS
+      (for example 'Microsoft Windows');
+ -  in the file 'folding' create variable with a name as are short name of the OS and a
+      having long name of the OS (for example: win='Microsoft Windows');
+ - append (by analogy with existing) handlers for this OS in the sequence of handlers in
+      processing section at the end of the script file 'folding', for example:
+
+        sed -e "$(echo_remark win)"     |
+        sed -e "$(echo_final win $p)"   |
+        sed -e "$(echo_final win $e)"
+
+Consistency of the list supported operating systems provided by the user.
+
 ####TODO:
 - exclude submenu creation if sequence of target OS'es menu entries already
   enclosed into submenu.
@@ -111,6 +136,33 @@ Microsoft Windows или несколько вариантов загрузки 
 исполняются "вхолостую".
 Возможно расширение списка поддерживаемых ОС путём несложной доработки кода
 сценария folding и создания соответствующих заголовочный файлов секций.
+
+####Для добавления поддержки новой ОС необходимо:
+
+ - задать "короткое имя" ОС - например "win"; это обозначение будет
+     использоваться пограммой;
+ - создать файлы секций в каталоге конфигурации GRUB - /etc/grub.d по умолчанию;
+     - файлы секций должны быть исполняемыми сценариями оболочки и должны иметь имена вида:
+>       `_<короткое_имя_ОС>-prolog`,
+>       `_<короткое_имя_ОС>-epilog`
+       (например: `_win-prolog`, `_win-epilog`);
+     - файлы секций могут быть созданы путём копирования существующих;
+     - в файле необходимо определить имя секции подменю и, при необходимости -
+       ввести пользовательский текст;
+  (вывод в stdout при исполнении этих файлов будет помещён в файл grub.cfg,
+  вывод в stderror (перенаправление >&2) - выводится на экран;
+ - определить "длинное имя ОС", по которому будут определяться пункты меню для этой ОС,
+   например "Microsoft Windows";
+ - в файле 'folding' создать переменную, с именем, соответствующим короткому имени ОС и
+   содержащую "длинное имя", например - win='Microsoft Windows';
+ - добавить (по аналогии) обработчики для этой ОС в конец конвейера в секции обработки
+   в конце сценария 'folding', например:
+   
+        sed -e "$(echo_remark win)"     |
+        sed -e "$(echo_final win $p)"   |
+        sed -e "$(echo_final win $e)"
+
+Непротиворечивость перечня обрабатываемых ОС обеспечивается самим пользователем. 
 
 ####TODO:
 - исключить создание подменю, если последовательность пунктов меню уже заключена в подменю.

@@ -36,7 +36,7 @@ if [ "x$pkgdatadir" = x ]; then
 fi
 grub_cfg=""
 #grub_mkconfig_dir="${sysconfdir}"/grub.d
-grub_mkconfig_dir=./my.grub.d
+grub_mkconfig_dir=./grub.d
 
 self=`basename $0`
 

@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.10 by 14.07.2014.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.11 by 14.07.2014.
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.10'
+ver='2.2.11'
 version="v.$ver, by 14.07.2014 from aso"
 
 #win='Microsoft Windows'	# product variant
@@ -55,11 +55,12 @@ e='epilog'
 
 sysconfdir="/etc"
 #grub_mkcfg_dir="${sysconfdir}/grub.d"
-# for dev
-grub_mkcfg_dir='./my.grub.d'
+# for dev target
+#grub_mkcfg_dir='./my.grub.d'
+grub_mkcfg_dir='./grub.d'
 
-self=`basename $0`
-GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
+#self=`basename $0`
+#GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
 
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
@@ -124,7 +125,7 @@ echo_remark()
 	# regexp block for using in criteria for sampling full menu srction
 	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
 	eval os="\$$1"
-	echo "OS name is: $os" >&2
+#	echo "OS name is: $os" >&2
 
 cat << EOF
 ## entrance
@@ -224,16 +225,15 @@ fi
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-#TEMP=`getopt -o hvti --long help,version,pipeline,in-place \
-#     -s sh -n 'folding' -- "$@"`
 TEMP=$(getopt -o hvti --long help,version,pipeline,in-place \
      -s sh -n 'folding' -- "$@")
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
 # Note the quotes around `$TEMP': they are essential!
-#eval set -- "$TEMP"
-eval set -- "$(getopt -o hvti --long help,version,pipeline,in-place \
-     -s sh -n 'folding' -- $@)"
+eval set -- "$TEMP"
+# eval set -- "$(getopt -o hvti --long help,version,pipeline,in-place \
+#      -s sh -n 'folding' -- $@)"
 
 
 while true ; do
@@ -265,16 +265,18 @@ while true ; do
 done
 
 
-echo "Folding (v.$ver) ..." >&2
+echo "Folding (v.$ver)..." >&2
 
 echo "# Folding $version"
 echo "# This is a stub"
 echo "# Output of this module was placed bypass the main flow"
 
 
-if ! [ $pipe ] ; then
+if ! [ $pipe ]; then
 
-  tmpbuf='/tmp/$$$sect$$$'
+#  tmpbuf='/tmp/$$$sect$$$'
+  mkdir $tmprefix
+  tmpbuf="$tmprefix/$$$sect$$$"
   exec 4<&0	# store stdin into #4
   exec 6>&1	# store stdout into #6
   outfile=$(readlink /proc/self/fd/6)
@@ -282,7 +284,6 @@ if ! [ $pipe ] ; then
   exec 1>&-		# close stdout
   exec 0< $outfile
   exec 1> $tmpbuf
-
 fi
 
 
@@ -291,15 +292,15 @@ fi
 
 sed $allopts -e "$(echo_remark win)"	|
 sed $allopts -e "$(echo_remark gen)"	|
-sed $allopts -e "$(echo_final win $p)" |
-sed $allopts -e "$(echo_final win $e)" |
-sed $allopts -e "$(echo_final gen $p)" |
+sed $allopts -e "$(echo_final win $p)"	|
+sed $allopts -e "$(echo_final win $e)"	|
+sed $allopts -e "$(echo_final gen $p)"	|
 sed $allopts -e "$(echo_final gen $e)"
 
 ##************##
 
 
-if ! [ $pipe ] ; then
+if ! [ $pipe ]; then
 	#restore all files
   exec 1>&-		# close stdout
   exec 0<&-		# close stdin
@@ -308,6 +309,6 @@ if ! [ $pipe ] ; then
   exec 0<&4
   exec 1>&6
   tail -c $(($fsz2 - $fsz1)) $tmpbuf
-  rm "$tmpbuf"	# remove tmpbuf
-
+#  rm "$tmpbuf"	# remove tmpbuf
+  rm -rf $tmprefix
 fi
