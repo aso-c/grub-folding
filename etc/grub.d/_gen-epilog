@@ -20,7 +20,7 @@ set -e
 ####################################################
 #
 # Gentoo section epilogue GRUB configuration file
-# v.2.0.5 from 17.06.2014. by aso
+# v.2.1.0 from 14.07.2014. by aso
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -29,16 +29,18 @@ set -e
 #
 ####################################################
 
-ver='2.0.5'
-date='17.06.2014'
+ver='2.1.0'
+date='14.07.2014'
 version="$ver, from $date by aso"
 
 
 usage()
 {
     cat <<EOF
-Usage: $self [OPTION]
-Insert Folding section in GRUB configuration file
+_gen-epilog: grub-mkconfig helper script.
+version $version
+Insert Gentoo section epilogue into GRUB configuration file
+Usage: _gen-epilog [OPTIONS]
 
   -i, --insert            output section data into stdout
   -x, --exclude           exclude folding header
@@ -54,37 +56,28 @@ _insert=0
 _exclude=0
 
 # Processing the arguments.
-while test $# -gt 0
+while getopts hvix f
 do
-    option=$1
-    shift
-
-    case "$option" in
-    -h | --help)
+    case $f in
+    h | --help)
 	usage
 	exit 2 ;;
-    -v | --version)
+    v | --version)
 	echo $version
 	exit 1 ;;
-    -i | --insert)
+    i | --insert)
 	_insert=1
 	;;
-    -x | --exclude)
+    x | --exclude)
 	_exclude=1
 	;;
-    -ix | -xi)
-	_insert=1
-	_exclude=1
-	;;
-    -*)
-	echo "Unrecognized options: $option"
-	;;
-    # Explicitly ignore non-option arguments, for compatibility.
     esac
 done
+#shift $(expr $OPTIND - 1)
+shift $(($OPTIND - 1))
 
 # Don't change the next "if" operator
-if [ ${_insert} = 0 ]; then
+if [ ${_insert} = 0 ] ; then
   echo "# This is a gentoo section epilogue stub"
   echo "# $version"
   exit

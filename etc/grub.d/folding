@@ -3,10 +3,11 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.0 by 07.07.2014.							#
-#   GPLv3										#
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.3.0 by 14.07.2014.
+#   GPLv3
 #
-# -t, --pipline       processing input file (stdin) into stdout output file (for debug)
+# -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
+#     --pipe              and saved into stdout output file (intended for debug)
 # -i, --in-place      processing config file "in place" from stdout; default option
 #
 # This config script create separate submenu for each group of consequtive items
@@ -40,25 +41,22 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.0'
-version="v.$ver, by 07.07.2014 from aso"
+ver='2.3.0'
+version="v.$ver, by 14.07.2014 from aso"
 
-gen='gen'
-win='win'
+win='Microsoft Windows'
+gen='Gentoo Linux'
+gentoo='Gentoo Linux'
+
+p='prolog'
+e='epilog'
+
 
 sysconfdir="/etc"
 grub_mkcfg_dir="${sysconfdir}/grub.d"
 
-self=`basename $0`
-GRUB_PREFIX=`echo '/boot/grub' | sed "s,//*,/,g"`
-
 tmpdir='/tmp'
 tmprefix="$tmpdir/fold$$$"
-
-
-
-BEG='BEGIN'
-EN='END'
 
 
 usage()
@@ -67,100 +65,27 @@ usage()
 Usage: $self [OPTION]
 Insert Folding section in GRUB configuration file
 
-  -h, --help            this help
-  -v, --version         version of program
-  -t, --pipline         processing input file (stdin) into stdout output file
-  -i, --in-place        processing config file "in place" from stdout; default option
+  -h, --help             this help
+  -v, --version          version of the program
+  -t, --pipeline, --pipe processing input file (stdin) into stdout output file
+  -i, --in-place         processing config file "in place" from stdout; default option
 
 Report bugs to <Solomatov.A.A@gmail.com>.
+
+$version
 EOF
-} # usage() --------------------------------------
+} # usage() -------------------------------------------------------------------
 
 
-#
-# Shielding with parameter analyses
-# for using in sed-scripts
-# Simplified sintax:
-#	any symbols from set: {| (+ )?} -> \{original_symbol}
-#	char chain \{| (+ )?}           -> {original_symbol} (w/o '\')
-shield()
-{
-
-	    local subst='|(+ )?'
-
-    # parameter - substitution string
-    main_subst()
-    {
-	# The order is important!
-	sed -e "s/[${1}]/\\\&/g;" -e "s/\(\\\\\\\\\)\([${1}]\)/\2/g"
-    } # main_subst()
-
-    cfg=''
-    # Processing the arguments.
-    while getopts bin f
-    do
-	case $f in
-	b)
-	    # не экранировать пробелы
-	    cfg="b$cfg" ;;
-	i)
-	    # экранировать косую ('/')
-	    cfg="i$cfg"	;;
-	n)
-	    # отменить стандартные подстановки
-	    cfg="n$cfg"	;;
-	esac
-    done
-
-    shift $(expr $OPTIND - 1)
-
-    if [ "$(expr index ${cfg}u n)" != 0 ]; then
-	subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')"
-    fi
-
-    if [ "$(expr index u$cfg b)" != 0 ]; then
-	subst="$(echo "${subst}" | sed -e 's/ //g')"
-    fi
-
-    if [ "$(expr index u$cfg i)" != 0 ]; then
-	subst="/$subst"
-    fi
-
-    if [ "$1no" = 'no' ]; then
-	# use in pipe-mode
-	main_subst "${subst}"
-     else
-	# use parameter as input
-	echo "${*}" | main_subst "${subst}"
-    fi
-} # shield
+BEG='BEGIN'
+EN='END'
 
 
 # Create marker
-mark()
-{
+mark() {
     echo "### $1 ###"
-} # mark() ---------------------------------------
+} # mark() ------------
 
-
-# Echoing OS name from class
-# Parameter:
-#   #1 - class OS (gentoo, win),
-o_name()
-{
-case "$1" in
-'win')	  echo 'Microsoft Windows'
-	;;
-'gentoo') echo 'Gentoo Linux'
-	;;
-'gen')	  echo 'Gentoo Linux'
-	;;
-esac
-} # o_name() -------------------------------------
-
-
-p='prolog'
-e='epilog'
 
 # Echoing string of control comment
 # Parameters:
@@ -171,21 +96,32 @@ echo_cmd()
     shield $(mark "$BEG $grub_mkcfg_dir/_$1-$2")\\
     echo "# exec!$grub_mkcfg_dir/_$1-$2 -i #\\"
     shield $(mark "$EN $grub_mkcfg_dir/_$1-$2")\\n
-} # echo_cmd
+} # echo_cmd() ----------------------------------------------------------------
 
 
-# Echoing string for markup section in config file function
+# Insert folding section in config file function on file insertion
+# Parameters:
+#   $1 - OS class (win/gen\gentoo\)
+#   $2 - sect class (prolog/epilog)
+echo_final()
+{
+    echo "s\/# *exec! *(${grub_mkcfg_dir}/_$1-$2)([^#]*)\/\\\1\\\2 \/e" | shield -i
+} # echo_final()---------------------------------------------------------------
+
+
+# Output (print) into stdout sed script string for markup section in config file function
 # Parameters:
 #   $1 - OS class (gen, win...)
 echo_remark()
 {
 	# regexp block for using in criteria for sampling full menu srction
 	local blkcmt='([^{#}\\n]*(#[^\\n]*)?\\n)*[^{#}\\n]*'
+	eval os="\$$1"
 
 cat << EOF
-  
 #presample
-  /^[ \t]*menuentry[^#]\+$(o_name $1)/! b; $ b
+  # if not matched /menuentry <OS_Name>/ - e.g. needed section was not started - exit
+  /^[ \t]*menuentry[^#]\+${os}/! b; $ b
 
 :presample
   # presampling menuentry section & intersection gap into pattern space
@@ -194,7 +130,7 @@ cat << EOF
   N; /### \($BEG\)\|\($EN\)/ b		# control comment - go out
   /\n[^#\n]*submenu/ b			# other submenu section was started
   /\n[^#\n]*menuentry/! b presample	# detect that not start of new section - continue
-  /\n[^#\n]*$(o_name $1)/! b		# new section is not in sequence - go out
+  /\n[^#\n]*${os}/! b			# new section is not in sequence - go out
 
   # insert control comment before output buffer
   i\\\\
@@ -208,61 +144,107 @@ cat << EOF
   /### \($BEG\)\|\($EN\)/ b close	# control comment - close section
   /[^#]*submenu/ b close		# other subsection started
   /[^#]*menuentry/! b consect		# detect that not start of new section
-  /[^#]*$(o_name $1)/ b consect		# new section is started
+  /[^#]*${os}/ b consect		# new section is started
 
 :close
   i\\$(echo_cmd $1 $e)
   /### BEG/! i\\\\
 EOF
-} # echo_remark() -------------------------------------------------------------------------
+} # echo_remark() -------------------------------------------------------------
 
 
-# Insert folding section in config file function on file insertion
-# Parameters:
-#   $1 - OS class (win/gentoo)
-#   $2 - sect class (prolog/epilog)
-remark_insert()
+#
+# Shielding with parameter analyses
+# for using in sed-scripts
+# Simplified sintax:
+#	any symbols from set: {(+ )?}(opt.- /) -> \{original_symbol}
+#	char chain \{| (+ )?}(opt.- /)         -> {original_symbol} (w/o '\')
+# -i, --slash-screening - экранирование символа косой '/' (по умолчанию - нет)
+# -b, --space-ignore - не экранировать пробелы
+# -n, --no-std-subst - не делать стандартную подстановку
+shield()
 {
-    sed -e "s/# *exec! $(shield -i "*(${grub_mkcfg_dir}/_$1-$2)([^#]*)")/\1\2 /e"
-} # remark_insert()------------------------------------------------------------
+	local subst='| (+)?'	# substitution chars
 
+    # Processing the arguments.
+    while getopts bin f
+    do
+	case $f in
+	b)  # не экранировать пробелы
+	    subst="$(echo "${subst}" | sed -e 's/ //g')" ;;
+	i)  # экранировать косую ('/')
+	    subst="/$subst" ;;
+	n)  # отменить стандартные подстановки
+	    subst="$(echo "${subst}" | sed -e 's/[|(+)?]//g')" ;;
+	esac
+    done
+    shift $(($OPTIND - 1))
+
+    exe=''
+    if [ "$1no" != 'no' ]; then exe='echo $* | '; fi
+
+    eval $exe sed -e '"s/[${subst}]/\\\&/g"' -e '"s/\(\\\\\\\\\)\([${subst}]\)/\2/g"'
+
+} # shield() ------------------------------------------------------------------
+
+
+#==============================================================================
 
 
 # Processing the arguments.
-while test $# -gt 0
-do
-    option=$1
-    shift
 
-    case "$option" in
-    -h | --help)
+#---------------------------------------------------
+# Note that we use `"$@"' to let each command-line parameter expand to a
+# separate word. The quotes around `$@' are essential!
+# We need TEMP as the `eval set --' would nuke the return value of getopt.
+TEMP=$(getopt -o hvti --long help,version,pipeline,in-place \
+     -s sh -n 'folding' -- "$@")
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+
+while true ; do
+    case "$1" in
+
+    -h|--help)
 	usage
 	exit 2 ;;
-    -v | --version)
+    -v|--version)
 	echo $version
 	exit 0 ;;
-    -t | --pipeline)
-	pipe=${option} ;;
-    -i | --in-place)
+    -t|--pipeline)
+	pipe=${1} ;;
+    -i|--in-place)
 	pipe='' ;;
+    --)
+        shift
+	break ;;
     -*)
-	allopts="$allopts $option"
-	;;
+	allopts="$allopts ${1}" ;;
     # Explicitly ignore non-option arguments, for compatibility.
+    *)
+	echo "Internal error!"
+	exit 1 ;;
+
     esac
+    shift
 done
 
 
-echo "Folding (v.$ver) ..." >&2
+echo "Folding (v.$ver)..." >&2
 
-echo "# Folding $version"
+echo "# Folding $ver"
 echo "# This is a stub"
 echo "# Output of this module was placed bypass the main flow"
 
 
 if ! [ $pipe ]; then
 
-  tmpbuf='/tmp/$$$sect$$$'
+  mkdir $tmprefix
+  tmpbuf="$tmprefix/$$$sect$$$"
   exec 4<&0	# store stdin into #4
   exec 6>&1	# store stdout into #6
   outfile=$(readlink /proc/self/fd/6)
@@ -270,19 +252,18 @@ if ! [ $pipe ]; then
   exec 1>&-		# close stdout
   exec 0< $outfile
   exec 1> $tmpbuf
-
 fi
 
 
 ##************##
 
 
-sed $allopts -e "$(echo_remark $win)"	|
-sed $allopts -e "$(echo_remark $gen)"	|
-remark_insert $win $p	|
-remark_insert $win $e	|
-remark_insert $gen $p	|
-remark_insert $gen $e
+sed $allopts -e "$(echo_remark win)"	|
+sed $allopts -e "$(echo_remark gen)"	|
+sed $allopts -e "$(echo_final win $p)"	|
+sed $allopts -e "$(echo_final win $e)"	|
+sed $allopts -e "$(echo_final gen $p)"	|
+sed $allopts -e "$(echo_final gen $e)"
 
 ##************##
 
@@ -296,6 +277,5 @@ if ! [ $pipe ]; then
   exec 0<&4
   exec 1>&6
   tail -c $(($fsz2 - $fsz1)) $tmpbuf
-  rm "$tmpbuf"	# remove tmpbuf
-
+  rm -rf $tmprefix
 fi

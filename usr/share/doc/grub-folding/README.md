@@ -1,13 +1,6 @@
 grub-folding
 ============
 
-<<<<<<< HEAD
-/etc/grub.d configuration script for folding sequence of similar grub menu entries (as gentoo, gentoo... or Windows, Windows...)
-
-###==[ en ]====================================================
-
-Config script the grub-folding is provide the folding of similar GRUB menu entries sequence.
-=======
 grub-mkconfig helper script for folding the sequence of similar
 grub menu entries (as gentoo, gentoo... or Windows, Windows...)
 
@@ -15,7 +8,6 @@ grub menu entries (as gentoo, gentoo... or Windows, Windows...)
 
 Config script the grub-folding is provide the folding of similar GRUB menu
 entries sequence.
->>>>>>> release-ver.V-2
 Each sequence of entries for Microsoft Windows or Gentoo OS loading separately
 is included into submenu section.
 Submenu section was implemented by insertion output of suitable section file
@@ -34,21 +26,12 @@ items GRUB boot menu for each type OS.
  - Gentoo.
 
 ####Project files:
-<<<<<<< HEAD
-    - folding - the config script that creates a submenu from sequence of a homogeneous
-                   menu items.
-    - _gen-prolog  - Gentoo section prologue file; it can contain custom code,
-                     that will be placed immediately before the submenu "Gentoo"
-                     or inside submenu at the beginning of it.
-		     Submenu title also given in that file.
-=======
     - folding      - the config script that creates a submenu from sequence of a homogeneous
                      menu items.
     - _gen-prolog  - Gentoo section prologue file; it can contain custom code,
                      that will be placed immediately before the submenu "Gentoo"
                      or inside submenu at the beginning of it.
                      Submenu title also given in that file.
->>>>>>> release-ver.V-2
     - _gen-epilog  - Gentoo section epilogue file; it can contain custom code,
                      that will be placed immediately after the submenu "Gentoo"
                      or inside submenu at the end of it.
@@ -70,19 +53,36 @@ Execution in the GRUB configurator context are bypassed.
 Expanding the list of supported OS'es is possibly by simple code modification &
 define appropriate section files.
 
-####TODO:
-<<<<<<< HEAD
-- FIXED <S>exclude submenu creation for single menu entry from list of target OS'es;
-- exclude submenu creation if sequence of target OS'es menu entries already
-  enclosed into submenu.
+####For appending support of new OS needed:
 
-###==[ ru ]====================================================
-=======
+ - choose the OS "short name", for example 'win' - it will be used in script;
+ - create section files in the GRUB config dir; by default - /etc/grub.d;
+    - section files must be execution shell script and should have names as:
+        `_<short_name_OS>-prolog`,
+        `_<short_name_ОС>-epilog`
+       (for example: `_win-prolog`, `_win-epilog`);
+    - section files may be created by copying an existing file;
+    - in section file needed define submenu name, and enter custom text if necessary;
+      (output of this files executions will be placed into grub.cfg; output into stderr
+      (redirection >&2) - will be printed to screen).
+ - define OS "long name", which will be determined that the menu item refers to this OS
+      (for example 'Microsoft Windows');
+ -  in the file 'folding' create variable with a name as are short name of the OS and a
+      having long name of the OS (for example: win='Microsoft Windows');
+ - append (by analogy with existing) handlers for this OS in the sequence of handlers in
+      processing section at the end of the script file 'folding', for example:
+
+        sed -e "$(echo_remark win)"     |
+        sed -e "$(echo_final win $p)"   |
+        sed -e "$(echo_final win $e)"
+
+Consistency of the list supported operating systems provided by the user.
+
+####TODO:
 - exclude submenu creation if sequence of target OS'es menu entries already
   enclosed into submenu.
 
 ###==[ ru ]==================================================
->>>>>>> release-ver.V-2
 
 Конфигурационный скрипт "grub-folding" обеспечивает сворачивание последовательности
 из нескольких подобных пунктов меню загрузки GRUB (несколько установленных ОС
@@ -105,13 +105,8 @@ Microsoft Windows или несколько вариантов загрузки 
  - Gentoo.
 
 ####Файлы проекта:
-<<<<<<< HEAD
-    - folding - непосредственно сам файл скрипта, преобразующего последовательность
-                однородных пунктов меню в подменю.
-=======
     - folding      - непосредственно сам файл скрипта, преобразующего последовательность
                      однородных пунктов меню в подменю.
->>>>>>> release-ver.V-2
     - _gen-prolog  - заголовочный файл начала секции "Gentoo"; может содержать
                      произвольный пользовательский код, который будет помещён
                      непосредственно перед подменю "Gentoo" - или внутри подменю
@@ -142,65 +137,83 @@ Microsoft Windows или несколько вариантов загрузки 
 Возможно расширение списка поддерживаемых ОС путём несложной доработки кода
 сценария folding и создания соответствующих заголовочный файлов секций.
 
-####TODO:
-<<<<<<< HEAD
-- ИСПРАВЛЕНО <S>исключить создание подменю, если встречен одиночный пункт меню из списка обрабатывемых;
-- исключить создание подменю, если последовательность пунктов меню уже заключена в подменю.
+####Для добавления поддержки новой ОС необходимо:
 
-##==[ history ]========================================
-=======
+ - задать "короткое имя" ОС - например "win"; это обозначение будет
+     использоваться пограммой;
+ - создать файлы секций в каталоге конфигурации GRUB - /etc/grub.d по умолчанию;
+     - файлы секций должны быть исполняемыми сценариями оболочки и должны иметь имена вида:
+         `_<короткое_имя_ОС>-prolog`,
+         `_<короткое_имя_ОС>-epilog`
+       (например: `_win-prolog`, `_win-epilog`);
+     - файлы секций могут быть созданы путём копирования существующих;
+     - в файле необходимо определить имя секции подменю и, при необходимости -
+       ввести пользовательский текст;
+  (вывод в stdout при исполнении этих файлов будет помещён в файл grub.cfg,
+  вывод в stderror (перенаправление >&2) - выводится на экран;
+ - определить "длинное имя ОС", по которому будут определяться пункты меню для этой ОС,
+   например "Microsoft Windows";
+ - в файле 'folding' создать переменную, с именем, соответствующим короткому имени ОС и
+   содержащую "длинное имя", например - win='Microsoft Windows';
+ - добавить (по аналогии) обработчики для этой ОС в конец конвейера в секции обработки
+   в конце сценария 'folding', например:
+   
+        sed -e "$(echo_remark win)"     |
+        sed -e "$(echo_final win $p)"   |
+        sed -e "$(echo_final win $e)"
+
+Непротиворечивость перечня обрабатываемых ОС обеспечивается самим пользователем. 
+
+####TODO:
 - исключить создание подменю, если последовательность пунктов меню уже заключена в подменю.
 
 ##==[ history ]=============================
->>>>>>> release-ver.V-2
 ####ru
 Ранние версии grub-folding использовали непосредственную вставку содержимого файлов секций
 в файл меню загрузки GRUB, затем была реализована вставка вывода конфигурационных
 скриптов файлов секций при помощи сохранение его во временных файлах.
-<<<<<<< HEAD
-=======
 
->>>>>>> release-ver.V-2
 -------------------------------------------------------------------------------
 ####en
 Early versions of grub-folding used directly insert of section file contents into
 GRUB boot menu file. It was later implemented insertion of output of section file
 config script into GRUB boot menu file by storing it in a temporary files.
-<<<<<<< HEAD
-=======
+
+-------------------------------------------------------------------------------
+
+####folding_v.5.3
+#####(c) aso, v.2.3.0 by 14.07.2014.
+    Transition variant 3 with exclusion re-creating submenu if it existing.
+    - Mutable the 'shield' function - input from parameter, if position parameter
+    (not flag) is not empty.
+    - Simplify any using the 'shield' function.
+    - Exclude the function 'o_name' - convert short name to long name.
+        Use instead of them set variables with short names and contens the long names.
+    - Reordered function - the 'shield' function is shifted to the end of
+        all function definitions.
+    - Changed place creation of tmp buffer - now it's created in /tmp/folding{$$$} dir.
+    - Change dev mk.config dir from ./my.grub.d to ./grub.d
+    
+        Product revision version V-3
+       (c) aso, v.2.3.0 by 14.07.2014.
 
 -------------------------------------------------------------------------------
 
 ####folding_v.5.2
 #####(c) aso, v.2.2.0 by 07.07.2014.
-
     Transition variant 2 with exclusion re-creating submenu if it existing.
     The universal 'shield' function - with parameter analyse, two form of calling -
-    input parameters or input file and using one func for all substitutions.
+    input from parameters or input file. Using one func for all substitutions.
     The simplified sintax at the 'shield' function: provide '\' as escaping chars.
-    New keyword 'submenu' for breaking section sampling was added. 
+    New keyword 'submenu' for breaking section sampling was added.
 
         Product revision version V-2
->>>>>>> release-ver.V-2
 -------------------------------------------------------------------------------
 
 ####folding_v.5.1
 #####(c) aso, v.2.1.0 by 17.06.2014.
 
     Transition variant 2 to exclusion re-creating submenu if it existing.
-<<<<<<< HEAD
-    Insertion output of the configuration script of section into the GRUB boot
-    menu file uses 'e' subcommand of 's///' sed's command.
-    The first section in the sequence completely sampled in pattern space with
-    'N' command. Terminal criterion to fetch the first menu item is a sampling
-    full block '{..}' with any number of internal groups '{..}' and up to
-    3 levels of nesting.
-    Create submenus for a single menu item is excluded.
-    The 'shield' function provide escaping chars for simplify expressions.
-    The 'shield0' function provide uncompatible part of functionality 'shield0'.
-
-        Product revision version V-1.
-=======
     Used 'e' subcommand of 's///' sed's command for insertion output of the
     configuration script into the output file
     The first section in the sequence completely sampled in pattern space
@@ -212,7 +225,6 @@ config script into GRUB boot menu file by storing it in a temporary files.
     The 'shield0' function provide uncompatible part of functionality 'shield'.
 
         Product revision version V-1
->>>>>>> release-ver.V-2
 -------------------------------------------------------------------------------
 
 ####folding_v.5.0
