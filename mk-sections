@@ -4,25 +4,20 @@
 # Generate Section files with specified parameters
 # Copyright (c) aso, v.0.1, 14.07.14
 
-trap 'echo Process: HUP!!!' HUP
-trap 'echo Process exited' EXIT
-trap 'echo Process returned' RETURN
-trap 'echo Process quited' QUIT
-trap 'echo Process terminated' TERM
-trap 'echo Process interrupted' INT
-trap 'echo Process killed' KILL
-trap -p
+# trap 'echo Process terminated' TERM
+# trap 'echo Process interrupted' INT
+# trap -p
 
 #trap TERM # посылается kill без спецификации сигнала; при завершении выдаёт "завершено"
 
-echo -e "\nHop!" && kill -s HUP $$
-echo 'QUIT!' && kill -s QUIT $$
-echo 'TERMinate!' && kill -s TERM $$
-echo 'INTerrupt!' && kill -s INT $$
-#echo 'Process KILL!' && kill -s KILL $$
+# echo 'TERMinate!' && kill -s TERM $$
+# echo 'INTerrupt!' && kill -s INT $$
 
-echo -n 'include folding '
-. ./folding -v
+. ./folding --lib
+
+sec_auth='aso'
+sec_date='14.07.2014'
+sec_ver='2.1.0'
 
 mk-sect()
 {
@@ -50,6 +45,7 @@ set -e
 #
 # Gentoo section prologue GRUB configuration file
 # v.2.1.0 from 14.07.2014. by aso
+# v.${sec_ver} from ${sec_date}. by ${sec_auth}
 #
 # -i, --insert            insert section data into stdout
 # -x, --exclude           exclude folding header
@@ -59,8 +55,11 @@ set -e
 ####################################################
 
 ver='2.1.0'
+ver='${sec_ver}'
 date='14.07.2014'
+date='${sec_date}'
 version="v.$ver, from $date by aso"
+version="v.\$ver, from \$date by ${sec_auth}"
 
 
 usage()
