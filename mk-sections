@@ -13,11 +13,19 @@
 # echo 'TERMinate!' && kill -s TERM $$
 # echo 'INTerrupt!' && kill -s INT $$
 
-. ./folding --lib
+
+_dev=1
+export _dev
+
+. ./folding
 
 sec_auth='aso'
 sec_date='14.07.2014'
 sec_ver='2.1.0'
+
+sec_os=( 'gen', 'win' )
+sec_os_full=( 'Gentoo', 'Windows' )
+sec_hdr=( 'Gentoo Linux (all vaiants)', 'submenu "MS Windows (all variants)" {' )
 
 mk-sect()
 {
@@ -44,7 +52,7 @@ set -e
 ####################################################
 #
 # Gentoo section prologue GRUB configuration file
-# v.2.1.0 from 14.07.2014. by aso
+# Gentoo section ${2}logue GRUB configuration file
 # v.${sec_ver} from ${sec_date}. by ${sec_auth}
 #
 # -i, --insert            insert section data into stdout
@@ -54,11 +62,8 @@ set -e
 #
 ####################################################
 
-ver='2.1.0'
 ver='${sec_ver}'
-date='14.07.2014'
 date='${sec_date}'
-version="v.$ver, from $date by aso"
 version="v.\$ver, from \$date by ${sec_auth}"
 
 
@@ -66,9 +71,12 @@ usage()
 {
     cat <<EOF
 _gen-prolog: grub-mkconfig helper script.
-version $version
+_${1}-${2}log: grub-mkconfig helper script.
+version \$version
 Insert Gentoo section prologue into GRUB configuration file
+Insert Gentoo section ${2}logue into GRUB configuration file
 Usage: _gen-prolog [OPTIONS]
+Usage: _${1}-${2}log [OPTIONS]
 
   -i, --insert            output section data into stdout
   -x, --exclude           exclude folding header
@@ -144,6 +152,12 @@ COFR
 
 
 
+# work definitions
+
+p='pro' 	# for prologu stage
+e='epi' 	# for epilogue stage 
+
 echo '### Generating section file >>>>-------------------------' >&2
 
-mk-sect
+mk-sect win $e
+mk-sect gen $e
