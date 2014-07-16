@@ -3,7 +3,7 @@ set -e
 
 #
 # grub-mkconfig helper script.
-# (c) aso<Solomatov.A.A@gmail.com>, v.2.2.11 by 14.07.2014.
+# (c) aso<Solomatov.A.A@gmail.com>, v.2.3.1 by 14.07.2014.
 #   GPLv3
 #
 # -t, --pipeline,     pipline mode: data from input file (stdin) processed 'on fly'
@@ -41,7 +41,7 @@ set -e
 # Section files priority is absent, they used in its original form.
 #
 
-ver='2.2.11'
+ver='2.3.1'
 version="v.$ver, by 14.07.2014 from aso"
 
 #win='Microsoft Windows'	# product variant
@@ -241,11 +241,13 @@ while true ; do
 
     -h|--help)
 	usage
-	exit 2 ;;
+	exit 0 ;;
     -v|--version)
 #	echo "$self (${PACKAGE_NAME}) ${PACKAGE_VERSION}"
-	echo $version
-	exit 0 ;;
+	echo folding $version
+	kill -INT $$;;
+#	kill -TERM $$;; # эквивалентно просто 'kill $$'
+#	exit 0 ;;
     -t|--pipeline)
 	pipe=${1} ;;
     -i|--in-place)
