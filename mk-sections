@@ -12,7 +12,7 @@ export _dev
 
 sec_auth='aso'
 sec_date='17.07.2014'
-sec_ver='2.1.3'
+sec_ver='2.1.4'
 
 os_idx=( 'gen', 'win' )
 
@@ -44,16 +44,11 @@ mk_secftr() {
 mk-sect()
 {
 
-#	local os=$1
+	local s_name="$1_sect[@]"
+	local sect=( "${!s_name}" )
 	local fullos="$1_sect[1]"
 	local stage=$2
 	local stgidx=0	# for prologue (by default)
-#	tst="$1_sect[*]"
-#	local ${!tst}
-	local s_name="$1_sect[@]"
-	local sect=( "${!s_name}" )
-#	local sect=''
-#	eval "sect=( \${$1_sect[@]} )"
 
     if [ "${2}n" == 'epin' ]; then
 	stgidx=1
@@ -95,7 +90,6 @@ set -e
 
 ####################################################
 #
-# ${!fullos} section ${stage}logue GRUB configuration file
 # ${sect[1]} section ${stage}logue GRUB configuration file
 # v.${sec_ver} from ${sec_date}. by ${sec_auth}
 #
@@ -117,6 +111,7 @@ usage()
 _${1}-${2}log: grub-mkconfig helper script.
 version \$version
 Insert ${!fullos} section ${2}logue into GRUB configuration file
+Insert ${sect[1]} section ${2}logue into GRUB configuration file
 Usage: _${1}-${2}log [OPTIONS]
 
   -i, --insert            output section data into stdout
@@ -154,6 +149,7 @@ shift $(($OPTIND - 1))
 # Don't change the next "if" operator
 if [ ${_insert} = 0 ] ; then
   echo "# This is a gentoo section prologue stub"
+  echo "# This is a ${sect[1]} section prologue stub"
   echo "# This is a test version."
   echo "# $version"
   exit
@@ -161,6 +157,7 @@ fi
 
 
 echo "Start ${!fullos} folding section in menu" >&2
+echo "Start ${sect[1]} folding section in menu" >&2
 
 # User code section 1 >>>------------------------
 # Insert user code here, between this lines, code placed out of section, before section header
@@ -168,9 +165,10 @@ echo "Start ${!fullos} folding section in menu" >&2
 # End of user code section <<<-------------------
 
 # Insert ${!fullos} section header if needed
+# Insert ${sect[1]} section header if needed
 if  [ "${_exclude}" = 0 ] ; then
     echo 'submenu "Gentoo Linux (all vaiants)" {'
-    echo 'submenu "Gentoo Linux (all vaiants)" {'
+    echo '$(eval ${sect[(2 + stgidx)]})'
 fi
 
 # User code section 2 >>>------------------------
@@ -203,4 +201,4 @@ e='epi' 	# for epilogue stage
 echo '### Generating section file >>>>-------------------------' >&2
 
 mk-sect win $e
-mk-sect gen $e
+mk-sect gen $p
